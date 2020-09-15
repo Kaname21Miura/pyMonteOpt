@@ -36,7 +36,7 @@ class BaseSolidModel(MonteCalro,metaclass = ABCMeta):
         self.ma = np.array([1])
         self.g = np.array([1])
         
-        self.setParams(*initial_data, **kwargs)
+        self.built(*initial_data, **kwargs)
         self.generateInisalCoodinate()
         
     def checkNumpyArray(self,val,key):
@@ -51,7 +51,7 @@ class BaseSolidModel(MonteCalro,metaclass = ABCMeta):
             self.checkNumpyArray(val,key)
             setattr(self,key,np.array(val).astype(self.f_bit))
         
-    def setParams(self,*initial_data, **kwargs):
+    def built(self,*initial_data, **kwargs):
         def specialKey(key,item):
             if key == 'fluence':
                 self.setFluenceClass(item)  

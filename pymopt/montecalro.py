@@ -19,6 +19,7 @@ class MonteCalro:
         
         self.v_result = np.empty((3,1)).astype(self.f_bit)
         self.p_result = np.empty((3,1)).astype(self.f_bit)
+        self.add_result = np.empty((3,1)).astype('int16')
         self.w_result = np.empty(1).astype(self.f_bit)
         
         self.p = np.empty((3,1)).astype(self.f_bit)
