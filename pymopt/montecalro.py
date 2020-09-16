@@ -226,11 +226,18 @@ class MonteCalro:
     def getRdTtRate(self):
         Tt_index = np.where(self.v_result[2]>0)[0]
         Rd_index = np.where(self.v_result[2]<0)[0]
+        self.Rdw = self.w_result[Rd_index].sum()/self.nPh
+        self.Ttw = self.w_result[Tt_index].sum()/self.nPh
         print('######')
-        print('Mean Rd %0.6f'%(self.w_result[Rd_index].sum()/self.nPh))
-        print('Mean Tt %0.6f'%(self.w_result[Tt_index].sum()/self.nPh))
+        print('Mean Rd %0.6f'% self.Rdw)
+        print('Mean Tt %0.6f'% self.Ttw)
         print()
         
+    def getRdTtValues(self):
+        return {
+            'Rd':self.Rdw,
+            'Tt':self.Ttw,
+        }
     
     
 
