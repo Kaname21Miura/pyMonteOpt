@@ -115,16 +115,18 @@ class BaseVoxcelMonteCalro(MonteCalro,metaclass = ABCMeta):
         B = ~A
         ni = self.model.getReflectiveIndex(add)
         sigAv = A*np.sign(v).astype("int16")
-        ds = ((l/2-p*np.sign(v))/abs(v)).min(0)
-        
+        ds = np.min(db,axis=0)
         s -= ds
-        p = sigAv*l/2+B*(p+v*ds)
+        #p = A*ds+B*(p+v*ds)
+        
+        p = l/2*A*np.sign(v)+B*(p+v*ds)
+        
         nt = self.model.getReflectiveIndex((add+sigAv))
         pb_index = np.where(ni!=nt)[0]
         pn_index = np.where(ni==nt)[0]
         
         if list(pb_index) != []:
-            p[:,pn_index] = -sigAv[:,pn_index]*l/2
+            """p[:,pn_index] = -sigAv[:,pn_index]*l/2
             add[:,pn_index] += sigAv[:,pn_index]
             #透過判別
             #入射角の計算
@@ -151,9 +153,40 @@ class BaseVoxcelMonteCalro(MonteCalro,metaclass = ABCMeta):
             v[:,vt_index] = (ni[vt_index]/nt[vt_index])*B[:,vt_index]*v[:,vt_index]\
             +np.sign(sigAv[:,vt_index])*np.cos(at)
             add[:,vt_index] += sigAv[:,vt_index]
-            p[:,vt_index] = -sigAv[:,vt_index]*l/2
+            p[:,vt_index] = p[:,vt_index]*(B[:,vt_index]*1-A[:,vt_index]*1)"""
+            #透過判別
+            #入射角の計算
+            ai = np.abs(A[:,pb_index]*v[:,pb_index])
+            ai = np.arccos(ai[ai!=0])#Aから算出される0を排除して1次元配列にする
+            #全反射するときのインデックスを取得
+            sub_index = np.where(ai>=np.arcsin(nt[pb_index]/ni[pb_index]))[0]
+            #屈折角の計算
+            ##(ai,at)=(0,0)の時は透過させ方向ベクトルは変化させない
+            at = np.arcsin((ni[pb_index]/nt[pb_index])*np.sin(ai))
+            Ra = np.random.rand(ai.size)-0.5*(np.add((np.sin(ai-at)/np.sin(ai+at))**2,
+                                                     (np.tan(ai-at)/np.tan(ai+at))**2))
+            #全反射はRaを強制的に0以下にし反射させる
+            Ra[sub_index] = -1
+            
+            #透過と反射のindexを取得
+            vl_index = pb_index[np.where(Ra<=0)[0].tolist()].tolist()#反射
+            sub_index = np.where(Ra>0)[0]#Raに対する透過のindex
+            vt_index = pb_index[sub_index]#全体ベクトルvに対する透過のindex
+            
+            #反射するときのベクトルを更新　
+            v[:,vl_index] = v[:,vl_index]*(B[:,vl_index]*1-A[:,vl_index]*1)
+            
+            #透過するときのベクトルを更新
+            if vt_index !=[]:
+                v[:,vt_index] = (ni[vt_index]/nt[vt_index])\
+                    *((v[:,vt_index]*B[:,vt_index])+(A[:,vt_index]*np.sign(v[:,vt_index])*np.cos(at[sub_index])))
+                
+            #境界を超えた時の位置更新,番地の更新
+            pt_index = np.delete(np.arange(ni.size),vl_index)
+            p[:,pt_index] = p[:,pt_index]*(B[:,pt_index]*1-A[:,pt_index]*1)
+            add[:,pt_index] += sigAv[:,pt_index]
         else:
-            p = -sigAv*l/2
+            p = p*(B*1-A*1)
             add += sigAv
         return v,p,add,s
     
@@ -197,8 +230,6 @@ class BaseVoxcelMonteCalro(MonteCalro,metaclass = ABCMeta):
                     s_ = np.delete(s_,out_index_)
                     index = np.delete(index,out_index_)
             else:
-                #print(v_.shape)
-                #print(v[:,index].shape)
                 v[:,index] = v_
                 p[:,index] = p_+s_*v_
                 break
