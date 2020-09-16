@@ -7,9 +7,12 @@ Created on Thu Sep 10 10:30:04 2020
 """
 import numpy as np
 from numba import njit
+from ..utils import _deprecate_positional_args
+
 
 class IntarnalFluence(object):
-    def __init__(self,nr,nz,dr,dz):
+    @_deprecate_positional_args
+    def __init__(self,*,nr,nz,dr,dz):
         self.r = np.array([(i)*dr for i in range(nr+1)])
         self.z = np.array([(i)*dz for i in range(nz+1)])
         self.Arz = np.zeros((nr,nz),dtype = 'float32')
@@ -17,7 +20,11 @@ class IntarnalFluence(object):
         self.nz = nz
         self.dr = dr
         self.dz = dz
-
+        print("Memory area size for fluence storage: %d Mbyte" % (self.Arz.nbytes*1e-6))
+        
+    def getArz(self):
+        return self.Arz
+    
     def getArrayZ(self):
         return np.array([(i+0.5)*self.dz for i in range(self.nz)])
     

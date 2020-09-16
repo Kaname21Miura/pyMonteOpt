@@ -11,7 +11,7 @@ import itertools
 from abc import ABCMeta, abstractmethod
 
 from ..montecalro import MonteCalro
-from ..intarnal_fluence import IntarnalFluence
+from ..fluence import IntarnalFluence
 from ..utils import _deprecate_positional_args
 
 
@@ -24,8 +24,12 @@ class BaseSolidModel(MonteCalro,metaclass = ABCMeta):
     @_deprecate_positional_args
     def __init__(self,*initial_data, **kwargs):
         super().__init__()
-        self.keys = ['nPh','g','ma','ms','n','n_air','thickness','fluence','f_bit','vectorTh']
+        self.keys = ['nPh','g','ma','ms','n','n_air','thickness',
+                     'fluence','nr','nz','dr','dz',
+                     'f_bit','vectorTh',
+                     ]
         self.fluence = False
+        self.nr=50;self.nz=20;self.dr=0.1;self.dz=0.1
         
         self.borderposit = np.array([0])
         self.thickness = np.array([0])
@@ -38,6 +42,8 @@ class BaseSolidModel(MonteCalro,metaclass = ABCMeta):
         
         self.built(*initial_data, **kwargs)
         self.generateInisalCoodinate()
+        if self.fluence :
+            self.fluence = IntarnalFluence(nr=self.nr,nz=self.nz,dr=self.dr,dz=self.dz)
         
     def checkNumpyArray(self,val,key):
         if (not type(val) is np.ndarray)and(not type(val) is list):
@@ -52,34 +58,22 @@ class BaseSolidModel(MonteCalro,metaclass = ABCMeta):
             setattr(self,key,np.array(val).astype(self.f_bit))
         
     def built(self,*initial_data, **kwargs):
-        def specialKey(key,item):
-            if key == 'fluence':
-                self.setFluenceClass(item)  
                 
         for dictionary in initial_data:
             for key in dictionary:
                 if not key in self.keys:
                     raise KeyError(key)
                 setattr(self,key, dictionary[key])
-                specialKey(key, dictionary[key])
         for key in kwargs:
             if not key in self.keys:
                 raise KeyError(key)
             setattr(self, key, kwargs[key])
-            specialKey(key, kwargs[key])
             
         self.setBorderPosit()
         self.checkPrams()
         self.setRefIndex()
         self.generateInisalCoodinate()
-        
-    def setFluenceClass(self,flue):
-        if isinstance(flue,IntarnalFluence):
-            setattr(self, 'fluence', flue)
-        elif flue == False:
-            setattr(self, 'fluence', flue)
-        else:
-            raise KeyError('fluence should be input fluence class')
+
 
     def setRefIndex(self):
         border = np.append(self.n_air,self.n)
@@ -123,12 +117,17 @@ class BaseSolidModel(MonteCalro,metaclass = ABCMeta):
         self.w_result = self.w_result[1:]
         
     def getResult(self):
-        result = {
+        return {
             'p':self.p_result,
             'v':self.v_result,
             'w':self.w_result,
         }
-        return result
+    
+    def getFluence(self):
+        return {'Arz':self.fluence.getArz(),
+                'r':self.fluence.getArrayR(),
+                'z':self.fluence.getArrayZ(),
+                }
 
 # =============================================================================
 # Public montecalro model
