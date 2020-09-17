@@ -1,0 +1,7 @@
+cython 使い方
+
+build方法
+$python setup.py build_ext --inplace
+
+cへの変換とhtml生成
+$cython -a hoge.pyx

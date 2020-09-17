@@ -30,6 +30,9 @@ class BaseVoxelMonteCalro(MonteCalro,metaclass = ABCMeta):
         self.fluence = fluence
         self.generateInisalCoodinate(self.nPh)
         
+    def getVoxelModel(self):
+        return self.model.voxel_model
+        
     def generateInisalCoodinate(self,nPh,f = 'float32'):
         center_add_xy = int(self.model.voxel_model.shape[0]/2)
         self.add =  np.full((3, nPh),center_add_xy).astype("int16")
