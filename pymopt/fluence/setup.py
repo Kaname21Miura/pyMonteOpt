@@ -8,15 +8,10 @@ Created on Thu Sep 17 16:08:37 2020
 
 from distutils.core import setup
 from distutils.extension import Extension
-from Cython.Distutils import build_ext
-
+from Cython.Build import cythonize
 import numpy as np
 
-    
-sourcefiles = ['_fluence.pyx']
 setup(
-    cmdclass = {'build_ext':build_ext},
-    ext_modules = [Extension('_fluence', sourcefiles)],
-    extra_compile_args=["-O3"],
+    ext_modules = cythonize("_fluence.pyx"),
     include_dirs = [np.get_include()]
 )
