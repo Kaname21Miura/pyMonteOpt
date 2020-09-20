@@ -19,7 +19,7 @@ __all__ = ['VoxelPlateModel']
 # Base solid model
 # =============================================================================
         
-class BaseVoxelMonteCalro(MonteCalro,metaclass = ABCMeta):
+class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
     #@_deprecate_positional_args
     @abstractmethod
     def __init__(self,*,nPh,model,fluence = False,f_bit='float32'):
@@ -297,13 +297,19 @@ class PlateModel(VoxelModel):
         self.g = np.array(g).astype(f)
         self.getModelSize()
         
+    def getParams(self):
+        return {'ms':self.ms,
+                'ma':self.ma,
+                'n':self.g,
+                'g':self.n}
+        
     def getModelSize(self):
         print("Memory area size for voxel storage: %d Mbyte" % (self.voxel_model.nbytes*1e-6))
         
 # =============================================================================
 # Public montecalro model
 # =============================================================================
-class VoxelPlateModel(BaseVoxelMonteCalro):
+class VoxelPlateModel(BaseVoxelMonteCarlo):
     def __init__(self,*,nPh,fluence=False,
                  nr=50,nz=20,dr=0.1,dz=0.1):
         super().__init__(nPh = nPh,fluence =fluence, model = PlateModel())
@@ -315,3 +321,5 @@ class VoxelPlateModel(BaseVoxelMonteCalro):
                 'r':self.fluence.getArrayR(),
                 'z':self.fluence.getArrayZ(),
                 }
+    def getParams(self):
+        return self.model.getParams()

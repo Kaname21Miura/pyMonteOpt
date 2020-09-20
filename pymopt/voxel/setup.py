@@ -12,9 +12,9 @@ from Cython.Distutils import build_ext
 
 import numpy as np
 
-sourcefiles = ['test.pyx']
+sourcefiles = ['_voxel_montecarlo.pyx']
 setup(
     cmdclass = {'build_ext':build_ext},
-    ext_modules = [Extension('test1', sourcefiles)],
+    ext_modules = [Extension('_voxel_montecarlo', sourcefiles)],
     include_dirs = [np.get_include()]
 )
