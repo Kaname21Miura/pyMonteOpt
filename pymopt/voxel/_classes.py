@@ -300,8 +300,8 @@ class PlateModel(VoxelModel):
     def getParams(self):
         return {'ms':self.ms,
                 'ma':self.ma,
-                'n':self.g,
-                'g':self.n}
+                'n':self.n,
+                'g':self.g}
         
     def getModelSize(self):
         print("Memory area size for voxel storage: %d Mbyte" % (self.voxel_model.nbytes*1e-6))

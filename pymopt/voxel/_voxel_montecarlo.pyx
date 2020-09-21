@@ -16,7 +16,25 @@ from libc.math cimport sin, cos, tan, acos, asin, copysign, sqrt,log,fabs
 cdef float NAN = np.nan
 ctypedef np.float32_t DTYPE_t
 
+"""# distutils: language = c++
+# distutils: extra_compile_args = -std=c++11
 
+cdef extern from "<random>" namespace "std":
+    cdef cppclass mt19937:
+        mt19937() # we need to define this constructor to stack allocate classes in Cython
+        mt19937(unsigned int seed) # not worrying about matching the exact int type for seed
+
+    cdef cppclass uniform_real_distribution[T]:
+        uniform_real_distribution()
+        uniform_real_distribution(T a, T b)
+        T operator()(mt19937 gen) # ignore the possibility of using other classes for "gen"
+
+def test():
+    cdef:
+        mt19937 gen = mt19937(5)
+        uniform_real_distribution[double] dist = uniform_real_distribution[double](0.0,1.0)
+    return dist(gen)
+"""
 # =============================================================================
 # BaseVoxelMonteCarlo
 # =============================================================================    
@@ -30,22 +48,45 @@ cdef class BaseVoxelMonteCarlo:
     # 結果は、 getResult で取得します。 getResult は dict型で、p,v,wで定義されています。
     # 内部で消失した光子は、np.nanで表現しています。
     cdef:
-        float vectorTh,wTh,voxel_space
-        int nPh,russian_m,fluence_mode
+        float vectorTh,wTh,voxel_space,russian_m
+        int nPh,fluence_mode
         np.ndarray p_result,v_result,w_result
         np.ndarray p,v,w,add,voxel_model
         np.ndarray xy_size
+        int logger1,logger2
+        np.ndarray logger_int,logger_float
     
     def __cinit__(self,int nPh, int fluence_mode):
-        self.vectorTh = 0.99999
+        self.vectorTh = 0.9999
         self.wTh = 0.0001
         self.nPh = nPh
         self.fluence_mode = fluence_mode
-        self.russian_m = 10
+        self.russian_m = 10.
+        self.logger1 = 0
+        self.logger2 = 0
+        self.logger_int = np.zeros(nPh,dtype = int)
+        self.logger_float = np.zeros(nPh,dtype = 'float32')
         
         self.p_result = np.zeros((3,nPh),dtype = "float32")
         self.v_result = np.zeros((3,nPh),dtype = "float32")
         self.w_result = np.zeros(nPh,dtype = "float32")
+        
+        self.voxel_model = np.zeros((10,10,10),dtype = "int8")
+        
+        
+    def set_nofphoton(self,int nPh):
+        self.nPh = nPh
+        self.p_result = np.zeros((3,nPh),dtype = "float32")
+        self.v_result = np.zeros((3,nPh),dtype = "float32")
+        self.w_result = np.zeros(nPh,dtype = "float32")
+        
+    def get_logger(self):
+        return {
+            'logger1':self.logger1,
+            'logger2':self.logger2,
+            'logger_int':self.logger_int,
+            'logger_float':self.logger_float,
+            }
         
     def setInitialCoordinate(self,np.ndarray[ndim = 2, dtype=DTYPE_t] p,
                              np.ndarray[ndim = 2, dtype=DTYPE_t] v,
@@ -64,8 +105,10 @@ cdef class BaseVoxelMonteCarlo:
         self.voxel_space = voxel_space
         
     cdef Fluence fluence
+    
     def setFluence(self,Fluence fluence):
         self.fluence = fluence
+        
     def getFluenceResult(self):
         return self.fluence.getArz
         
@@ -96,8 +139,8 @@ cdef class BaseVoxelMonteCarlo:
         # Let's MonteCarlo!
         for i in range(n_Photon):
             self._a_photon_movement(i)
-            if i%counter==0:
-                print("Progress: %s [％]"%int(i*100/n_Photon))
+            #if i%counter==0:
+                #print("Progress: %s [％]"%int(i*100/float(n_Photon)))
                     
     cdef int _get_model_val_atAdd(self, int x, int y, int z):
         cdef int val = self.voxel_model[x][y][z]
@@ -138,18 +181,17 @@ cdef class BaseVoxelMonteCarlo:
     
     cdef float _russianRoulette(self,float w):
         ## 確率的に光子を生き返らせます。
-        cdef int m = self.russian_m
+        cdef float m = self.russian_m
         cdef float randnum = self.random_uniform()
-        if randnum > 1/m:
+        if randnum > 1./m:
             w = 0.
         else:
             w = w*m
         return w
     
-    cdef float _encooder(self,
-                         float px, float py, float pz, 
+    cdef _encooder(self,float px, float py, float pz, 
                          int adx, int ady, int adz):
-        cdef float space = self.voxcel_space
+        cdef float space = self.voxel_space
         cdef int center_add_x,center_add_y
         center_add_x = int((self.xy_size[0]+2)/2)
         center_add_y = int((self.xy_size[1]+2)/2)
@@ -157,7 +199,7 @@ cdef class BaseVoxelMonteCarlo:
         cdef float  ex, ey, ez
         ex = space*(adx-center_add_x)+px
         ey = space*(ady-center_add_y)+py
-        ez = space*(adz-1)+pz+space/2
+        ez = space*(adz-1)+pz+space/2.
         return ex, ey, ez
         
     
@@ -171,107 +213,125 @@ cdef class BaseVoxelMonteCarlo:
             val = z
         return val
                    
-    cdef int _get_next_add(self,int index, int x, int y, int z, 
+    cdef _get_next_add(self,int index, int x, int y, int z, 
                            float vx, float vy, float vz):
+        cdef int val = 0
         if index == 0:
-            vx = copysign(1,vx)
-            x = x + int(vx)
+            val = int(copysign(1,vx))
+            x = x + val
         elif index == 1:
-            vy = copysign(1,vy)
-            y = y + int(vy)
+            val = int(copysign(1,vy))
+            y = y + val
         elif index == 2:
-            vz = copysign(1,vz)
-            z = z + int(vz)
+            val = int(copysign(1,vz))
+            z = z + val
         return x,y,z
     
-    cdef int _create01val(self,int index, int index_val,int base_val):
-        cdef float x,y,z
-        x = base_val; y = base_val; z = base_val
+    cdef _create01val(self,int index, float index_val,float base_val):
+        cdef float x_,y_,z_
+        x_ = base_val; y_ = base_val; z_ = base_val
         if index == 0:
-            x = index_val
+            x_ = index_val
         elif index == 1:
-            y = index_val
+            y_ = index_val
         elif index == 2:
-            z = index_val
-        return x,y,z
+            z_ = index_val
+        
+        return x_, y_, z_
     
     
-    cdef float random_uniform(self):
+    """cdef float random_uniform(self):
         cdef float random = float(rand())
         cdef float randmax = float(RAND_MAX)
-        return random/randmax
+        return random/randmax"""
+        
+    cdef np.float32_t random_uniform(self):
+        cdef np.float32_t r = np.random.rand()
+        return r
     
-    
-    cdef float vectorUpdate(self,float vx,float vy,float vz,float g):
-        cdef float randnum1, randnum2
+    cdef vectorUpdate(self,float vx,float vy,float vz,float g):
+        cdef:
+            float randnum1, randnum2
+            float cosTh,sinTh, cosFi, sinFi,val_f
+            float th = 0.99999
+            float distance
+            
         randnum1 = self.random_uniform()
         randnum2 = self.random_uniform()
-        cdef float cosTh,sinTh, cosFi, sinFi
-        cdef float th = self.vectorTh
+
         if g == 0:
             cosTh = 2*randnum1-1
         else:
-            cosTh = (1+g**2-((1-g**2)/(1-g+2*g*randnum1**2)))/(2*g)
+            cosTh = (1+g**2-((1-g**2)/(1-g+2*g*randnum1))**2)/(2*g)
         
-        sinTh = (1-cosTh**2)**0.5
-    
-        #cos(fai)とsin(fai)と求める
+        sinTh = sqrt(1-cosTh**2)
+        
         cdef float Fi = 2*3.141592*randnum2
         cosFi = cos(Fi)
         sinFi = sin(Fi)
     
-        #Zが１かそれ以外で分離
-        if vz <= th:
-            vx = sinTh*(vx*vz*cosFi-vy*sinFi)/sqrt(1-vz**2) + vx*cosTh
-            vy = sinTh*(vy*vz*cosFi+vx*sinFi)/sqrt(1-vz**2) + vy*cosTh
-            vz = -sinTh*cosFi*sqrt(1-vz**2) + vz*cosTh
+        if abs(vz) <= th:
+            val_f = sqrt(1.-vz**2)
+
+            vx = sinTh*(vx*vz*cosFi-vy*sinFi)/val_f + vx*cosTh
+            vy = sinTh*(vy*vz*cosFi+vx*sinFi)/val_f + vy*cosTh
+            vz = -sinTh*cosFi*val_f + vz*cosTh
             
         else:#Z方向ベクトルが0.99999以上
             vx = sinTh*cosFi
             vy = sinTh*sinFi
-            vz = copysign(cosTh,vz)
-        cdef float distance
+            vz = cosTh*copysign(1,vz) 
+        
         distance = sqrt(vx**2 + vy**2 + vz**2)
         vx = vx/distance
         vy = vy/distance
         vz = vz/distance
         return vx,vy,vz
     
+    cdef float _distance_to_boundary(self,float x, float v, float l):
+        cdef float db
+        if v == 0:
+            db = 1000.
+        else:
+            db = (l/2.-x*copysign(1,v))/fabs(v)
+        return db
+    
     cdef void _a_photon_movement(self,int p_id):
-        cdef float px,py,pz
-        cdef float vx,vy,vz
-        cdef int adx,ady,adz
-        cdef float w
+        cdef:
+            float px,py,pz
+            float vx,vy,vz
+            int adx,ady,adz
+            float w
+            
+            float ma, ms, mt, ni, nt
+            float ai, at, Ra
+            float dby,dbx,dbz,db_min,l
+            int index,val_i,val_xi, val_yi, val_zi
+            float val_f,val_xf, val_yf, val_zf
+           
+            int flag_1,flag_2
+        
         px = self.p[0][p_id]; py = self.p[1][p_id]; pz = self.p[2][p_id]
         vx = self.v[0][p_id]; vy = self.v[1][p_id]; vz = self.v[2][p_id]
         adx = self.add[0][p_id]; ady = self.add[1][p_id]; adz = self.add[2][p_id]
         w = self.w[p_id]
-        
-        cdef float ma, ms, mt, ni, nt
-        cdef float ai, at, Ra
-        cdef float dby,dbx,dbz,db_min,l
+
         l = self.voxel_space
-        
-        cdef int index,val_i,val_xi, val_yi, val_zi
-        cdef float val_f,val_xf, val_yf, val_zf
-        
-        cdef int flag_1,flag_2
         
         flag_1 = 1
         while flag_1:
             s = self.random_uniform()
             s = -log(s)
-            
             flag_2 = 1
             while flag_2:
                 ma = self._getAbsorptionCoeff(adx,ady,adz)
                 ms = self._getScatteringCoeff(adx,ady,adz)
                 mt = ma + ms
-                s = s/mt
+                s /= mt
+                dbx = self._distance_to_boundary(px,vx,l)
+                dby = self._distance_to_boundary(py,vy,l)
+                dbz = self._distance_to_boundary(pz,vz,l)
                 
-                dbx = (l/2-copysign(px,vx))/fabs(vx)
-                dby = (l/2-copysign(py,vy))/fabs(vy)
-                dbz = (l/2-copysign(pz,vz))/fabs(vz)
                 if dbz < dbx and dbz < dby:
                     db_min = dbz
                     index = 2
@@ -281,89 +341,106 @@ cdef class BaseVoxelMonteCarlo:
                 elif dbx < dby and dbx < dbz:
                     db_min = dbx
                     index = 0
-                val_f = db_min-s
+                val_f = s-db_min
                 
-                if val_f <= 0:
-                    s -= db_min
+                if val_f >= 0:
+
+                    px,py,pz = self._p_movement_to_bouder(index,px,py,pz,vx,vy,vz,db_min,l)
+                    
                     ni = self._getReflectiveIndex(adx,ady,adz)
-                    val_xi, val_yi, val_zi = self._get_next_add(
-                        index,adx,ady,adz,vx,vy,vz)
+                    val_xi, val_yi, val_zi = self._get_next_add(index,adx,ady,adz,vx,vy,vz)
+                        
                     nt = self._getReflectiveIndex(val_xi,val_yi,val_zi)
+                    s -= db_min
                     
                     if ni != nt:
-                        ai = self._get_index_val(index,vx,vy,vz)
-                        ai = fabs(ai)
+                        
+                        ai = fabs(self._get_index_val(index,vx,vy,vz))
                         ai = acos(ai)
                         val_f = asin(nt/ni)
                         if ai < val_f:
                             val_f = self.random_uniform()
-                            at = asin(ni*sin(ai)/nt)
-                            Ra = val_f-0.5*((sin(ai-at)/sin(ai+at))**2\
-                                            + (tan(ai-at)/tan(ai+at))**2)
-                                
+                            self.logger_float[p_id] = val_f
+                            at = asin(sin(ai)*(ni/nt))
+                            Ra = val_f - 0.5*((sin(ai-at)/sin(ai+at))**2+(tan(ai-at)/tan(ai+at))**2)
                         else:
                             Ra = -1
                             
-                        if Ra <= 0:
-                            val_xi,val_yi,val_zi = self._create01val(index,-1,1)
-                            vx *= val_xi
-                            vy *= val_yi
-                            vz *= val_zi
+                        if Ra <= 0: #Internally reflect
+                            val_xf,val_yf,val_zf = self._create01val(index,-1.,1.)
+                            vx *= val_xf
+                            vy *= val_yf
+                            vz *= val_zf
                             
-                        else:
+                        else: #Transmit
                             adx = val_xi; ady = val_yi; adz = val_zi
                             
-                            val_xi,val_yi,val_zi = self._create01val(index,0,1)
-                            vx = vx*val_xi
-                            vy = vx*val_yi
-                            vz = vx*val_zi
-                            
-                            val_xi,val_yi,val_zi = self._create01val(index,1,0)
                             val_f = cos(ai)
-                            vx += val_xi*copysign(val_f,vx)
-                            vy += val_yi*copysign(val_f,vy)
-                            vz += val_zi*copysign(val_f,vz)
+                            vx,vy,vz = self.transmit_v(index,vx,vy,vz,ni/nt,val_f)
                             
-                            val_f = ni/nt
-                            vx *= val_f
-                            vy *= val_f
-                            vz *= val_f
-                            
-                            val_xi,val_yi,val_zi = self._create01val(index,-1,1)
-                            px *= val_xi
-                            py *= val_yi
-                            pz *= val_zi
+                            val_xf,val_yf,val_zf = self._create01val(index,-1.,1.)
+                            px *= val_xf
+                            py *= val_yf
+                            pz *= val_zf
                             
                     else:
                         adx = val_xi; ady = val_yi; adz = val_zi
                         
-                        val_xi,val_yi,val_zi = self._create01val(index,-1,1)
-                        px *= val_xi
-                        py *= val_yi
-                        pz *= val_zi
+                        val_xf,val_yf,val_zf= self._create01val(index,-1.,1.)
+                        px *= val_xf
+                        py *= val_yf
+                        pz *= val_zf
                         
                     s *= mt
-                    val_i = self._get_model_val_atAdd(adx,ady,adz)
+                    #val_i = self._get_model_val_atAdd(adx,ady,adz)
+                    val_i = self.voxel_model[adx][ady][adz]
                     if val_i < 0:
                         self._save_photon(p_id,px,py,pz,adx,ady,adz,vx,vy,vz,w)
                         flag_1 = 0
                         break
                     
                 else:
-                    px = px + vx*s
-                    py = py + vy*s
-                    pz = pz + vz*s
-                    
+                    px += vx*s
+                    py += vy*s
+                    pz += vz*s
                     g = self._getAnisotropyCoeff(adx,ady,adz)
+                    
                     vx,vy,vz = self.vectorUpdate( vx, vy, vz, g)
                     w = self._wUpdate(w,ma,mt,px,py,pz,adx,ady,adz)
-                    if w <= self.wTh:
+                    if w <= 0.0001:
                         w = self._russianRoulette(w)
                         if w == 0.:
                             self._save_vanish_photon(p_id)
                             flag_1 = 0
                             break
                     flag_2 = 0
+                    
+    cdef transmit_v(self,int index, float vx,float vy, float vz,
+                    float ni_by_nt,float cos_ai):
+        if index == 0:
+            vx = cos_ai*copysign(1,vx)
+            vy *= ni_by_nt; vz *= ni_by_nt
+        elif index ==1:
+            vy = cos_ai*copysign(1,vy)
+            vx *= ni_by_nt; vz *= ni_by_nt
+        elif index == 2:
+            vz = cos_ai*copysign(1,vz)
+            vx *= ni_by_nt; vy *= ni_by_nt
+        return vx,vy,vz
+    
+    cdef _p_movement_to_bouder(self,int index, float px, float py, float pz,
+                              float vx, float vy, float vz, float db_min, float l):        
+        if index == 0:
+            px = l*copysign(1,vx)/2.
+            py += vy*db_min; pz += vz*db_min
+        elif index ==1:
+            py = l*copysign(1,vy)/2.
+            px += vx*db_min; pz += vz*db_min
+        elif index == 2:
+            pz = l*copysign(1,vz)/2.
+            px += vx*db_min; py += vy*db_min
+        return px,py,pz
+
     
     cdef float _getAbsorptionCoeff(self, int x, int y, int z):
         pass
@@ -394,6 +471,13 @@ cdef class VoxelPlateMonteCarlo(BaseVoxelMonteCarlo):
         self.ms = ms
         self.g = g
         self.n = n
+    def getParams(self):
+        return {
+            "ma":self.ma,
+            "ms":self.ms,
+            "g":self.g,
+            "n":self.n,
+            }
     
     cdef float _getAbsorptionCoeff(self, int x, int y, int z):
         cdef int index = self.voxel_model[x][y][z]
@@ -408,7 +492,8 @@ cdef class VoxelPlateMonteCarlo(BaseVoxelMonteCarlo):
         return self.g[index]
     
     cdef float _getReflectiveIndex(self, int x, int y, int z):
-        cdef int index = self.voxel_model[x][y][z]+1
+        cdef int index = int(self.voxel_model[x][y][z])
+        index += 1
         return self.n[index]
     
     

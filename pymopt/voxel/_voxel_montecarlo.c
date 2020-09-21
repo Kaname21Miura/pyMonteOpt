@@ -1065,7 +1065,7 @@ typedef npy_longdouble __pyx_t_5numpy_longdouble_t;
  * cdef float NAN = np.nan
  * ctypedef np.float32_t DTYPE_t             # <<<<<<<<<<<<<<
  * 
- * 
+ * """# distutils: language = c++
  */
 typedef __pyx_t_5numpy_float32_t __pyx_t_17_voxel_montecarlo_DTYPE_t;
 /* Declarations.proto */
@@ -1134,7 +1134,7 @@ typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
  */
 typedef npy_cdouble __pyx_t_5numpy_complex_t;
 
-/* "_voxel_montecarlo.pyx":23
+/* "_voxel_montecarlo.pyx":41
  * # BaseVoxelMonteCarlo
  * # =============================================================================
  * cdef class BaseVoxelMonteCarlo:             # <<<<<<<<<<<<<<
@@ -1147,8 +1147,8 @@ struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo {
   float vectorTh;
   float wTh;
   float voxel_space;
+  float russian_m;
   int nPh;
-  int russian_m;
   int fluence_mode;
   PyArrayObject *p_result;
   PyArrayObject *v_result;
@@ -1159,11 +1159,15 @@ struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo {
   PyArrayObject *add;
   PyArrayObject *voxel_model;
   PyArrayObject *xy_size;
+  int logger1;
+  int logger2;
+  PyArrayObject *logger_int;
+  PyArrayObject *logger_float;
   struct __pyx_obj_17_voxel_montecarlo_Fluence *fluence;
 };
 
 
-/* "_voxel_montecarlo.pyx":384
+/* "_voxel_montecarlo.pyx":461
  * # Public montecarlo class
  * # =============================================================================
  * cdef class VoxelPlateMonteCarlo(BaseVoxelMonteCarlo):             # <<<<<<<<<<<<<<
@@ -1179,7 +1183,7 @@ struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo {
 };
 
 
-/* "_voxel_montecarlo.pyx":419
+/* "_voxel_montecarlo.pyx":504
  * # =============================================================================
  * 
  * cdef class Fluence:             # <<<<<<<<<<<<<<
@@ -1200,7 +1204,7 @@ struct __pyx_obj_17_voxel_montecarlo_Fluence {
 
 
 
-/* "_voxel_montecarlo.pyx":23
+/* "_voxel_montecarlo.pyx":41
  * # BaseVoxelMonteCarlo
  * # =============================================================================
  * cdef class BaseVoxelMonteCarlo:             # <<<<<<<<<<<<<<
@@ -1216,13 +1220,16 @@ struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo {
   PyObject *(*_save_vanish_photon)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int);
   float (*_wUpdate)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, float, float, float, float, float, float, int, int, int);
   float (*_russianRoulette)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, float);
-  float (*_encooder)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, float, float, float, int, int, int);
+  PyObject *(*_encooder)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, float, float, float, int, int, int);
   float (*_get_index_val)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, float, float, float);
-  int (*_get_next_add)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int, int, float, float, float);
-  int (*_create01val)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int);
-  float (*random_uniform)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *);
-  float (*vectorUpdate)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, float, float, float, float);
+  PyObject *(*_get_next_add)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int, int, float, float, float);
+  PyObject *(*_create01val)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, float, float);
+  __pyx_t_5numpy_float32_t (*random_uniform)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *);
+  PyObject *(*vectorUpdate)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, float, float, float, float);
+  float (*_distance_to_boundary)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, float, float, float);
   void (*_a_photon_movement)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int);
+  PyObject *(*transmit_v)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, float, float, float, float, float);
+  PyObject *(*_p_movement_to_bouder)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, float, float, float, float, float, float, float, float);
   float (*_getAbsorptionCoeff)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int);
   float (*_getScatteringCoeff)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int);
   float (*_getAnisotropyCoeff)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int);
@@ -1231,7 +1238,7 @@ struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo {
 static struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_vtabptr_17_voxel_montecarlo_BaseVoxelMonteCarlo;
 
 
-/* "_voxel_montecarlo.pyx":384
+/* "_voxel_montecarlo.pyx":461
  * # Public montecarlo class
  * # =============================================================================
  * cdef class VoxelPlateMonteCarlo(BaseVoxelMonteCarlo):             # <<<<<<<<<<<<<<
@@ -1245,7 +1252,7 @@ struct __pyx_vtabstruct_17_voxel_montecarlo_VoxelPlateMonteCarlo {
 static struct __pyx_vtabstruct_17_voxel_montecarlo_VoxelPlateMonteCarlo *__pyx_vtabptr_17_voxel_montecarlo_VoxelPlateMonteCarlo;
 
 
-/* "_voxel_montecarlo.pyx":419
+/* "_voxel_montecarlo.pyx":504
  * # =============================================================================
  * 
  * cdef class Fluence:             # <<<<<<<<<<<<<<
@@ -1517,14 +1524,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func);
 /* None.proto */
 static CYTHON_INLINE long __Pyx_div_long(long, long);
 
-/* PyIntCompare.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_EqObjC(PyObject *op1, PyObject *op2, long intval, long inplace);
-
-/* WriteUnraisableException.proto */
-static void __Pyx_WriteUnraisable(const char *name, int clineno,
-                                  int lineno, const char *filename,
-                                  int full_traceback, int nogil);
-
 /* GetItemInt.proto */
 #define __Pyx_GetItemInt(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
     (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
@@ -1546,6 +1545,11 @@ static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize
 static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j);
 static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i,
                                                      int is_list, int wraparound, int boundscheck);
+
+/* WriteUnraisableException.proto */
+static void __Pyx_WriteUnraisable(const char *name, int clineno,
+                                  int lineno, const char *filename,
+                                  int full_traceback, int nogil);
 
 /* RaiseTooManyValuesToUnpack.proto */
 static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected);
@@ -1569,23 +1573,12 @@ static int __Pyx_SetItemInt_Generic(PyObject *o, PyObject *j, PyObject *v);
 static CYTHON_INLINE int __Pyx_SetItemInt_Fast(PyObject *o, Py_ssize_t i, PyObject *v,
                                                int is_list, int wraparound, int boundscheck);
 
-/* UnaryNegOverflows.proto */
-#define UNARY_NEG_WOULD_OVERFLOW(x)\
-        (((x) < 0) & ((unsigned long)(x) == 0-(unsigned long)(x)))
-
 /* PyIntBinop.proto */
 #if !CYTHON_COMPILING_IN_PYPY
 static PyObject* __Pyx_PyInt_AddObjC(PyObject *op1, PyObject *op2, long intval, int inplace, int zerodivision_check);
 #else
 #define __Pyx_PyInt_AddObjC(op1, op2, intval, inplace, zerodivision_check)\
     (inplace ? PyNumber_InPlaceAdd(op1, op2) : PyNumber_Add(op1, op2))
-#endif
-
-/* PyIntFromDouble.proto */
-#if PY_MAJOR_VERSION < 3
-static CYTHON_INLINE PyObject* __Pyx_PyInt_FromDouble(double value);
-#else
-#define __Pyx_PyInt_FromDouble(value) PyLong_FromDouble(value)
 #endif
 
 /* RaiseException.proto */
@@ -1896,13 +1889,16 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__save_photon(struc
 static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__save_vanish_photon(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_p_id); /* proto*/
 static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__wUpdate(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, float __pyx_v_w, float __pyx_v_ma, float __pyx_v_mt, float __pyx_v_px, float __pyx_v_py, float __pyx_v_pz, int __pyx_v_adx, int __pyx_v_ady, int __pyx_v_adz); /* proto*/
 static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__russianRoulette(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, float __pyx_v_w); /* proto*/
-static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__encooder(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, float __pyx_v_px, float __pyx_v_py, float __pyx_v_pz, int __pyx_v_adx, int __pyx_v_ady, int __pyx_v_adz); /* proto*/
+static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__encooder(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, float __pyx_v_px, float __pyx_v_py, float __pyx_v_pz, int __pyx_v_adx, int __pyx_v_ady, int __pyx_v_adz); /* proto*/
 static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_index_val(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_index, float __pyx_v_x, float __pyx_v_y, float __pyx_v_z); /* proto*/
-static int __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_next_add(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_index, int __pyx_v_x, int __pyx_v_y, int __pyx_v_z, float __pyx_v_vx, float __pyx_v_vy, float __pyx_v_vz); /* proto*/
-static int __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__create01val(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_index, int __pyx_v_index_val, int __pyx_v_base_val); /* proto*/
-static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_random_uniform(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self); /* proto*/
-static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_vectorUpdate(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, float __pyx_v_vx, float __pyx_v_vy, float __pyx_v_vz, float __pyx_v_g); /* proto*/
+static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_next_add(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_index, int __pyx_v_x, int __pyx_v_y, int __pyx_v_z, float __pyx_v_vx, float __pyx_v_vy, float __pyx_v_vz); /* proto*/
+static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__create01val(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_index, float __pyx_v_index_val, float __pyx_v_base_val); /* proto*/
+static __pyx_t_5numpy_float32_t __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_random_uniform(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self); /* proto*/
+static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_vectorUpdate(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, float __pyx_v_vx, float __pyx_v_vy, float __pyx_v_vz, float __pyx_v_g); /* proto*/
+static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__distance_to_boundary(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, float __pyx_v_x, float __pyx_v_v, float __pyx_v_l); /* proto*/
 static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_p_id); /* proto*/
+static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_transmit_v(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_index, float __pyx_v_vx, float __pyx_v_vy, float __pyx_v_vz, float __pyx_v_ni_by_nt, float __pyx_v_cos_ai); /* proto*/
+static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__p_movement_to_bouder(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_index, float __pyx_v_px, float __pyx_v_py, float __pyx_v_pz, float __pyx_v_vx, float __pyx_v_vy, float __pyx_v_vz, float __pyx_v_db_min, float __pyx_v_l); /* proto*/
 static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__getAbsorptionCoeff(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, CYTHON_UNUSED int __pyx_v_x, CYTHON_UNUSED int __pyx_v_y, CYTHON_UNUSED int __pyx_v_z); /* proto*/
 static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__getScatteringCoeff(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, CYTHON_UNUSED int __pyx_v_x, CYTHON_UNUSED int __pyx_v_y, CYTHON_UNUSED int __pyx_v_z); /* proto*/
 static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__getAnisotropyCoeff(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, CYTHON_UNUSED int __pyx_v_x, CYTHON_UNUSED int __pyx_v_y, CYTHON_UNUSED int __pyx_v_z); /* proto*/
@@ -1967,7 +1963,6 @@ static PyObject *__pyx_builtin_TypeError;
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_RuntimeError;
 static PyObject *__pyx_builtin_ImportError;
-static const char __pyx_k_[] = "";
 static const char __pyx_k_g[] = "g";
 static const char __pyx_k_n[] = "n";
 static const char __pyx_k_p[] = "p";
@@ -1975,6 +1970,7 @@ static const char __pyx_k_v[] = "v";
 static const char __pyx_k_w[] = "w";
 static const char __pyx_k_x[] = "x";
 static const char __pyx_k_y[] = "y";
+static const char __pyx_k__3[] = "";
 static const char __pyx_k_dr[] = "dr";
 static const char __pyx_k_dz[] = "dz";
 static const char __pyx_k_ma[] = "ma";
@@ -1988,8 +1984,10 @@ static const char __pyx_k_end[] = "end";
 static const char __pyx_k_nPh[] = "nPh";
 static const char __pyx_k_nan[] = "nan";
 static const char __pyx_k_file[] = "file";
+static const char __pyx_k_int8[] = "int8";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
+static const char __pyx_k_rand[] = "rand";
 static const char __pyx_k_test[] = "test";
 static const char __pyx_k_Start[] = "###### Start ######";
 static const char __pyx_k_array[] = "array";
@@ -2003,23 +2001,26 @@ static const char __pyx_k_Finish[] = "###### Finish ######";
 static const char __pyx_k_astype[] = "astype";
 static const char __pyx_k_getArz[] = "getArz";
 static const char __pyx_k_import[] = "__import__";
+static const char __pyx_k_random[] = "random";
 static const char __pyx_k_reduce[] = "__reduce__";
 static const char __pyx_k_test_2[] = "__test__";
 static const char __pyx_k_Fluence[] = "Fluence";
 static const char __pyx_k_float32[] = "float32";
+static const char __pyx_k_logger1[] = "logger1";
+static const char __pyx_k_logger2[] = "logger2";
 static const char __pyx_k_getstate[] = "__getstate__";
 static const char __pyx_k_setstate[] = "__setstate__";
 static const char __pyx_k_TypeError[] = "TypeError";
 static const char __pyx_k_reduce_ex[] = "__reduce_ex__";
-static const char __pyx_k_Progress_s[] = "Progress: %s [\357\274\205]";
 static const char __pyx_k_ValueError[] = "ValueError";
+static const char __pyx_k_logger_int[] = "logger_int";
 static const char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static const char __pyx_k_ImportError[] = "ImportError";
 static const char __pyx_k_voxel_model[] = "voxel_model";
 static const char __pyx_k_voxel_space[] = "voxel_space";
 static const char __pyx_k_RuntimeError[] = "RuntimeError";
 static const char __pyx_k_fluence_mode[] = "fluence_mode";
-static const char __pyx_k_voxcel_space[] = "voxcel_space";
+static const char __pyx_k_logger_float[] = "logger_float";
 static const char __pyx_k_reduce_cython[] = "__reduce_cython__";
 static const char __pyx_k_setstate_cython[] = "__setstate_cython__";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
@@ -2035,7 +2036,6 @@ static const char __pyx_k_ndarray_is_not_Fortran_contiguou[] = "ndarray is not F
 static const char __pyx_k_no_default___reduce___due_to_non[] = "no default __reduce__ due to non-trivial __cinit__";
 static const char __pyx_k_numpy_core_umath_failed_to_impor[] = "numpy.core.umath failed to import";
 static const char __pyx_k_Format_string_allocated_too_shor_2[] = "Format string allocated too short.";
-static PyObject *__pyx_kp_s_;
 static PyObject *__pyx_n_s_BaseVoxelMonteCarlo;
 static PyObject *__pyx_kp_s_Finish;
 static PyObject *__pyx_n_s_Fluence;
@@ -2043,12 +2043,12 @@ static PyObject *__pyx_kp_u_Format_string_allocated_too_shor;
 static PyObject *__pyx_kp_u_Format_string_allocated_too_shor_2;
 static PyObject *__pyx_n_s_ImportError;
 static PyObject *__pyx_kp_u_Non_native_byte_order_not_suppor;
-static PyObject *__pyx_kp_s_Progress_s;
 static PyObject *__pyx_n_s_RuntimeError;
 static PyObject *__pyx_kp_s_Start;
 static PyObject *__pyx_n_s_TypeError;
 static PyObject *__pyx_n_s_ValueError;
 static PyObject *__pyx_n_s_VoxelPlateMonteCarlo;
+static PyObject *__pyx_kp_s__3;
 static PyObject *__pyx_n_s_add;
 static PyObject *__pyx_n_s_array;
 static PyObject *__pyx_n_s_astype;
@@ -2064,6 +2064,11 @@ static PyObject *__pyx_n_s_g;
 static PyObject *__pyx_n_s_getArz;
 static PyObject *__pyx_n_s_getstate;
 static PyObject *__pyx_n_s_import;
+static PyObject *__pyx_n_s_int8;
+static PyObject *__pyx_n_s_logger1;
+static PyObject *__pyx_n_s_logger2;
+static PyObject *__pyx_n_s_logger_float;
+static PyObject *__pyx_n_s_logger_int;
 static PyObject *__pyx_n_s_ma;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_ms;
@@ -2083,6 +2088,8 @@ static PyObject *__pyx_n_s_nz;
 static PyObject *__pyx_n_s_p;
 static PyObject *__pyx_n_s_print;
 static PyObject *__pyx_n_s_pyx_vtable;
+static PyObject *__pyx_n_s_rand;
+static PyObject *__pyx_n_s_random;
 static PyObject *__pyx_n_s_range;
 static PyObject *__pyx_n_s_reduce;
 static PyObject *__pyx_n_s_reduce_cython;
@@ -2094,7 +2101,6 @@ static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_test_2;
 static PyObject *__pyx_kp_u_unknown_dtype_code_in_numpy_pxd;
 static PyObject *__pyx_n_s_v;
-static PyObject *__pyx_n_s_voxcel_space;
 static PyObject *__pyx_n_s_voxel_model;
 static PyObject *__pyx_n_s_voxel_space;
 static PyObject *__pyx_n_s_w;
@@ -2103,18 +2109,21 @@ static PyObject *__pyx_n_s_y;
 static PyObject *__pyx_n_s_zeros;
 static PyObject *__pyx_n_s_zz;
 static int __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo___cinit__(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_nPh, int __pyx_v_fluence_mode); /* proto */
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_2setInitialCoordinate(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, PyArrayObject *__pyx_v_p, PyArrayObject *__pyx_v_v, PyArrayObject *__pyx_v_add, PyArrayObject *__pyx_v_w); /* proto */
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_4setModel(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, PyArrayObject *__pyx_v_voxel_model, float __pyx_v_voxel_space); /* proto */
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_6setFluence(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, struct __pyx_obj_17_voxel_montecarlo_Fluence *__pyx_v_fluence); /* proto */
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_8getFluenceResult(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_10setParams(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_12getResult(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_14start(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_16__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_18__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_2set_nofphoton(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_nPh); /* proto */
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_4get_logger(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_6setInitialCoordinate(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, PyArrayObject *__pyx_v_p, PyArrayObject *__pyx_v_v, PyArrayObject *__pyx_v_add, PyArrayObject *__pyx_v_w); /* proto */
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_8setModel(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, PyArrayObject *__pyx_v_voxel_model, float __pyx_v_voxel_space); /* proto */
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_10setFluence(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, struct __pyx_obj_17_voxel_montecarlo_Fluence *__pyx_v_fluence); /* proto */
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_12getFluenceResult(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_14setParams(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_16getResult(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_18start(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_20__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_22__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
 static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_setParams(struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *__pyx_v_self, PyArrayObject *__pyx_v_ma, PyArrayObject *__pyx_v_ms, PyArrayObject *__pyx_v_g, PyArrayObject *__pyx_v_n); /* proto */
-static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_2__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_4__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
+static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_2getParams(struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_4__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_6__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
 static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_voxel_montecarlo_Fluence *__pyx_v_self, int __pyx_v_nr, int __pyx_v_nz, float __pyx_v_dr, float __pyx_v_dz); /* proto */
 static PyObject *__pyx_pf_17_voxel_montecarlo_7Fluence_2getArz(struct __pyx_obj_17_voxel_montecarlo_Fluence *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_17_voxel_montecarlo_7Fluence_4test(struct __pyx_obj_17_voxel_montecarlo_Fluence *__pyx_v_self, float __pyx_v_w, float __pyx_v_x, float __pyx_v_y, float __pyx_v_zz); /* proto */
@@ -2125,13 +2134,12 @@ static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_s
 static PyObject *__pyx_tp_new_17_voxel_montecarlo_BaseVoxelMonteCarlo(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_17_voxel_montecarlo_VoxelPlateMonteCarlo(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_17_voxel_montecarlo_Fluence(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
-static PyObject *__pyx_int_0;
 static PyObject *__pyx_int_1;
 static PyObject *__pyx_int_2;
 static PyObject *__pyx_int_3;
-static PyObject *__pyx_int_100;
+static PyObject *__pyx_int_10;
+static PyObject *__pyx_tuple_;
 static PyObject *__pyx_tuple__2;
-static PyObject *__pyx_tuple__3;
 static PyObject *__pyx_tuple__4;
 static PyObject *__pyx_tuple__5;
 static PyObject *__pyx_tuple__6;
@@ -2143,13 +2151,15 @@ static PyObject *__pyx_tuple__11;
 static PyObject *__pyx_tuple__12;
 static PyObject *__pyx_tuple__13;
 static PyObject *__pyx_tuple__14;
+static PyObject *__pyx_tuple__15;
+static PyObject *__pyx_tuple__16;
 /* Late includes */
 
-/* "_voxel_montecarlo.pyx":39
- *         np.ndarray xy_size
+/* "_voxel_montecarlo.pyx":59
+ *         np.ndarray logger_int,logger_float
  * 
  *     def __cinit__(self,int nPh, int fluence_mode):             # <<<<<<<<<<<<<<
- *         self.vectorTh = 0.99999
+ *         self.vectorTh = 0.9999
  *         self.wTh = 0.0001
  */
 
@@ -2184,11 +2194,11 @@ static int __pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_1__cinit__(PyObjec
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_fluence_mode)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 2, 2, 1); __PYX_ERR(0, 39, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 2, 2, 1); __PYX_ERR(0, 59, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) __PYX_ERR(0, 39, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) __PYX_ERR(0, 59, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -2196,12 +2206,12 @@ static int __pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_1__cinit__(PyObjec
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_nPh = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_nPh == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 39, __pyx_L3_error)
-    __pyx_v_fluence_mode = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_fluence_mode == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 39, __pyx_L3_error)
+    __pyx_v_nPh = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_nPh == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 59, __pyx_L3_error)
+    __pyx_v_fluence_mode = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_fluence_mode == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 59, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 39, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 59, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("_voxel_montecarlo.BaseVoxelMonteCarlo.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -2223,174 +2233,286 @@ static int __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo___cinit__(struct _
   PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "_voxel_montecarlo.pyx":40
+  /* "_voxel_montecarlo.pyx":60
  * 
  *     def __cinit__(self,int nPh, int fluence_mode):
- *         self.vectorTh = 0.99999             # <<<<<<<<<<<<<<
+ *         self.vectorTh = 0.9999             # <<<<<<<<<<<<<<
  *         self.wTh = 0.0001
  *         self.nPh = nPh
  */
-  __pyx_v_self->vectorTh = 0.99999;
+  __pyx_v_self->vectorTh = 0.9999;
 
-  /* "_voxel_montecarlo.pyx":41
+  /* "_voxel_montecarlo.pyx":61
  *     def __cinit__(self,int nPh, int fluence_mode):
- *         self.vectorTh = 0.99999
+ *         self.vectorTh = 0.9999
  *         self.wTh = 0.0001             # <<<<<<<<<<<<<<
  *         self.nPh = nPh
  *         self.fluence_mode = fluence_mode
  */
   __pyx_v_self->wTh = 0.0001;
 
-  /* "_voxel_montecarlo.pyx":42
- *         self.vectorTh = 0.99999
+  /* "_voxel_montecarlo.pyx":62
+ *         self.vectorTh = 0.9999
  *         self.wTh = 0.0001
  *         self.nPh = nPh             # <<<<<<<<<<<<<<
  *         self.fluence_mode = fluence_mode
- *         self.russian_m = 10
+ *         self.russian_m = 10.
  */
   __pyx_v_self->nPh = __pyx_v_nPh;
 
-  /* "_voxel_montecarlo.pyx":43
+  /* "_voxel_montecarlo.pyx":63
  *         self.wTh = 0.0001
  *         self.nPh = nPh
  *         self.fluence_mode = fluence_mode             # <<<<<<<<<<<<<<
- *         self.russian_m = 10
- * 
+ *         self.russian_m = 10.
+ *         self.logger1 = 0
  */
   __pyx_v_self->fluence_mode = __pyx_v_fluence_mode;
 
-  /* "_voxel_montecarlo.pyx":44
+  /* "_voxel_montecarlo.pyx":64
  *         self.nPh = nPh
  *         self.fluence_mode = fluence_mode
- *         self.russian_m = 10             # <<<<<<<<<<<<<<
+ *         self.russian_m = 10.             # <<<<<<<<<<<<<<
+ *         self.logger1 = 0
+ *         self.logger2 = 0
+ */
+  __pyx_v_self->russian_m = 10.;
+
+  /* "_voxel_montecarlo.pyx":65
+ *         self.fluence_mode = fluence_mode
+ *         self.russian_m = 10.
+ *         self.logger1 = 0             # <<<<<<<<<<<<<<
+ *         self.logger2 = 0
+ *         self.logger_int = np.zeros(nPh,dtype = int)
+ */
+  __pyx_v_self->logger1 = 0;
+
+  /* "_voxel_montecarlo.pyx":66
+ *         self.russian_m = 10.
+ *         self.logger1 = 0
+ *         self.logger2 = 0             # <<<<<<<<<<<<<<
+ *         self.logger_int = np.zeros(nPh,dtype = int)
+ *         self.logger_float = np.zeros(nPh,dtype = 'float32')
+ */
+  __pyx_v_self->logger2 = 0;
+
+  /* "_voxel_montecarlo.pyx":67
+ *         self.logger1 = 0
+ *         self.logger2 = 0
+ *         self.logger_int = np.zeros(nPh,dtype = int)             # <<<<<<<<<<<<<<
+ *         self.logger_float = np.zeros(nPh,dtype = 'float32')
+ * 
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 67, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 67, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_nPh); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 67, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 67, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
+  __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 67, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyInt_Type))) < 0) __PYX_ERR(0, 67, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 67, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 67, __pyx_L1_error)
+  __Pyx_GIVEREF(__pyx_t_4);
+  __Pyx_GOTREF(__pyx_v_self->logger_int);
+  __Pyx_DECREF(((PyObject *)__pyx_v_self->logger_int));
+  __pyx_v_self->logger_int = ((PyArrayObject *)__pyx_t_4);
+  __pyx_t_4 = 0;
+
+  /* "_voxel_montecarlo.pyx":68
+ *         self.logger2 = 0
+ *         self.logger_int = np.zeros(nPh,dtype = int)
+ *         self.logger_float = np.zeros(nPh,dtype = 'float32')             # <<<<<<<<<<<<<<
  * 
  *         self.p_result = np.zeros((3,nPh),dtype = "float32")
  */
-  __pyx_v_self->russian_m = 10;
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_nPh); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
+  __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_n_s_float32) < 0) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 68, __pyx_L1_error)
+  __Pyx_GIVEREF(__pyx_t_2);
+  __Pyx_GOTREF(__pyx_v_self->logger_float);
+  __Pyx_DECREF(((PyObject *)__pyx_v_self->logger_float));
+  __pyx_v_self->logger_float = ((PyArrayObject *)__pyx_t_2);
+  __pyx_t_2 = 0;
 
-  /* "_voxel_montecarlo.pyx":46
- *         self.russian_m = 10
+  /* "_voxel_montecarlo.pyx":70
+ *         self.logger_float = np.zeros(nPh,dtype = 'float32')
  * 
  *         self.p_result = np.zeros((3,nPh),dtype = "float32")             # <<<<<<<<<<<<<<
  *         self.v_result = np.zeros((3,nPh),dtype = "float32")
  *         self.w_result = np.zeros(nPh,dtype = "float32")
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 70, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_nPh); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_nPh); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 70, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_int_3);
   __Pyx_GIVEREF(__pyx_int_3);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_int_3);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_1);
-  __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
+  __pyx_t_2 = 0;
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 70, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_n_s_float32) < 0) __PYX_ERR(0, 46, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 46, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_n_s_float32) < 0) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 46, __pyx_L1_error)
-  __Pyx_GIVEREF(__pyx_t_4);
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 70, __pyx_L1_error)
+  __Pyx_GIVEREF(__pyx_t_1);
   __Pyx_GOTREF(__pyx_v_self->p_result);
   __Pyx_DECREF(((PyObject *)__pyx_v_self->p_result));
-  __pyx_v_self->p_result = ((PyArrayObject *)__pyx_t_4);
-  __pyx_t_4 = 0;
+  __pyx_v_self->p_result = ((PyArrayObject *)__pyx_t_1);
+  __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":47
+  /* "_voxel_montecarlo.pyx":71
  * 
  *         self.p_result = np.zeros((3,nPh),dtype = "float32")
  *         self.v_result = np.zeros((3,nPh),dtype = "float32")             # <<<<<<<<<<<<<<
  *         self.w_result = np.zeros(nPh,dtype = "float32")
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 47, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_nPh); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 47, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 71, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_nPh); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_int_3);
   __Pyx_GIVEREF(__pyx_int_3);
-  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_int_3);
-  __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_4);
-  __pyx_t_4 = 0;
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 47, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_int_3);
   __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_n_s_float32) < 0) __PYX_ERR(0, 47, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 47, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
+  __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_n_s_float32) < 0) __PYX_ERR(0, 71, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 71, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 71, __pyx_L1_error)
+  __Pyx_GIVEREF(__pyx_t_4);
   __Pyx_GOTREF(__pyx_v_self->v_result);
   __Pyx_DECREF(((PyObject *)__pyx_v_self->v_result));
-  __pyx_v_self->v_result = ((PyArrayObject *)__pyx_t_2);
-  __pyx_t_2 = 0;
+  __pyx_v_self->v_result = ((PyArrayObject *)__pyx_t_4);
+  __pyx_t_4 = 0;
 
-  /* "_voxel_montecarlo.pyx":48
+  /* "_voxel_montecarlo.pyx":72
  *         self.p_result = np.zeros((3,nPh),dtype = "float32")
  *         self.v_result = np.zeros((3,nPh),dtype = "float32")
  *         self.w_result = np.zeros(nPh,dtype = "float32")             # <<<<<<<<<<<<<<
  * 
- *     def setInitialCoordinate(self,np.ndarray[ndim = 2, dtype=DTYPE_t] p,
+ *         self.voxel_model = np.zeros((10,10,10),dtype = "int8")
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_nPh); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2);
-  __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_n_s_float32) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_nPh); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_4);
+  __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_n_s_float32) < 0) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 72, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 48, __pyx_L1_error)
+  if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 72, __pyx_L1_error)
   __Pyx_GIVEREF(__pyx_t_3);
   __Pyx_GOTREF(__pyx_v_self->w_result);
   __Pyx_DECREF(((PyObject *)__pyx_v_self->w_result));
   __pyx_v_self->w_result = ((PyArrayObject *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "_voxel_montecarlo.pyx":39
- *         np.ndarray xy_size
+  /* "_voxel_montecarlo.pyx":74
+ *         self.w_result = np.zeros(nPh,dtype = "float32")
+ * 
+ *         self.voxel_model = np.zeros((10,10,10),dtype = "int8")             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_n_s_int8) < 0) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_tuple__2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 74, __pyx_L1_error)
+  __Pyx_GIVEREF(__pyx_t_1);
+  __Pyx_GOTREF(__pyx_v_self->voxel_model);
+  __Pyx_DECREF(((PyObject *)__pyx_v_self->voxel_model));
+  __pyx_v_self->voxel_model = ((PyArrayObject *)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "_voxel_montecarlo.pyx":59
+ *         np.ndarray logger_int,logger_float
  * 
  *     def __cinit__(self,int nPh, int fluence_mode):             # <<<<<<<<<<<<<<
- *         self.vectorTh = 0.99999
+ *         self.vectorTh = 0.9999
  *         self.wTh = 0.0001
  */
 
@@ -2409,8 +2531,303 @@ static int __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo___cinit__(struct _
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":50
+/* "_voxel_montecarlo.pyx":77
+ * 
+ * 
+ *     def set_nofphoton(self,int nPh):             # <<<<<<<<<<<<<<
+ *         self.nPh = nPh
+ *         self.p_result = np.zeros((3,nPh),dtype = "float32")
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_3set_nofphoton(PyObject *__pyx_v_self, PyObject *__pyx_arg_nPh); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_3set_nofphoton(PyObject *__pyx_v_self, PyObject *__pyx_arg_nPh) {
+  int __pyx_v_nPh;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("set_nofphoton (wrapper)", 0);
+  assert(__pyx_arg_nPh); {
+    __pyx_v_nPh = __Pyx_PyInt_As_int(__pyx_arg_nPh); if (unlikely((__pyx_v_nPh == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 77, __pyx_L3_error)
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("_voxel_montecarlo.BaseVoxelMonteCarlo.set_nofphoton", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_2set_nofphoton(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self), ((int)__pyx_v_nPh));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_2set_nofphoton(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_nPh) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  __Pyx_RefNannySetupContext("set_nofphoton", 0);
+
+  /* "_voxel_montecarlo.pyx":78
+ * 
+ *     def set_nofphoton(self,int nPh):
+ *         self.nPh = nPh             # <<<<<<<<<<<<<<
+ *         self.p_result = np.zeros((3,nPh),dtype = "float32")
+ *         self.v_result = np.zeros((3,nPh),dtype = "float32")
+ */
+  __pyx_v_self->nPh = __pyx_v_nPh;
+
+  /* "_voxel_montecarlo.pyx":79
+ *     def set_nofphoton(self,int nPh):
+ *         self.nPh = nPh
+ *         self.p_result = np.zeros((3,nPh),dtype = "float32")             # <<<<<<<<<<<<<<
+ *         self.v_result = np.zeros((3,nPh),dtype = "float32")
  *         self.w_result = np.zeros(nPh,dtype = "float32")
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_nPh); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_INCREF(__pyx_int_3);
+  __Pyx_GIVEREF(__pyx_int_3);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_int_3);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_1);
+  __pyx_t_1 = 0;
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
+  __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_n_s_float32) < 0) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 79, __pyx_L1_error)
+  __Pyx_GIVEREF(__pyx_t_4);
+  __Pyx_GOTREF(__pyx_v_self->p_result);
+  __Pyx_DECREF(((PyObject *)__pyx_v_self->p_result));
+  __pyx_v_self->p_result = ((PyArrayObject *)__pyx_t_4);
+  __pyx_t_4 = 0;
+
+  /* "_voxel_montecarlo.pyx":80
+ *         self.nPh = nPh
+ *         self.p_result = np.zeros((3,nPh),dtype = "float32")
+ *         self.v_result = np.zeros((3,nPh),dtype = "float32")             # <<<<<<<<<<<<<<
+ *         self.w_result = np.zeros(nPh,dtype = "float32")
+ * 
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_nPh); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_INCREF(__pyx_int_3);
+  __Pyx_GIVEREF(__pyx_int_3);
+  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_int_3);
+  __Pyx_GIVEREF(__pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_4);
+  __pyx_t_4 = 0;
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
+  __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_n_s_float32) < 0) __PYX_ERR(0, 80, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 80, __pyx_L1_error)
+  __Pyx_GIVEREF(__pyx_t_2);
+  __Pyx_GOTREF(__pyx_v_self->v_result);
+  __Pyx_DECREF(((PyObject *)__pyx_v_self->v_result));
+  __pyx_v_self->v_result = ((PyArrayObject *)__pyx_t_2);
+  __pyx_t_2 = 0;
+
+  /* "_voxel_montecarlo.pyx":81
+ *         self.p_result = np.zeros((3,nPh),dtype = "float32")
+ *         self.v_result = np.zeros((3,nPh),dtype = "float32")
+ *         self.w_result = np.zeros(nPh,dtype = "float32")             # <<<<<<<<<<<<<<
+ * 
+ *     def get_logger(self):
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_nPh); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2);
+  __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_n_s_float32) < 0) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GIVEREF(__pyx_t_3);
+  __Pyx_GOTREF(__pyx_v_self->w_result);
+  __Pyx_DECREF(((PyObject *)__pyx_v_self->w_result));
+  __pyx_v_self->w_result = ((PyArrayObject *)__pyx_t_3);
+  __pyx_t_3 = 0;
+
+  /* "_voxel_montecarlo.pyx":77
+ * 
+ * 
+ *     def set_nofphoton(self,int nPh):             # <<<<<<<<<<<<<<
+ *         self.nPh = nPh
+ *         self.p_result = np.zeros((3,nPh),dtype = "float32")
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_AddTraceback("_voxel_montecarlo.BaseVoxelMonteCarlo.set_nofphoton", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "_voxel_montecarlo.pyx":83
+ *         self.w_result = np.zeros(nPh,dtype = "float32")
+ * 
+ *     def get_logger(self):             # <<<<<<<<<<<<<<
+ *         return {
+ *             'logger1':self.logger1,
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_5get_logger(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_5get_logger(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("get_logger (wrapper)", 0);
+  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_4get_logger(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_4get_logger(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  __Pyx_RefNannySetupContext("get_logger", 0);
+
+  /* "_voxel_montecarlo.pyx":84
+ * 
+ *     def get_logger(self):
+ *         return {             # <<<<<<<<<<<<<<
+ *             'logger1':self.logger1,
+ *             'logger2':self.logger2,
+ */
+  __Pyx_XDECREF(__pyx_r);
+
+  /* "_voxel_montecarlo.pyx":85
+ *     def get_logger(self):
+ *         return {
+ *             'logger1':self.logger1,             # <<<<<<<<<<<<<<
+ *             'logger2':self.logger2,
+ *             'logger_int':self.logger_int,
+ */
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 85, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->logger1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 85, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_logger1, __pyx_t_2) < 0) __PYX_ERR(0, 85, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "_voxel_montecarlo.pyx":86
+ *         return {
+ *             'logger1':self.logger1,
+ *             'logger2':self.logger2,             # <<<<<<<<<<<<<<
+ *             'logger_int':self.logger_int,
+ *             'logger_float':self.logger_float,
+ */
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->logger2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_logger2, __pyx_t_2) < 0) __PYX_ERR(0, 85, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "_voxel_montecarlo.pyx":87
+ *             'logger1':self.logger1,
+ *             'logger2':self.logger2,
+ *             'logger_int':self.logger_int,             # <<<<<<<<<<<<<<
+ *             'logger_float':self.logger_float,
+ *             }
+ */
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_logger_int, ((PyObject *)__pyx_v_self->logger_int)) < 0) __PYX_ERR(0, 85, __pyx_L1_error)
+
+  /* "_voxel_montecarlo.pyx":88
+ *             'logger2':self.logger2,
+ *             'logger_int':self.logger_int,
+ *             'logger_float':self.logger_float,             # <<<<<<<<<<<<<<
+ *             }
+ * 
+ */
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_logger_float, ((PyObject *)__pyx_v_self->logger_float)) < 0) __PYX_ERR(0, 85, __pyx_L1_error)
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "_voxel_montecarlo.pyx":83
+ *         self.w_result = np.zeros(nPh,dtype = "float32")
+ * 
+ *     def get_logger(self):             # <<<<<<<<<<<<<<
+ *         return {
+ *             'logger1':self.logger1,
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("_voxel_montecarlo.BaseVoxelMonteCarlo.get_logger", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "_voxel_montecarlo.pyx":91
+ *             }
  * 
  *     def setInitialCoordinate(self,np.ndarray[ndim = 2, dtype=DTYPE_t] p,             # <<<<<<<<<<<<<<
  *                              np.ndarray[ndim = 2, dtype=DTYPE_t] v,
@@ -2418,8 +2835,8 @@ static int __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo___cinit__(struct _
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_3setInitialCoordinate(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_3setInitialCoordinate(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_7setInitialCoordinate(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_7setInitialCoordinate(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_p = 0;
   PyArrayObject *__pyx_v_v = 0;
   PyArrayObject *__pyx_v_add = 0;
@@ -2454,23 +2871,23 @@ static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_3setInitialC
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_v)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("setInitialCoordinate", 1, 4, 4, 1); __PYX_ERR(0, 50, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("setInitialCoordinate", 1, 4, 4, 1); __PYX_ERR(0, 91, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_add)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("setInitialCoordinate", 1, 4, 4, 2); __PYX_ERR(0, 50, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("setInitialCoordinate", 1, 4, 4, 2); __PYX_ERR(0, 91, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_w)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("setInitialCoordinate", 1, 4, 4, 3); __PYX_ERR(0, 50, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("setInitialCoordinate", 1, 4, 4, 3); __PYX_ERR(0, 91, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "setInitialCoordinate") < 0)) __PYX_ERR(0, 50, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "setInitialCoordinate") < 0)) __PYX_ERR(0, 91, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -2487,17 +2904,17 @@ static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_3setInitialC
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("setInitialCoordinate", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 50, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("setInitialCoordinate", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 91, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("_voxel_montecarlo.BaseVoxelMonteCarlo.setInitialCoordinate", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_p), __pyx_ptype_5numpy_ndarray, 1, "p", 0))) __PYX_ERR(0, 50, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_v), __pyx_ptype_5numpy_ndarray, 1, "v", 0))) __PYX_ERR(0, 51, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_add), __pyx_ptype_5numpy_ndarray, 1, "add", 0))) __PYX_ERR(0, 52, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_w), __pyx_ptype_5numpy_ndarray, 1, "w", 0))) __PYX_ERR(0, 53, __pyx_L1_error)
-  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_2setInitialCoordinate(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self), __pyx_v_p, __pyx_v_v, __pyx_v_add, __pyx_v_w);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_p), __pyx_ptype_5numpy_ndarray, 1, "p", 0))) __PYX_ERR(0, 91, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_v), __pyx_ptype_5numpy_ndarray, 1, "v", 0))) __PYX_ERR(0, 92, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_add), __pyx_ptype_5numpy_ndarray, 1, "add", 0))) __PYX_ERR(0, 93, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_w), __pyx_ptype_5numpy_ndarray, 1, "w", 0))) __PYX_ERR(0, 94, __pyx_L1_error)
+  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_6setInitialCoordinate(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self), __pyx_v_p, __pyx_v_v, __pyx_v_add, __pyx_v_w);
 
   /* function exit code */
   goto __pyx_L0;
@@ -2508,7 +2925,7 @@ static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_3setInitialC
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_2setInitialCoordinate(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, PyArrayObject *__pyx_v_p, PyArrayObject *__pyx_v_v, PyArrayObject *__pyx_v_add, PyArrayObject *__pyx_v_w) {
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_6setInitialCoordinate(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, PyArrayObject *__pyx_v_p, PyArrayObject *__pyx_v_v, PyArrayObject *__pyx_v_add, PyArrayObject *__pyx_v_w) {
   __Pyx_LocalBuf_ND __pyx_pybuffernd_add;
   __Pyx_Buffer __pyx_pybuffer_add;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_p;
@@ -2538,26 +2955,26 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_2setInitialC
   __pyx_pybuffernd_w.rcbuffer = &__pyx_pybuffer_w;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_p.rcbuffer->pybuffer, (PyObject*)__pyx_v_p, &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 50, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_p.rcbuffer->pybuffer, (PyObject*)__pyx_v_p, &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 91, __pyx_L1_error)
   }
   __pyx_pybuffernd_p.diminfo[0].strides = __pyx_pybuffernd_p.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_p.diminfo[0].shape = __pyx_pybuffernd_p.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_p.diminfo[1].strides = __pyx_pybuffernd_p.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_p.diminfo[1].shape = __pyx_pybuffernd_p.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_v.rcbuffer->pybuffer, (PyObject*)__pyx_v_v, &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 50, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_v.rcbuffer->pybuffer, (PyObject*)__pyx_v_v, &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 91, __pyx_L1_error)
   }
   __pyx_pybuffernd_v.diminfo[0].strides = __pyx_pybuffernd_v.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_v.diminfo[0].shape = __pyx_pybuffernd_v.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_v.diminfo[1].strides = __pyx_pybuffernd_v.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_v.diminfo[1].shape = __pyx_pybuffernd_v.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_add.rcbuffer->pybuffer, (PyObject*)__pyx_v_add, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 50, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_add.rcbuffer->pybuffer, (PyObject*)__pyx_v_add, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 91, __pyx_L1_error)
   }
   __pyx_pybuffernd_add.diminfo[0].strides = __pyx_pybuffernd_add.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_add.diminfo[0].shape = __pyx_pybuffernd_add.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_add.diminfo[1].strides = __pyx_pybuffernd_add.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_add.diminfo[1].shape = __pyx_pybuffernd_add.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_w.rcbuffer->pybuffer, (PyObject*)__pyx_v_w, &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 50, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_w.rcbuffer->pybuffer, (PyObject*)__pyx_v_w, &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 91, __pyx_L1_error)
   }
   __pyx_pybuffernd_w.diminfo[0].strides = __pyx_pybuffernd_w.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_w.diminfo[0].shape = __pyx_pybuffernd_w.rcbuffer->pybuffer.shape[0];
 
-  /* "_voxel_montecarlo.pyx":54
+  /* "_voxel_montecarlo.pyx":95
  *                              np.ndarray[ndim = 2, dtype=np.int_t] add,
  *                              np.ndarray[ndim = 1, dtype=DTYPE_t] w):
  *         self.p = p             # <<<<<<<<<<<<<<
@@ -2570,7 +2987,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_2setInitialC
   __Pyx_DECREF(((PyObject *)__pyx_v_self->p));
   __pyx_v_self->p = ((PyArrayObject *)__pyx_v_p);
 
-  /* "_voxel_montecarlo.pyx":55
+  /* "_voxel_montecarlo.pyx":96
  *                              np.ndarray[ndim = 1, dtype=DTYPE_t] w):
  *         self.p = p
  *         self.v = v             # <<<<<<<<<<<<<<
@@ -2583,7 +3000,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_2setInitialC
   __Pyx_DECREF(((PyObject *)__pyx_v_self->v));
   __pyx_v_self->v = ((PyArrayObject *)__pyx_v_v);
 
-  /* "_voxel_montecarlo.pyx":56
+  /* "_voxel_montecarlo.pyx":97
  *         self.p = p
  *         self.v = v
  *         self.add = add             # <<<<<<<<<<<<<<
@@ -2596,7 +3013,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_2setInitialC
   __Pyx_DECREF(((PyObject *)__pyx_v_self->add));
   __pyx_v_self->add = ((PyArrayObject *)__pyx_v_add);
 
-  /* "_voxel_montecarlo.pyx":57
+  /* "_voxel_montecarlo.pyx":98
  *         self.v = v
  *         self.add = add
  *         self.w = w             # <<<<<<<<<<<<<<
@@ -2609,8 +3026,8 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_2setInitialC
   __Pyx_DECREF(((PyObject *)__pyx_v_self->w));
   __pyx_v_self->w = ((PyArrayObject *)__pyx_v_w);
 
-  /* "_voxel_montecarlo.pyx":50
- *         self.w_result = np.zeros(nPh,dtype = "float32")
+  /* "_voxel_montecarlo.pyx":91
+ *             }
  * 
  *     def setInitialCoordinate(self,np.ndarray[ndim = 2, dtype=DTYPE_t] p,             # <<<<<<<<<<<<<<
  *                              np.ndarray[ndim = 2, dtype=DTYPE_t] v,
@@ -2644,7 +3061,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_2setInitialC
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":59
+/* "_voxel_montecarlo.pyx":100
  *         self.w = w
  * 
  *     def setModel(self,np.ndarray[ndim = 3, dtype=np.int8_t] voxel_model,             # <<<<<<<<<<<<<<
@@ -2653,8 +3070,8 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_2setInitialC
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_5setModel(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_5setModel(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_9setModel(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_9setModel(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_voxel_model = 0;
   float __pyx_v_voxel_space;
   PyObject *__pyx_r = 0;
@@ -2683,11 +3100,11 @@ static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_5setModel(Py
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_voxel_space)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("setModel", 1, 2, 2, 1); __PYX_ERR(0, 59, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("setModel", 1, 2, 2, 1); __PYX_ERR(0, 100, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "setModel") < 0)) __PYX_ERR(0, 59, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "setModel") < 0)) __PYX_ERR(0, 100, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -2696,18 +3113,18 @@ static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_5setModel(Py
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_voxel_model = ((PyArrayObject *)values[0]);
-    __pyx_v_voxel_space = __pyx_PyFloat_AsFloat(values[1]); if (unlikely((__pyx_v_voxel_space == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 60, __pyx_L3_error)
+    __pyx_v_voxel_space = __pyx_PyFloat_AsFloat(values[1]); if (unlikely((__pyx_v_voxel_space == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("setModel", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 59, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("setModel", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 100, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("_voxel_montecarlo.BaseVoxelMonteCarlo.setModel", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_voxel_model), __pyx_ptype_5numpy_ndarray, 1, "voxel_model", 0))) __PYX_ERR(0, 59, __pyx_L1_error)
-  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_4setModel(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self), __pyx_v_voxel_model, __pyx_v_voxel_space);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_voxel_model), __pyx_ptype_5numpy_ndarray, 1, "voxel_model", 0))) __PYX_ERR(0, 100, __pyx_L1_error)
+  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_8setModel(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self), __pyx_v_voxel_model, __pyx_v_voxel_space);
 
   /* function exit code */
   goto __pyx_L0;
@@ -2718,7 +3135,7 @@ static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_5setModel(Py
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_4setModel(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, PyArrayObject *__pyx_v_voxel_model, float __pyx_v_voxel_space) {
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_8setModel(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, PyArrayObject *__pyx_v_voxel_model, float __pyx_v_voxel_space) {
   __Pyx_LocalBuf_ND __pyx_pybuffernd_voxel_model;
   __Pyx_Buffer __pyx_pybuffer_voxel_model;
   PyObject *__pyx_r = NULL;
@@ -2736,11 +3153,11 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_4setModel(st
   __pyx_pybuffernd_voxel_model.rcbuffer = &__pyx_pybuffer_voxel_model;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_voxel_model.rcbuffer->pybuffer, (PyObject*)__pyx_v_voxel_model, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int8_t, PyBUF_FORMAT| PyBUF_STRIDES, 3, 0, __pyx_stack) == -1)) __PYX_ERR(0, 59, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_voxel_model.rcbuffer->pybuffer, (PyObject*)__pyx_v_voxel_model, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int8_t, PyBUF_FORMAT| PyBUF_STRIDES, 3, 0, __pyx_stack) == -1)) __PYX_ERR(0, 100, __pyx_L1_error)
   }
   __pyx_pybuffernd_voxel_model.diminfo[0].strides = __pyx_pybuffernd_voxel_model.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_voxel_model.diminfo[0].shape = __pyx_pybuffernd_voxel_model.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_voxel_model.diminfo[1].strides = __pyx_pybuffernd_voxel_model.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_voxel_model.diminfo[1].shape = __pyx_pybuffernd_voxel_model.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_voxel_model.diminfo[2].strides = __pyx_pybuffernd_voxel_model.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_voxel_model.diminfo[2].shape = __pyx_pybuffernd_voxel_model.rcbuffer->pybuffer.shape[2];
 
-  /* "_voxel_montecarlo.pyx":61
+  /* "_voxel_montecarlo.pyx":102
  *     def setModel(self,np.ndarray[ndim = 3, dtype=np.int8_t] voxel_model,
  *                  float voxel_space):
  *         self.voxel_model = voxel_model             # <<<<<<<<<<<<<<
@@ -2753,39 +3170,39 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_4setModel(st
   __Pyx_DECREF(((PyObject *)__pyx_v_self->voxel_model));
   __pyx_v_self->voxel_model = ((PyArrayObject *)__pyx_v_voxel_model);
 
-  /* "_voxel_montecarlo.pyx":62
+  /* "_voxel_montecarlo.pyx":103
  *                  float voxel_space):
  *         self.voxel_model = voxel_model
  *         self.xy_size = np.array([voxel_model.shape[0],             # <<<<<<<<<<<<<<
  *                                  voxel_model.shape[1]]).astype(int)
  *         self.voxel_space = voxel_space
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 103, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 103, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_voxel_model->dimensions[0])); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_voxel_model->dimensions[0])); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 103, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
 
-  /* "_voxel_montecarlo.pyx":63
+  /* "_voxel_montecarlo.pyx":104
  *         self.voxel_model = voxel_model
  *         self.xy_size = np.array([voxel_model.shape[0],
  *                                  voxel_model.shape[1]]).astype(int)             # <<<<<<<<<<<<<<
  *         self.voxel_space = voxel_space
  * 
  */
-  __pyx_t_5 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_voxel_model->dimensions[1])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_voxel_model->dimensions[1])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 104, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
 
-  /* "_voxel_montecarlo.pyx":62
+  /* "_voxel_montecarlo.pyx":103
  *                  float voxel_space):
  *         self.voxel_model = voxel_model
  *         self.xy_size = np.array([voxel_model.shape[0],             # <<<<<<<<<<<<<<
  *                                  voxel_model.shape[1]]).astype(int)
  *         self.voxel_space = voxel_space
  */
-  __pyx_t_6 = PyList_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_6 = PyList_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 103, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_3);
   PyList_SET_ITEM(__pyx_t_6, 0, __pyx_t_3);
@@ -2806,18 +3223,18 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_4setModel(st
   __pyx_t_2 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_5, __pyx_t_6) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_6);
   __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L1_error)
+  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 103, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "_voxel_montecarlo.pyx":63
+  /* "_voxel_montecarlo.pyx":104
  *         self.voxel_model = voxel_model
  *         self.xy_size = np.array([voxel_model.shape[0],
  *                                  voxel_model.shape[1]]).astype(int)             # <<<<<<<<<<<<<<
  *         self.voxel_space = voxel_space
  * 
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_astype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_astype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 104, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = NULL;
@@ -2832,12 +3249,12 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_4setModel(st
   }
   __pyx_t_1 = (__pyx_t_2) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_2, ((PyObject *)(&PyInt_Type))) : __Pyx_PyObject_CallOneArg(__pyx_t_4, ((PyObject *)(&PyInt_Type)));
   __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 104, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 104, __pyx_L1_error)
 
-  /* "_voxel_montecarlo.pyx":62
+  /* "_voxel_montecarlo.pyx":103
  *                  float voxel_space):
  *         self.voxel_model = voxel_model
  *         self.xy_size = np.array([voxel_model.shape[0],             # <<<<<<<<<<<<<<
@@ -2850,7 +3267,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_4setModel(st
   __pyx_v_self->xy_size = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":64
+  /* "_voxel_montecarlo.pyx":105
  *         self.xy_size = np.array([voxel_model.shape[0],
  *                                  voxel_model.shape[1]]).astype(int)
  *         self.voxel_space = voxel_space             # <<<<<<<<<<<<<<
@@ -2859,7 +3276,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_4setModel(st
  */
   __pyx_v_self->voxel_space = __pyx_v_voxel_space;
 
-  /* "_voxel_montecarlo.pyx":59
+  /* "_voxel_montecarlo.pyx":100
  *         self.w = w
  * 
  *     def setModel(self,np.ndarray[ndim = 3, dtype=np.int8_t] voxel_model,             # <<<<<<<<<<<<<<
@@ -2894,22 +3311,22 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_4setModel(st
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":67
- * 
+/* "_voxel_montecarlo.pyx":109
  *     cdef Fluence fluence
+ * 
  *     def setFluence(self,Fluence fluence):             # <<<<<<<<<<<<<<
  *         self.fluence = fluence
- *     def getFluenceResult(self):
+ * 
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_7setFluence(PyObject *__pyx_v_self, PyObject *__pyx_v_fluence); /*proto*/
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_7setFluence(PyObject *__pyx_v_self, PyObject *__pyx_v_fluence) {
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_11setFluence(PyObject *__pyx_v_self, PyObject *__pyx_v_fluence); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_11setFluence(PyObject *__pyx_v_self, PyObject *__pyx_v_fluence) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("setFluence (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_fluence), __pyx_ptype_17_voxel_montecarlo_Fluence, 1, "fluence", 0))) __PYX_ERR(0, 67, __pyx_L1_error)
-  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_6setFluence(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self), ((struct __pyx_obj_17_voxel_montecarlo_Fluence *)__pyx_v_fluence));
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_fluence), __pyx_ptype_17_voxel_montecarlo_Fluence, 1, "fluence", 0))) __PYX_ERR(0, 109, __pyx_L1_error)
+  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_10setFluence(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self), ((struct __pyx_obj_17_voxel_montecarlo_Fluence *)__pyx_v_fluence));
 
   /* function exit code */
   goto __pyx_L0;
@@ -2920,17 +3337,17 @@ static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_7setFluence(
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_6setFluence(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, struct __pyx_obj_17_voxel_montecarlo_Fluence *__pyx_v_fluence) {
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_10setFluence(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, struct __pyx_obj_17_voxel_montecarlo_Fluence *__pyx_v_fluence) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("setFluence", 0);
 
-  /* "_voxel_montecarlo.pyx":68
- *     cdef Fluence fluence
+  /* "_voxel_montecarlo.pyx":110
+ * 
  *     def setFluence(self,Fluence fluence):
  *         self.fluence = fluence             # <<<<<<<<<<<<<<
+ * 
  *     def getFluenceResult(self):
- *         return self.fluence.getArz
  */
   __Pyx_INCREF(((PyObject *)__pyx_v_fluence));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_fluence));
@@ -2938,12 +3355,12 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_6setFluence(
   __Pyx_DECREF(((PyObject *)__pyx_v_self->fluence));
   __pyx_v_self->fluence = __pyx_v_fluence;
 
-  /* "_voxel_montecarlo.pyx":67
- * 
+  /* "_voxel_montecarlo.pyx":109
  *     cdef Fluence fluence
+ * 
  *     def setFluence(self,Fluence fluence):             # <<<<<<<<<<<<<<
  *         self.fluence = fluence
- *     def getFluenceResult(self):
+ * 
  */
 
   /* function exit code */
@@ -2953,50 +3370,50 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_6setFluence(
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":69
- *     def setFluence(self,Fluence fluence):
+/* "_voxel_montecarlo.pyx":112
  *         self.fluence = fluence
+ * 
  *     def getFluenceResult(self):             # <<<<<<<<<<<<<<
  *         return self.fluence.getArz
  * 
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_9getFluenceResult(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_9getFluenceResult(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_13getFluenceResult(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_13getFluenceResult(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("getFluenceResult (wrapper)", 0);
-  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_8getFluenceResult(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self));
+  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_12getFluenceResult(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_8getFluenceResult(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self) {
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_12getFluenceResult(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("getFluenceResult", 0);
 
-  /* "_voxel_montecarlo.pyx":70
- *         self.fluence = fluence
+  /* "_voxel_montecarlo.pyx":113
+ * 
  *     def getFluenceResult(self):
  *         return self.fluence.getArz             # <<<<<<<<<<<<<<
  * 
  *     def setParams(self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->fluence), __pyx_n_s_getArz); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->fluence), __pyx_n_s_getArz); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 113, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":69
- *     def setFluence(self,Fluence fluence):
+  /* "_voxel_montecarlo.pyx":112
  *         self.fluence = fluence
+ * 
  *     def getFluenceResult(self):             # <<<<<<<<<<<<<<
  *         return self.fluence.getArz
  * 
@@ -3013,7 +3430,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_8getFluenceR
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":72
+/* "_voxel_montecarlo.pyx":115
  *         return self.fluence.getArz
  * 
  *     def setParams(self):             # <<<<<<<<<<<<<<
@@ -3022,19 +3439,19 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_8getFluenceR
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_11setParams(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_11setParams(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_15setParams(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_15setParams(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("setParams (wrapper)", 0);
-  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_10setParams(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self));
+  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_14setParams(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_10setParams(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self) {
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_14setParams(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("setParams", 0);
@@ -3046,7 +3463,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_10setParams(
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":75
+/* "_voxel_montecarlo.pyx":118
  *         pass
  * 
  *     def getResult(self):             # <<<<<<<<<<<<<<
@@ -3055,25 +3472,25 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_10setParams(
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_13getResult(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_13getResult(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_17getResult(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_17getResult(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("getResult (wrapper)", 0);
-  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_12getResult(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self));
+  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_16getResult(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_12getResult(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self) {
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_16getResult(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("getResult", 0);
 
-  /* "_voxel_montecarlo.pyx":76
+  /* "_voxel_montecarlo.pyx":119
  * 
  *     def getResult(self):
  *         return {             # <<<<<<<<<<<<<<
@@ -3082,39 +3499,39 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_12getResult(
  */
   __Pyx_XDECREF(__pyx_r);
 
-  /* "_voxel_montecarlo.pyx":77
+  /* "_voxel_montecarlo.pyx":120
  *     def getResult(self):
  *         return {
  *             'p':self.p_result,             # <<<<<<<<<<<<<<
  *             'v':self.v_result,
  *             'w':self.w_result,
  */
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 77, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 120, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_p, ((PyObject *)__pyx_v_self->p_result)) < 0) __PYX_ERR(0, 77, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_p, ((PyObject *)__pyx_v_self->p_result)) < 0) __PYX_ERR(0, 120, __pyx_L1_error)
 
-  /* "_voxel_montecarlo.pyx":78
+  /* "_voxel_montecarlo.pyx":121
  *         return {
  *             'p':self.p_result,
  *             'v':self.v_result,             # <<<<<<<<<<<<<<
  *             'w':self.w_result,
  *             }
  */
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_v, ((PyObject *)__pyx_v_self->v_result)) < 0) __PYX_ERR(0, 77, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_v, ((PyObject *)__pyx_v_self->v_result)) < 0) __PYX_ERR(0, 120, __pyx_L1_error)
 
-  /* "_voxel_montecarlo.pyx":79
+  /* "_voxel_montecarlo.pyx":122
  *             'p':self.p_result,
  *             'v':self.v_result,
  *             'w':self.w_result,             # <<<<<<<<<<<<<<
  *             }
  * 
  */
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_w, ((PyObject *)__pyx_v_self->w_result)) < 0) __PYX_ERR(0, 77, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_w, ((PyObject *)__pyx_v_self->w_result)) < 0) __PYX_ERR(0, 120, __pyx_L1_error)
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":75
+  /* "_voxel_montecarlo.pyx":118
  *         pass
  * 
  *     def getResult(self):             # <<<<<<<<<<<<<<
@@ -3133,7 +3550,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_12getResult(
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":83
+/* "_voxel_montecarlo.pyx":126
  * 
  * 
  *     cpdef start(self):             # <<<<<<<<<<<<<<
@@ -3141,7 +3558,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_12getResult(
  *         print("###### Start ######")
  */
 
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_15start(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_19start(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
 static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_start(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_skip_dispatch) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -3159,9 +3576,9 @@ static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_start(struct 
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_type_dict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_start); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 83, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_start); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 126, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_15start)) {
+      if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_19start)) {
         __Pyx_XDECREF(__pyx_r);
         __Pyx_INCREF(__pyx_t_1);
         __pyx_t_3 = __pyx_t_1; __pyx_t_4 = NULL;
@@ -3176,7 +3593,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_start(struct 
         }
         __pyx_t_2 = (__pyx_t_4) ? __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4) : __Pyx_PyObject_CallNoArg(__pyx_t_3);
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-        if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 83, __pyx_L1_error)
+        if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 126, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         __pyx_r = __pyx_t_2;
@@ -3197,34 +3614,34 @@ static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_start(struct 
     #endif
   }
 
-  /* "_voxel_montecarlo.pyx":84
+  /* "_voxel_montecarlo.pyx":127
  * 
  *     cpdef start(self):
  *         print("")             # <<<<<<<<<<<<<<
  *         print("###### Start ######")
  *         print("")
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_) < 0) __PYX_ERR(0, 84, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s__3) < 0) __PYX_ERR(0, 127, __pyx_L1_error)
 
-  /* "_voxel_montecarlo.pyx":85
+  /* "_voxel_montecarlo.pyx":128
  *     cpdef start(self):
  *         print("")
  *         print("###### Start ######")             # <<<<<<<<<<<<<<
  *         print("")
  * 
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Start) < 0) __PYX_ERR(0, 85, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Start) < 0) __PYX_ERR(0, 128, __pyx_L1_error)
 
-  /* "_voxel_montecarlo.pyx":86
+  /* "_voxel_montecarlo.pyx":129
  *         print("")
  *         print("###### Start ######")
  *         print("")             # <<<<<<<<<<<<<<
  * 
  *         self._monteCycle()
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_) < 0) __PYX_ERR(0, 86, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s__3) < 0) __PYX_ERR(0, 129, __pyx_L1_error)
 
-  /* "_voxel_montecarlo.pyx":88
+  /* "_voxel_montecarlo.pyx":131
  *         print("")
  * 
  *         self._monteCycle()             # <<<<<<<<<<<<<<
@@ -3233,25 +3650,25 @@ static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_start(struct 
  */
   ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_monteCycle(__pyx_v_self);
 
-  /* "_voxel_montecarlo.pyx":90
+  /* "_voxel_montecarlo.pyx":133
  *         self._monteCycle()
  * 
  *         print("")             # <<<<<<<<<<<<<<
  *         print("###### Finish ######")
  * 
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_) < 0) __PYX_ERR(0, 90, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s__3) < 0) __PYX_ERR(0, 133, __pyx_L1_error)
 
-  /* "_voxel_montecarlo.pyx":91
+  /* "_voxel_montecarlo.pyx":134
  * 
  *         print("")
  *         print("###### Finish ######")             # <<<<<<<<<<<<<<
  * 
  *     cdef void _monteCycle(self):
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Finish) < 0) __PYX_ERR(0, 91, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Finish) < 0) __PYX_ERR(0, 134, __pyx_L1_error)
 
-  /* "_voxel_montecarlo.pyx":83
+  /* "_voxel_montecarlo.pyx":126
  * 
  * 
  *     cpdef start(self):             # <<<<<<<<<<<<<<
@@ -3276,25 +3693,25 @@ static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_start(struct 
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_15start(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_15start(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_19start(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_19start(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("start (wrapper)", 0);
-  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_14start(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self));
+  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_18start(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_14start(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self) {
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_18start(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("start", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_start(__pyx_v_self, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 83, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_start(__pyx_v_self, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3311,7 +3728,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_14start(stru
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":93
+/* "_voxel_montecarlo.pyx":136
  *         print("###### Finish ######")
  * 
  *     cdef void _monteCycle(self):             # <<<<<<<<<<<<<<
@@ -3321,20 +3738,15 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_14start(stru
 
 static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__monteCycle(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self) {
   int __pyx_v_n_Photon;
-  int __pyx_v_counter;
-  PyObject *__pyx_v_i = NULL;
+  CYTHON_UNUSED int __pyx_v_counter;
+  int __pyx_v_i;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  Py_ssize_t __pyx_t_4;
-  PyObject *(*__pyx_t_5)(PyObject *);
-  PyObject *__pyx_t_6 = NULL;
-  int __pyx_t_7;
-  PyObject *__pyx_t_8 = NULL;
+  int __pyx_t_2;
+  int __pyx_t_3;
   __Pyx_RefNannySetupContext("_monteCycle", 0);
 
-  /* "_voxel_montecarlo.pyx":94
+  /* "_voxel_montecarlo.pyx":137
  * 
  *     cdef void _monteCycle(self):
  *         cdef int n_Photon = self.nPh             # <<<<<<<<<<<<<<
@@ -3344,7 +3756,7 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__monteCycle(struct
   __pyx_t_1 = __pyx_v_self->nPh;
   __pyx_v_n_Photon = __pyx_t_1;
 
-  /* "_voxel_montecarlo.pyx":95
+  /* "_voxel_montecarlo.pyx":138
  *     cdef void _monteCycle(self):
  *         cdef int n_Photon = self.nPh
  *         cdef int counter =  int(n_Photon/10)             # <<<<<<<<<<<<<<
@@ -3353,134 +3765,29 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__monteCycle(struct
  */
   __pyx_v_counter = ((int)__Pyx_div_long(__pyx_v_n_Photon, 10));
 
-  /* "_voxel_montecarlo.pyx":97
+  /* "_voxel_montecarlo.pyx":140
  *         cdef int counter =  int(n_Photon/10)
  *         # Let's MonteCarlo!
  *         for i in range(n_Photon):             # <<<<<<<<<<<<<<
  *             self._a_photon_movement(i)
- *             if i%counter==0:
+ *             #if i%counter==0:
  */
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_n_Photon); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 97, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 97, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (likely(PyList_CheckExact(__pyx_t_3)) || PyTuple_CheckExact(__pyx_t_3)) {
-    __pyx_t_2 = __pyx_t_3; __Pyx_INCREF(__pyx_t_2); __pyx_t_4 = 0;
-    __pyx_t_5 = NULL;
-  } else {
-    __pyx_t_4 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 97, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_5 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 97, __pyx_L1_error)
-  }
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  for (;;) {
-    if (likely(!__pyx_t_5)) {
-      if (likely(PyList_CheckExact(__pyx_t_2))) {
-        if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_2)) break;
-        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 97, __pyx_L1_error)
-        #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_2, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 97, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_3);
-        #endif
-      } else {
-        if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
-        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 97, __pyx_L1_error)
-        #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_2, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 97, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_3);
-        #endif
-      }
-    } else {
-      __pyx_t_3 = __pyx_t_5(__pyx_t_2);
-      if (unlikely(!__pyx_t_3)) {
-        PyObject* exc_type = PyErr_Occurred();
-        if (exc_type) {
-          if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 97, __pyx_L1_error)
-        }
-        break;
-      }
-      __Pyx_GOTREF(__pyx_t_3);
-    }
-    __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_3);
-    __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_v_n_Photon;
+  __pyx_t_2 = __pyx_t_1;
+  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
+    __pyx_v_i = __pyx_t_3;
 
-    /* "_voxel_montecarlo.pyx":98
+    /* "_voxel_montecarlo.pyx":141
  *         # Let's MonteCarlo!
  *         for i in range(n_Photon):
  *             self._a_photon_movement(i)             # <<<<<<<<<<<<<<
- *             if i%counter==0:
- *                 print("Progress: %s []"%int(i*100/n_Photon))
+ *             #if i%counter==0:
+ *                 #print("Progress: %s []"%int(i*100/float(n_Photon)))
  */
-    __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_i); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L1_error)
-    ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_a_photon_movement(__pyx_v_self, __pyx_t_1);
-
-    /* "_voxel_montecarlo.pyx":99
- *         for i in range(n_Photon):
- *             self._a_photon_movement(i)
- *             if i%counter==0:             # <<<<<<<<<<<<<<
- *                 print("Progress: %s []"%int(i*100/n_Photon))
- * 
- */
-    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_counter); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 99, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_6 = PyNumber_Remainder(__pyx_v_i, __pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 99, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyInt_EqObjC(__pyx_t_6, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 99, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 99, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (__pyx_t_7) {
-
-      /* "_voxel_montecarlo.pyx":100
- *             self._a_photon_movement(i)
- *             if i%counter==0:
- *                 print("Progress: %s []"%int(i*100/n_Photon))             # <<<<<<<<<<<<<<
- * 
- *     cdef int _get_model_val_atAdd(self, int x, int y, int z):
- */
-      __pyx_t_3 = PyNumber_Multiply(__pyx_v_i, __pyx_int_100); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 100, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_n_Photon); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 100, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_8 = __Pyx_PyNumber_Divide(__pyx_t_3, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 100, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_8);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      __pyx_t_6 = __Pyx_PyNumber_Int(__pyx_t_8); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 100, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __pyx_t_8 = __Pyx_PyString_FormatSafe(__pyx_kp_s_Progress_s, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 100, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_8);
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      if (__Pyx_PrintOne(0, __pyx_t_8) < 0) __PYX_ERR(0, 100, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-
-      /* "_voxel_montecarlo.pyx":99
- *         for i in range(n_Photon):
- *             self._a_photon_movement(i)
- *             if i%counter==0:             # <<<<<<<<<<<<<<
- *                 print("Progress: %s []"%int(i*100/n_Photon))
- * 
- */
-    }
-
-    /* "_voxel_montecarlo.pyx":97
- *         cdef int counter =  int(n_Photon/10)
- *         # Let's MonteCarlo!
- *         for i in range(n_Photon):             # <<<<<<<<<<<<<<
- *             self._a_photon_movement(i)
- *             if i%counter==0:
- */
+    ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_a_photon_movement(__pyx_v_self, __pyx_v_i);
   }
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "_voxel_montecarlo.pyx":93
+  /* "_voxel_montecarlo.pyx":136
  *         print("###### Finish ######")
  * 
  *     cdef void _monteCycle(self):             # <<<<<<<<<<<<<<
@@ -3489,20 +3796,11 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__monteCycle(struct
  */
 
   /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_8);
-  __Pyx_WriteUnraisable("_voxel_montecarlo.BaseVoxelMonteCarlo._monteCycle", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
-  __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_i);
   __Pyx_RefNannyFinishContext();
 }
 
-/* "_voxel_montecarlo.pyx":102
- *                 print("Progress: %s []"%int(i*100/n_Photon))
+/* "_voxel_montecarlo.pyx":145
+ *                 #print("Progress: %s []"%int(i*100/float(n_Photon)))
  * 
  *     cdef int _get_model_val_atAdd(self, int x, int y, int z):             # <<<<<<<<<<<<<<
  *         cdef int val = self.voxel_model[x][y][z]
@@ -3518,26 +3816,26 @@ static int __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_model_val_atAd
   int __pyx_t_3;
   __Pyx_RefNannySetupContext("_get_model_val_atAdd", 0);
 
-  /* "_voxel_montecarlo.pyx":103
+  /* "_voxel_montecarlo.pyx":146
  * 
  *     cdef int _get_model_val_atAdd(self, int x, int y, int z):
  *         cdef int val = self.voxel_model[x][y][z]             # <<<<<<<<<<<<<<
  *         return val
  * 
  */
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->voxel_model), __pyx_v_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->voxel_model), __pyx_v_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 146, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 146, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_z, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_z, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 146, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 146, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_val = __pyx_t_3;
 
-  /* "_voxel_montecarlo.pyx":104
+  /* "_voxel_montecarlo.pyx":147
  *     cdef int _get_model_val_atAdd(self, int x, int y, int z):
  *         cdef int val = self.voxel_model[x][y][z]
  *         return val             # <<<<<<<<<<<<<<
@@ -3547,8 +3845,8 @@ static int __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_model_val_atAd
   __pyx_r = __pyx_v_val;
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":102
- *                 print("Progress: %s []"%int(i*100/n_Photon))
+  /* "_voxel_montecarlo.pyx":145
+ *                 #print("Progress: %s []"%int(i*100/float(n_Photon)))
  * 
  *     cdef int _get_model_val_atAdd(self, int x, int y, int z):             # <<<<<<<<<<<<<<
  *         cdef int val = self.voxel_model[x][y][z]
@@ -3566,7 +3864,7 @@ static int __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_model_val_atAd
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":106
+/* "_voxel_montecarlo.pyx":149
  *         return val
  * 
  *     cdef void _save_photon(self,int p_id,             # <<<<<<<<<<<<<<
@@ -3587,14 +3885,14 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__save_photon(struc
   float __pyx_t_9;
   __Pyx_RefNannySetupContext("_save_photon", 0);
 
-  /* "_voxel_montecarlo.pyx":110
+  /* "_voxel_montecarlo.pyx":153
  *                            int adx,int ady,int adz,
  *                            float vx, float vy, float vz, float w):
  *         px,py,pz = self._encooder(px,py,pz,adx,ady,adz)             # <<<<<<<<<<<<<<
  * 
  *         self.p_result[0][p_id] = px
  */
-  __pyx_t_1 = PyFloat_FromDouble(((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_encooder(__pyx_v_self, __pyx_v_px, __pyx_v_py, __pyx_v_pz, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 110, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_encooder(__pyx_v_self, __pyx_v_px, __pyx_v_py, __pyx_v_pz, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if ((likely(PyTuple_CheckExact(__pyx_t_1))) || (PyList_CheckExact(__pyx_t_1))) {
     PyObject* sequence = __pyx_t_1;
@@ -3602,7 +3900,7 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__save_photon(struc
     if (unlikely(size != 3)) {
       if (size > 3) __Pyx_RaiseTooManyValuesError(3);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 110, __pyx_L1_error)
+      __PYX_ERR(0, 153, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -3618,17 +3916,17 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__save_photon(struc
     __Pyx_INCREF(__pyx_t_3);
     __Pyx_INCREF(__pyx_t_4);
     #else
-    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 110, __pyx_L1_error)
+    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 153, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 110, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 153, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 110, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 153, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     #endif
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_5 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 110, __pyx_L1_error)
+    __pyx_t_5 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 153, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_t_6 = Py_TYPE(__pyx_t_5)->tp_iternext;
@@ -3638,7 +3936,7 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__save_photon(struc
     __Pyx_GOTREF(__pyx_t_3);
     index = 2; __pyx_t_4 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_4);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 110, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 153, __pyx_L1_error)
     __pyx_t_6 = NULL;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     goto __pyx_L4_unpacking_done;
@@ -3646,122 +3944,122 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__save_photon(struc
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_6 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 110, __pyx_L1_error)
+    __PYX_ERR(0, 153, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
-  __pyx_t_7 = __pyx_PyFloat_AsFloat(__pyx_t_2); if (unlikely((__pyx_t_7 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 110, __pyx_L1_error)
+  __pyx_t_7 = __pyx_PyFloat_AsFloat(__pyx_t_2); if (unlikely((__pyx_t_7 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_8 = __pyx_PyFloat_AsFloat(__pyx_t_3); if (unlikely((__pyx_t_8 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 110, __pyx_L1_error)
+  __pyx_t_8 = __pyx_PyFloat_AsFloat(__pyx_t_3); if (unlikely((__pyx_t_8 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_9 = __pyx_PyFloat_AsFloat(__pyx_t_4); if (unlikely((__pyx_t_9 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 110, __pyx_L1_error)
+  __pyx_t_9 = __pyx_PyFloat_AsFloat(__pyx_t_4); if (unlikely((__pyx_t_9 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_px = __pyx_t_7;
   __pyx_v_py = __pyx_t_8;
   __pyx_v_pz = __pyx_t_9;
 
-  /* "_voxel_montecarlo.pyx":112
+  /* "_voxel_montecarlo.pyx":155
  *         px,py,pz = self._encooder(px,py,pz,adx,ady,adz)
  * 
  *         self.p_result[0][p_id] = px             # <<<<<<<<<<<<<<
  *         self.p_result[1][p_id] = py
  *         self.p_result[2][p_id] = pz
  */
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_px); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 112, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_px); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 155, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->p_result), 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 112, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->p_result), 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 155, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (unlikely(__Pyx_SetItemInt(__pyx_t_4, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 112, __pyx_L1_error)
+  if (unlikely(__Pyx_SetItemInt(__pyx_t_4, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 155, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":113
+  /* "_voxel_montecarlo.pyx":156
  * 
  *         self.p_result[0][p_id] = px
  *         self.p_result[1][p_id] = py             # <<<<<<<<<<<<<<
  *         self.p_result[2][p_id] = pz
  * 
  */
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_py); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 113, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_py); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 156, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->p_result), 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 113, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->p_result), 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 156, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (unlikely(__Pyx_SetItemInt(__pyx_t_4, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 113, __pyx_L1_error)
+  if (unlikely(__Pyx_SetItemInt(__pyx_t_4, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 156, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":114
+  /* "_voxel_montecarlo.pyx":157
  *         self.p_result[0][p_id] = px
  *         self.p_result[1][p_id] = py
  *         self.p_result[2][p_id] = pz             # <<<<<<<<<<<<<<
  * 
  *         self.v_result[0][p_id] = vx
  */
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_pz); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 114, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_pz); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 157, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->p_result), 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 114, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->p_result), 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 157, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (unlikely(__Pyx_SetItemInt(__pyx_t_4, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 114, __pyx_L1_error)
+  if (unlikely(__Pyx_SetItemInt(__pyx_t_4, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 157, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":116
+  /* "_voxel_montecarlo.pyx":159
  *         self.p_result[2][p_id] = pz
  * 
  *         self.v_result[0][p_id] = vx             # <<<<<<<<<<<<<<
  *         self.v_result[1][p_id] = vy
  *         self.v_result[2][p_id] = vz
  */
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_vx); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 116, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_vx); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 159, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->v_result), 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 116, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->v_result), 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 159, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (unlikely(__Pyx_SetItemInt(__pyx_t_4, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 116, __pyx_L1_error)
+  if (unlikely(__Pyx_SetItemInt(__pyx_t_4, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 159, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":117
+  /* "_voxel_montecarlo.pyx":160
  * 
  *         self.v_result[0][p_id] = vx
  *         self.v_result[1][p_id] = vy             # <<<<<<<<<<<<<<
  *         self.v_result[2][p_id] = vz
  * 
  */
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_vy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 117, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_vy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 160, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->v_result), 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 117, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->v_result), 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 160, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (unlikely(__Pyx_SetItemInt(__pyx_t_4, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 117, __pyx_L1_error)
+  if (unlikely(__Pyx_SetItemInt(__pyx_t_4, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 160, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":118
+  /* "_voxel_montecarlo.pyx":161
  *         self.v_result[0][p_id] = vx
  *         self.v_result[1][p_id] = vy
  *         self.v_result[2][p_id] = vz             # <<<<<<<<<<<<<<
  * 
  *         self.w_result[p_id] = w
  */
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_vz); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 118, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_vz); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 161, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->v_result), 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 118, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->v_result), 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 161, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (unlikely(__Pyx_SetItemInt(__pyx_t_4, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 118, __pyx_L1_error)
+  if (unlikely(__Pyx_SetItemInt(__pyx_t_4, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 161, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":120
+  /* "_voxel_montecarlo.pyx":163
  *         self.v_result[2][p_id] = vz
  * 
  *         self.w_result[p_id] = w             # <<<<<<<<<<<<<<
  * 
  *     cdef _save_vanish_photon(self,int p_id):
  */
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_w); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 120, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_w); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_self->w_result), __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 120, __pyx_L1_error)
+  if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_self->w_result), __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 163, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":106
+  /* "_voxel_montecarlo.pyx":149
  *         return val
  * 
  *     cdef void _save_photon(self,int p_id,             # <<<<<<<<<<<<<<
@@ -3782,7 +4080,7 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__save_photon(struc
   __Pyx_RefNannyFinishContext();
 }
 
-/* "_voxel_montecarlo.pyx":122
+/* "_voxel_montecarlo.pyx":165
  *         self.w_result[p_id] = w
  * 
  *     cdef _save_vanish_photon(self,int p_id):             # <<<<<<<<<<<<<<
@@ -3799,19 +4097,19 @@ static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__save_vanish_
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("_save_vanish_photon", 0);
 
-  /* "_voxel_montecarlo.pyx":123
+  /* "_voxel_montecarlo.pyx":166
  * 
  *     cdef _save_vanish_photon(self,int p_id):
  *         self.w_result[p_id] = NAN             # <<<<<<<<<<<<<<
  *         for i in range(3):
  *             self.p_result[i][p_id] = NAN
  */
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_17_voxel_montecarlo_NAN); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_17_voxel_montecarlo_NAN); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 166, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_self->w_result), __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 123, __pyx_L1_error)
+  if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_self->w_result), __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 166, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":124
+  /* "_voxel_montecarlo.pyx":167
  *     cdef _save_vanish_photon(self,int p_id):
  *         self.w_result[p_id] = NAN
  *         for i in range(3):             # <<<<<<<<<<<<<<
@@ -3821,38 +4119,38 @@ static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__save_vanish_
   for (__pyx_t_2 = 0; __pyx_t_2 < 3; __pyx_t_2+=1) {
     __pyx_v_i = __pyx_t_2;
 
-    /* "_voxel_montecarlo.pyx":125
+    /* "_voxel_montecarlo.pyx":168
  *         self.w_result[p_id] = NAN
  *         for i in range(3):
  *             self.p_result[i][p_id] = NAN             # <<<<<<<<<<<<<<
  *             self.v_result[i][p_id] = NAN
  * 
  */
-    __pyx_t_1 = PyFloat_FromDouble(__pyx_v_17_voxel_montecarlo_NAN); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
+    __pyx_t_1 = PyFloat_FromDouble(__pyx_v_17_voxel_montecarlo_NAN); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 168, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->p_result), __pyx_v_i, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 125, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->p_result), __pyx_v_i, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 168, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (unlikely(__Pyx_SetItemInt(__pyx_t_3, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 125, __pyx_L1_error)
+    if (unlikely(__Pyx_SetItemInt(__pyx_t_3, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 168, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "_voxel_montecarlo.pyx":126
+    /* "_voxel_montecarlo.pyx":169
  *         for i in range(3):
  *             self.p_result[i][p_id] = NAN
  *             self.v_result[i][p_id] = NAN             # <<<<<<<<<<<<<<
  * 
  *     cdef float _wUpdate(self,float w, float ma, float mt,
  */
-    __pyx_t_1 = PyFloat_FromDouble(__pyx_v_17_voxel_montecarlo_NAN); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 126, __pyx_L1_error)
+    __pyx_t_1 = PyFloat_FromDouble(__pyx_v_17_voxel_montecarlo_NAN); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 169, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->v_result), __pyx_v_i, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 126, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->v_result), __pyx_v_i, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 169, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (unlikely(__Pyx_SetItemInt(__pyx_t_3, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 126, __pyx_L1_error)
+    if (unlikely(__Pyx_SetItemInt(__pyx_t_3, __pyx_v_p_id, __pyx_t_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 169, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "_voxel_montecarlo.pyx":122
+  /* "_voxel_montecarlo.pyx":165
  *         self.w_result[p_id] = w
  * 
  *     cdef _save_vanish_photon(self,int p_id):             # <<<<<<<<<<<<<<
@@ -3874,7 +4172,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__save_vanish_
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":128
+/* "_voxel_montecarlo.pyx":171
  *             self.v_result[i][p_id] = NAN
  * 
  *     cdef float _wUpdate(self,float w, float ma, float mt,             # <<<<<<<<<<<<<<
@@ -3898,7 +4196,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__wUpdate(struct _
   float __pyx_t_10;
   __Pyx_RefNannySetupContext("_wUpdate", 0);
 
-  /* "_voxel_montecarlo.pyx":132
+  /* "_voxel_montecarlo.pyx":175
  *                         int adx, int ady, int adz):
  *         cdef float dw
  *         dw = w*ma/mt             # <<<<<<<<<<<<<<
@@ -3908,11 +4206,11 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__wUpdate(struct _
   __pyx_t_1 = (__pyx_v_w * __pyx_v_ma);
   if (unlikely(__pyx_v_mt == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 132, __pyx_L1_error)
+    __PYX_ERR(0, 175, __pyx_L1_error)
   }
   __pyx_v_dw = (__pyx_t_1 / __pyx_v_mt);
 
-  /* "_voxel_montecarlo.pyx":133
+  /* "_voxel_montecarlo.pyx":176
  *         cdef float dw
  *         dw = w*ma/mt
  *         w -= dw             # <<<<<<<<<<<<<<
@@ -3921,7 +4219,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__wUpdate(struct _
  */
   __pyx_v_w = (__pyx_v_w - __pyx_v_dw);
 
-  /* "_voxel_montecarlo.pyx":134
+  /* "_voxel_montecarlo.pyx":177
  *         dw = w*ma/mt
  *         w -= dw
  *         if self.fluence_mode:             # <<<<<<<<<<<<<<
@@ -3931,14 +4229,14 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__wUpdate(struct _
   __pyx_t_2 = (__pyx_v_self->fluence_mode != 0);
   if (__pyx_t_2) {
 
-    /* "_voxel_montecarlo.pyx":135
+    /* "_voxel_montecarlo.pyx":178
  *         w -= dw
  *         if self.fluence_mode:
  *             px,py,pz = self._encooder(px,py,pz,adx,ady,adz)             # <<<<<<<<<<<<<<
  *             self.fluence.saveFluence(dw,px,py,pz)
  *         return w
  */
-    __pyx_t_3 = PyFloat_FromDouble(((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_encooder(__pyx_v_self, __pyx_v_px, __pyx_v_py, __pyx_v_pz, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 135, __pyx_L1_error)
+    __pyx_t_3 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_encooder(__pyx_v_self, __pyx_v_px, __pyx_v_py, __pyx_v_pz, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     if ((likely(PyTuple_CheckExact(__pyx_t_3))) || (PyList_CheckExact(__pyx_t_3))) {
       PyObject* sequence = __pyx_t_3;
@@ -3946,7 +4244,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__wUpdate(struct _
       if (unlikely(size != 3)) {
         if (size > 3) __Pyx_RaiseTooManyValuesError(3);
         else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-        __PYX_ERR(0, 135, __pyx_L1_error)
+        __PYX_ERR(0, 178, __pyx_L1_error)
       }
       #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
       if (likely(PyTuple_CheckExact(sequence))) {
@@ -3962,17 +4260,17 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__wUpdate(struct _
       __Pyx_INCREF(__pyx_t_5);
       __Pyx_INCREF(__pyx_t_6);
       #else
-      __pyx_t_4 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 135, __pyx_L1_error)
+      __pyx_t_4 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 178, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_5 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 135, __pyx_L1_error)
+      __pyx_t_5 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 178, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_6 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 135, __pyx_L1_error)
+      __pyx_t_6 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 178, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       #endif
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     } else {
       Py_ssize_t index = -1;
-      __pyx_t_7 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 135, __pyx_L1_error)
+      __pyx_t_7 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 178, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __pyx_t_8 = Py_TYPE(__pyx_t_7)->tp_iternext;
@@ -3982,7 +4280,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__wUpdate(struct _
       __Pyx_GOTREF(__pyx_t_5);
       index = 2; __pyx_t_6 = __pyx_t_8(__pyx_t_7); if (unlikely(!__pyx_t_6)) goto __pyx_L4_unpacking_failed;
       __Pyx_GOTREF(__pyx_t_6);
-      if (__Pyx_IternextUnpackEndCheck(__pyx_t_8(__pyx_t_7), 3) < 0) __PYX_ERR(0, 135, __pyx_L1_error)
+      if (__Pyx_IternextUnpackEndCheck(__pyx_t_8(__pyx_t_7), 3) < 0) __PYX_ERR(0, 178, __pyx_L1_error)
       __pyx_t_8 = NULL;
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       goto __pyx_L5_unpacking_done;
@@ -3990,31 +4288,31 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__wUpdate(struct _
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __pyx_t_8 = NULL;
       if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-      __PYX_ERR(0, 135, __pyx_L1_error)
+      __PYX_ERR(0, 178, __pyx_L1_error)
       __pyx_L5_unpacking_done:;
     }
-    __pyx_t_1 = __pyx_PyFloat_AsFloat(__pyx_t_4); if (unlikely((__pyx_t_1 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 135, __pyx_L1_error)
+    __pyx_t_1 = __pyx_PyFloat_AsFloat(__pyx_t_4); if (unlikely((__pyx_t_1 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 178, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_9 = __pyx_PyFloat_AsFloat(__pyx_t_5); if (unlikely((__pyx_t_9 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 135, __pyx_L1_error)
+    __pyx_t_9 = __pyx_PyFloat_AsFloat(__pyx_t_5); if (unlikely((__pyx_t_9 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 178, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_10 = __pyx_PyFloat_AsFloat(__pyx_t_6); if (unlikely((__pyx_t_10 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 135, __pyx_L1_error)
+    __pyx_t_10 = __pyx_PyFloat_AsFloat(__pyx_t_6); if (unlikely((__pyx_t_10 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 178, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_v_px = __pyx_t_1;
     __pyx_v_py = __pyx_t_9;
     __pyx_v_pz = __pyx_t_10;
 
-    /* "_voxel_montecarlo.pyx":136
+    /* "_voxel_montecarlo.pyx":179
  *         if self.fluence_mode:
  *             px,py,pz = self._encooder(px,py,pz,adx,ady,adz)
  *             self.fluence.saveFluence(dw,px,py,pz)             # <<<<<<<<<<<<<<
  *         return w
  * 
  */
-    __pyx_t_3 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_Fluence *)__pyx_v_self->fluence->__pyx_vtab)->saveFluence(__pyx_v_self->fluence, __pyx_v_dw, __pyx_v_px, __pyx_v_py, __pyx_v_pz); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 136, __pyx_L1_error)
+    __pyx_t_3 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_Fluence *)__pyx_v_self->fluence->__pyx_vtab)->saveFluence(__pyx_v_self->fluence, __pyx_v_dw, __pyx_v_px, __pyx_v_py, __pyx_v_pz); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 179, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "_voxel_montecarlo.pyx":134
+    /* "_voxel_montecarlo.pyx":177
  *         dw = w*ma/mt
  *         w -= dw
  *         if self.fluence_mode:             # <<<<<<<<<<<<<<
@@ -4023,7 +4321,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__wUpdate(struct _
  */
   }
 
-  /* "_voxel_montecarlo.pyx":137
+  /* "_voxel_montecarlo.pyx":180
  *             px,py,pz = self._encooder(px,py,pz,adx,ady,adz)
  *             self.fluence.saveFluence(dw,px,py,pz)
  *         return w             # <<<<<<<<<<<<<<
@@ -4033,7 +4331,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__wUpdate(struct _
   __pyx_r = __pyx_v_w;
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":128
+  /* "_voxel_montecarlo.pyx":171
  *             self.v_result[i][p_id] = NAN
  * 
  *     cdef float _wUpdate(self,float w, float ma, float mt,             # <<<<<<<<<<<<<<
@@ -4055,80 +4353,76 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__wUpdate(struct _
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":139
+/* "_voxel_montecarlo.pyx":182
  *         return w
  * 
  *     cdef float _russianRoulette(self,float w):             # <<<<<<<<<<<<<<
  *         ##
- *         cdef int m = self.russian_m
+ *         cdef float m = self.russian_m
  */
 
 static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__russianRoulette(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, float __pyx_v_w) {
-  int __pyx_v_m;
+  float __pyx_v_m;
   float __pyx_v_randnum;
   float __pyx_r;
   __Pyx_RefNannyDeclarations
-  int __pyx_t_1;
+  float __pyx_t_1;
   int __pyx_t_2;
   __Pyx_RefNannySetupContext("_russianRoulette", 0);
 
-  /* "_voxel_montecarlo.pyx":141
+  /* "_voxel_montecarlo.pyx":184
  *     cdef float _russianRoulette(self,float w):
  *         ##
- *         cdef int m = self.russian_m             # <<<<<<<<<<<<<<
+ *         cdef float m = self.russian_m             # <<<<<<<<<<<<<<
  *         cdef float randnum = self.random_uniform()
- *         if randnum > 1/m:
+ *         if randnum > 1./m:
  */
   __pyx_t_1 = __pyx_v_self->russian_m;
   __pyx_v_m = __pyx_t_1;
 
-  /* "_voxel_montecarlo.pyx":142
+  /* "_voxel_montecarlo.pyx":185
  *         ##
- *         cdef int m = self.russian_m
+ *         cdef float m = self.russian_m
  *         cdef float randnum = self.random_uniform()             # <<<<<<<<<<<<<<
- *         if randnum > 1/m:
+ *         if randnum > 1./m:
  *             w = 0.
  */
   __pyx_v_randnum = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->random_uniform(__pyx_v_self);
 
-  /* "_voxel_montecarlo.pyx":143
- *         cdef int m = self.russian_m
+  /* "_voxel_montecarlo.pyx":186
+ *         cdef float m = self.russian_m
  *         cdef float randnum = self.random_uniform()
- *         if randnum > 1/m:             # <<<<<<<<<<<<<<
+ *         if randnum > 1./m:             # <<<<<<<<<<<<<<
  *             w = 0.
  *         else:
  */
   if (unlikely(__pyx_v_m == 0)) {
-    PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-    __PYX_ERR(0, 143, __pyx_L1_error)
+    PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+    __PYX_ERR(0, 186, __pyx_L1_error)
   }
-  else if (sizeof(long) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_m == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(1))) {
-    PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-    __PYX_ERR(0, 143, __pyx_L1_error)
-  }
-  __pyx_t_2 = ((__pyx_v_randnum > __Pyx_div_long(1, __pyx_v_m)) != 0);
+  __pyx_t_2 = ((__pyx_v_randnum > (1. / __pyx_v_m)) != 0);
   if (__pyx_t_2) {
 
-    /* "_voxel_montecarlo.pyx":144
+    /* "_voxel_montecarlo.pyx":187
  *         cdef float randnum = self.random_uniform()
- *         if randnum > 1/m:
+ *         if randnum > 1./m:
  *             w = 0.             # <<<<<<<<<<<<<<
  *         else:
  *             w = w*m
  */
     __pyx_v_w = 0.;
 
-    /* "_voxel_montecarlo.pyx":143
- *         cdef int m = self.russian_m
+    /* "_voxel_montecarlo.pyx":186
+ *         cdef float m = self.russian_m
  *         cdef float randnum = self.random_uniform()
- *         if randnum > 1/m:             # <<<<<<<<<<<<<<
+ *         if randnum > 1./m:             # <<<<<<<<<<<<<<
  *             w = 0.
  *         else:
  */
     goto __pyx_L3;
   }
 
-  /* "_voxel_montecarlo.pyx":146
+  /* "_voxel_montecarlo.pyx":189
  *             w = 0.
  *         else:
  *             w = w*m             # <<<<<<<<<<<<<<
@@ -4140,22 +4434,22 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__russianRoulette(
   }
   __pyx_L3:;
 
-  /* "_voxel_montecarlo.pyx":147
+  /* "_voxel_montecarlo.pyx":190
  *         else:
  *             w = w*m
  *         return w             # <<<<<<<<<<<<<<
  * 
- *     cdef float _encooder(self,
+ *     cdef _encooder(self,float px, float py, float pz,
  */
   __pyx_r = __pyx_v_w;
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":139
+  /* "_voxel_montecarlo.pyx":182
  *         return w
  * 
  *     cdef float _russianRoulette(self,float w):             # <<<<<<<<<<<<<<
  *         ##
- *         cdef int m = self.russian_m
+ *         cdef float m = self.russian_m
  */
 
   /* function exit code */
@@ -4167,166 +4461,164 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__russianRoulette(
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":149
+/* "_voxel_montecarlo.pyx":192
  *         return w
  * 
- *     cdef float _encooder(self,             # <<<<<<<<<<<<<<
- *                          float px, float py, float pz,
+ *     cdef _encooder(self,float px, float py, float pz,             # <<<<<<<<<<<<<<
  *                          int adx, int ady, int adz):
+ *         cdef float space = self.voxel_space
  */
 
-static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__encooder(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, float __pyx_v_px, float __pyx_v_py, float __pyx_v_pz, int __pyx_v_adx, int __pyx_v_ady, int __pyx_v_adz) {
+static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__encooder(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, float __pyx_v_px, float __pyx_v_py, float __pyx_v_pz, int __pyx_v_adx, int __pyx_v_ady, int __pyx_v_adz) {
   float __pyx_v_space;
   int __pyx_v_center_add_x;
   int __pyx_v_center_add_y;
   float __pyx_v_ex;
   float __pyx_v_ey;
   float __pyx_v_ez;
-  float __pyx_r;
+  PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  float __pyx_t_2;
+  float __pyx_t_1;
+  PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
   int __pyx_t_4;
   PyObject *__pyx_t_5 = NULL;
   PyObject *__pyx_t_6 = NULL;
   __Pyx_RefNannySetupContext("_encooder", 0);
 
-  /* "_voxel_montecarlo.pyx":152
- *                          float px, float py, float pz,
+  /* "_voxel_montecarlo.pyx":194
+ *     cdef _encooder(self,float px, float py, float pz,
  *                          int adx, int ady, int adz):
- *         cdef float space = self.voxcel_space             # <<<<<<<<<<<<<<
+ *         cdef float space = self.voxel_space             # <<<<<<<<<<<<<<
  *         cdef int center_add_x,center_add_y
  *         center_add_x = int((self.xy_size[0]+2)/2)
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_voxcel_space); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 152, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_2 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 152, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_space = __pyx_t_2;
+  __pyx_t_1 = __pyx_v_self->voxel_space;
+  __pyx_v_space = __pyx_t_1;
 
-  /* "_voxel_montecarlo.pyx":154
- *         cdef float space = self.voxcel_space
+  /* "_voxel_montecarlo.pyx":196
+ *         cdef float space = self.voxel_space
  *         cdef int center_add_x,center_add_y
  *         center_add_x = int((self.xy_size[0]+2)/2)             # <<<<<<<<<<<<<<
  *         center_add_y = int((self.xy_size[1]+2)/2)
  * 
  */
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->xy_size), 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 154, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyInt_AddObjC(__pyx_t_1, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 154, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->xy_size), 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 196, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyInt_AddObjC(__pyx_t_2, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 196, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyNumber_Divide(__pyx_t_3, __pyx_int_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 154, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_t_3, __pyx_int_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 196, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 154, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 196, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 154, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 196, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_center_add_x = __pyx_t_4;
 
-  /* "_voxel_montecarlo.pyx":155
+  /* "_voxel_montecarlo.pyx":197
  *         cdef int center_add_x,center_add_y
  *         center_add_x = int((self.xy_size[0]+2)/2)
  *         center_add_y = int((self.xy_size[1]+2)/2)             # <<<<<<<<<<<<<<
  * 
  *         cdef float  ex, ey, ez
  */
-  __pyx_t_3 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->xy_size), 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 155, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->xy_size), 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 197, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = __Pyx_PyInt_AddObjC(__pyx_t_3, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 155, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyInt_AddObjC(__pyx_t_3, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 197, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyNumber_Divide(__pyx_t_1, __pyx_int_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 155, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyNumber_Divide(__pyx_t_2, __pyx_int_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 197, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 155, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 197, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 155, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 197, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_center_add_y = __pyx_t_4;
 
-  /* "_voxel_montecarlo.pyx":158
+  /* "_voxel_montecarlo.pyx":200
  * 
  *         cdef float  ex, ey, ez
  *         ex = space*(adx-center_add_x)+px             # <<<<<<<<<<<<<<
  *         ey = space*(ady-center_add_y)+py
- *         ez = space*(adz-1)+pz+space/2
+ *         ez = space*(adz-1)+pz+space/2.
  */
   __pyx_v_ex = ((__pyx_v_space * (__pyx_v_adx - __pyx_v_center_add_x)) + __pyx_v_px);
 
-  /* "_voxel_montecarlo.pyx":159
+  /* "_voxel_montecarlo.pyx":201
  *         cdef float  ex, ey, ez
  *         ex = space*(adx-center_add_x)+px
  *         ey = space*(ady-center_add_y)+py             # <<<<<<<<<<<<<<
- *         ez = space*(adz-1)+pz+space/2
+ *         ez = space*(adz-1)+pz+space/2.
  *         return ex, ey, ez
  */
   __pyx_v_ey = ((__pyx_v_space * (__pyx_v_ady - __pyx_v_center_add_y)) + __pyx_v_py);
 
-  /* "_voxel_montecarlo.pyx":160
+  /* "_voxel_montecarlo.pyx":202
  *         ex = space*(adx-center_add_x)+px
  *         ey = space*(ady-center_add_y)+py
- *         ez = space*(adz-1)+pz+space/2             # <<<<<<<<<<<<<<
+ *         ez = space*(adz-1)+pz+space/2.             # <<<<<<<<<<<<<<
  *         return ex, ey, ez
  * 
  */
-  __pyx_v_ez = (((__pyx_v_space * (__pyx_v_adz - 1)) + __pyx_v_pz) + (__pyx_v_space / 2.0));
+  __pyx_v_ez = (((__pyx_v_space * (__pyx_v_adz - 1)) + __pyx_v_pz) + (__pyx_v_space / 2.));
 
-  /* "_voxel_montecarlo.pyx":161
+  /* "_voxel_montecarlo.pyx":203
  *         ey = space*(ady-center_add_y)+py
- *         ez = space*(adz-1)+pz+space/2
+ *         ez = space*(adz-1)+pz+space/2.
  *         return ex, ey, ez             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_ex); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 161, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_ey); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 161, __pyx_L1_error)
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_ex); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 203, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_ey); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 203, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = PyFloat_FromDouble(__pyx_v_ez); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_t_5 = PyFloat_FromDouble(__pyx_v_ez); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 203, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = PyTuple_New(3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_t_6 = PyTuple_New(3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 203, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_6, 2, __pyx_t_5);
-  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
   __pyx_t_3 = 0;
   __pyx_t_5 = 0;
-  __pyx_t_2 = __pyx_PyFloat_AsFloat(__pyx_t_6); if (unlikely((__pyx_t_2 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 161, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_r = __pyx_t_2;
+  __pyx_r = __pyx_t_6;
+  __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":149
+  /* "_voxel_montecarlo.pyx":192
  *         return w
  * 
- *     cdef float _encooder(self,             # <<<<<<<<<<<<<<
- *                          float px, float py, float pz,
+ *     cdef _encooder(self,float px, float py, float pz,             # <<<<<<<<<<<<<<
  *                          int adx, int ady, int adz):
+ *         cdef float space = self.voxel_space
  */
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_WriteUnraisable("_voxel_montecarlo.BaseVoxelMonteCarlo._encooder", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_AddTraceback("_voxel_montecarlo.BaseVoxelMonteCarlo._encooder", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":164
+/* "_voxel_montecarlo.pyx":206
  * 
  * 
  *     cdef float _get_index_val(self,int index ,float x, float y, float z):             # <<<<<<<<<<<<<<
@@ -4340,7 +4632,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_index_val(CY
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("_get_index_val", 0);
 
-  /* "_voxel_montecarlo.pyx":165
+  /* "_voxel_montecarlo.pyx":207
  * 
  *     cdef float _get_index_val(self,int index ,float x, float y, float z):
  *         cdef float val = 0.             # <<<<<<<<<<<<<<
@@ -4349,7 +4641,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_index_val(CY
  */
   __pyx_v_val = 0.;
 
-  /* "_voxel_montecarlo.pyx":166
+  /* "_voxel_montecarlo.pyx":208
  *     cdef float _get_index_val(self,int index ,float x, float y, float z):
  *         cdef float val = 0.
  *         if index == 0:             # <<<<<<<<<<<<<<
@@ -4359,7 +4651,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_index_val(CY
   switch (__pyx_v_index) {
     case 0:
 
-    /* "_voxel_montecarlo.pyx":167
+    /* "_voxel_montecarlo.pyx":209
  *         cdef float val = 0.
  *         if index == 0:
  *             val = x             # <<<<<<<<<<<<<<
@@ -4368,7 +4660,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_index_val(CY
  */
     __pyx_v_val = __pyx_v_x;
 
-    /* "_voxel_montecarlo.pyx":166
+    /* "_voxel_montecarlo.pyx":208
  *     cdef float _get_index_val(self,int index ,float x, float y, float z):
  *         cdef float val = 0.
  *         if index == 0:             # <<<<<<<<<<<<<<
@@ -4378,7 +4670,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_index_val(CY
     break;
     case 1:
 
-    /* "_voxel_montecarlo.pyx":169
+    /* "_voxel_montecarlo.pyx":211
  *             val = x
  *         elif index == 1:
  *             val = y             # <<<<<<<<<<<<<<
@@ -4387,7 +4679,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_index_val(CY
  */
     __pyx_v_val = __pyx_v_y;
 
-    /* "_voxel_montecarlo.pyx":168
+    /* "_voxel_montecarlo.pyx":210
  *         if index == 0:
  *             val = x
  *         elif index == 1:             # <<<<<<<<<<<<<<
@@ -4397,7 +4689,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_index_val(CY
     break;
     case 2:
 
-    /* "_voxel_montecarlo.pyx":171
+    /* "_voxel_montecarlo.pyx":213
  *             val = y
  *         elif index == 2:
  *             val = z             # <<<<<<<<<<<<<<
@@ -4406,7 +4698,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_index_val(CY
  */
     __pyx_v_val = __pyx_v_z;
 
-    /* "_voxel_montecarlo.pyx":170
+    /* "_voxel_montecarlo.pyx":212
  *         elif index == 1:
  *             val = y
  *         elif index == 2:             # <<<<<<<<<<<<<<
@@ -4417,17 +4709,17 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_index_val(CY
     default: break;
   }
 
-  /* "_voxel_montecarlo.pyx":172
+  /* "_voxel_montecarlo.pyx":214
  *         elif index == 2:
  *             val = z
  *         return val             # <<<<<<<<<<<<<<
  * 
- *     cdef int _get_next_add(self,int index, int x, int y, int z,
+ *     cdef _get_next_add(self,int index, int x, int y, int z,
  */
   __pyx_r = __pyx_v_val;
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":164
+  /* "_voxel_montecarlo.pyx":206
  * 
  * 
  *     cdef float _get_index_val(self,int index ,float x, float y, float z):             # <<<<<<<<<<<<<<
@@ -4441,313 +4733,143 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_index_val(CY
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":174
+/* "_voxel_montecarlo.pyx":216
  *         return val
  * 
- *     cdef int _get_next_add(self,int index, int x, int y, int z,             # <<<<<<<<<<<<<<
+ *     cdef _get_next_add(self,int index, int x, int y, int z,             # <<<<<<<<<<<<<<
  *                            float vx, float vy, float vz):
- *         if index == 0:
+ *         cdef int val = 0
  */
 
-static int __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_next_add(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_index, int __pyx_v_x, int __pyx_v_y, int __pyx_v_z, float __pyx_v_vx, float __pyx_v_vy, float __pyx_v_vz) {
-  int __pyx_r;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  int __pyx_t_4;
-  PyObject *__pyx_t_5 = NULL;
-  __Pyx_RefNannySetupContext("_get_next_add", 0);
-
-  /* "_voxel_montecarlo.pyx":176
- *     cdef int _get_next_add(self,int index, int x, int y, int z,
- *                            float vx, float vy, float vz):
- *         if index == 0:             # <<<<<<<<<<<<<<
- *             vx = copysign(1,vx)
- *             x = x + int(vx)
- */
-  switch (__pyx_v_index) {
-    case 0:
-
-    /* "_voxel_montecarlo.pyx":177
- *                            float vx, float vy, float vz):
- *         if index == 0:
- *             vx = copysign(1,vx)             # <<<<<<<<<<<<<<
- *             x = x + int(vx)
- *         elif index == 1:
- */
-    __pyx_v_vx = copysign(1.0, __pyx_v_vx);
-
-    /* "_voxel_montecarlo.pyx":178
- *         if index == 0:
- *             vx = copysign(1,vx)
- *             x = x + int(vx)             # <<<<<<<<<<<<<<
- *         elif index == 1:
- *             vy = copysign(1,vy)
- */
-    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 178, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyInt_FromDouble(__pyx_v_vx); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 178, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyNumber_Add(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 178, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_v_x = __pyx_t_4;
-
-    /* "_voxel_montecarlo.pyx":176
- *     cdef int _get_next_add(self,int index, int x, int y, int z,
- *                            float vx, float vy, float vz):
- *         if index == 0:             # <<<<<<<<<<<<<<
- *             vx = copysign(1,vx)
- *             x = x + int(vx)
- */
-    break;
-    case 1:
-
-    /* "_voxel_montecarlo.pyx":180
- *             x = x + int(vx)
- *         elif index == 1:
- *             vy = copysign(1,vy)             # <<<<<<<<<<<<<<
- *             y = y + int(vy)
- *         elif index == 2:
- */
-    __pyx_v_vy = copysign(1.0, __pyx_v_vy);
-
-    /* "_voxel_montecarlo.pyx":181
- *         elif index == 1:
- *             vy = copysign(1,vy)
- *             y = y + int(vy)             # <<<<<<<<<<<<<<
- *         elif index == 2:
- *             vz = copysign(1,vz)
- */
-    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 181, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyInt_FromDouble(__pyx_v_vy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyNumber_Add(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 181, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 181, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_v_y = __pyx_t_4;
-
-    /* "_voxel_montecarlo.pyx":179
- *             vx = copysign(1,vx)
- *             x = x + int(vx)
- *         elif index == 1:             # <<<<<<<<<<<<<<
- *             vy = copysign(1,vy)
- *             y = y + int(vy)
- */
-    break;
-    case 2:
-
-    /* "_voxel_montecarlo.pyx":183
- *             y = y + int(vy)
- *         elif index == 2:
- *             vz = copysign(1,vz)             # <<<<<<<<<<<<<<
- *             z = z + int(vz)
- *         return x,y,z
- */
-    __pyx_v_vz = copysign(1.0, __pyx_v_vz);
-
-    /* "_voxel_montecarlo.pyx":184
- *         elif index == 2:
- *             vz = copysign(1,vz)
- *             z = z + int(vz)             # <<<<<<<<<<<<<<
- *         return x,y,z
- * 
- */
-    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_z); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 184, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyInt_FromDouble(__pyx_v_vz); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 184, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyNumber_Add(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 184, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 184, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_v_z = __pyx_t_4;
-
-    /* "_voxel_montecarlo.pyx":182
- *             vy = copysign(1,vy)
- *             y = y + int(vy)
- *         elif index == 2:             # <<<<<<<<<<<<<<
- *             vz = copysign(1,vz)
- *             z = z + int(vz)
- */
-    break;
-    default: break;
-  }
-
-  /* "_voxel_montecarlo.pyx":185
- *             vz = copysign(1,vz)
- *             z = z + int(vz)
- *         return x,y,z             # <<<<<<<<<<<<<<
- * 
- *     cdef int _create01val(self,int index, int index_val,int base_val):
- */
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_x); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 185, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_y); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 185, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_z); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 185, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 185, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_5, 2, __pyx_t_1);
-  __pyx_t_3 = 0;
-  __pyx_t_2 = 0;
-  __pyx_t_1 = 0;
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 185, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_r = __pyx_t_4;
-  goto __pyx_L0;
-
-  /* "_voxel_montecarlo.pyx":174
- *         return val
- * 
- *     cdef int _get_next_add(self,int index, int x, int y, int z,             # <<<<<<<<<<<<<<
- *                            float vx, float vy, float vz):
- *         if index == 0:
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_WriteUnraisable("_voxel_montecarlo.BaseVoxelMonteCarlo._get_next_add", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
-  __pyx_r = 0;
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "_voxel_montecarlo.pyx":187
- *         return x,y,z
- * 
- *     cdef int _create01val(self,int index, int index_val,int base_val):             # <<<<<<<<<<<<<<
- *         cdef float x,y,z
- *         x = base_val; y = base_val; z = base_val
- */
-
-static int __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__create01val(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_index, int __pyx_v_index_val, int __pyx_v_base_val) {
-  float __pyx_v_x;
-  float __pyx_v_y;
-  float __pyx_v_z;
-  int __pyx_r;
+static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_next_add(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_index, int __pyx_v_x, int __pyx_v_y, int __pyx_v_z, float __pyx_v_vx, float __pyx_v_vy, float __pyx_v_vz) {
+  int __pyx_v_val;
+  PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
   PyObject *__pyx_t_4 = NULL;
-  int __pyx_t_5;
-  __Pyx_RefNannySetupContext("_create01val", 0);
+  __Pyx_RefNannySetupContext("_get_next_add", 0);
 
-  /* "_voxel_montecarlo.pyx":189
- *     cdef int _create01val(self,int index, int index_val,int base_val):
- *         cdef float x,y,z
- *         x = base_val; y = base_val; z = base_val             # <<<<<<<<<<<<<<
+  /* "_voxel_montecarlo.pyx":218
+ *     cdef _get_next_add(self,int index, int x, int y, int z,
+ *                            float vx, float vy, float vz):
+ *         cdef int val = 0             # <<<<<<<<<<<<<<
  *         if index == 0:
- *             x = index_val
+ *             val = int(copysign(1,vx))
  */
-  __pyx_v_x = __pyx_v_base_val;
-  __pyx_v_y = __pyx_v_base_val;
-  __pyx_v_z = __pyx_v_base_val;
+  __pyx_v_val = 0;
 
-  /* "_voxel_montecarlo.pyx":190
- *         cdef float x,y,z
- *         x = base_val; y = base_val; z = base_val
+  /* "_voxel_montecarlo.pyx":219
+ *                            float vx, float vy, float vz):
+ *         cdef int val = 0
  *         if index == 0:             # <<<<<<<<<<<<<<
- *             x = index_val
- *         elif index == 1:
+ *             val = int(copysign(1,vx))
+ *             x = x + val
  */
   switch (__pyx_v_index) {
     case 0:
 
-    /* "_voxel_montecarlo.pyx":191
- *         x = base_val; y = base_val; z = base_val
+    /* "_voxel_montecarlo.pyx":220
+ *         cdef int val = 0
  *         if index == 0:
- *             x = index_val             # <<<<<<<<<<<<<<
+ *             val = int(copysign(1,vx))             # <<<<<<<<<<<<<<
+ *             x = x + val
  *         elif index == 1:
- *             y = index_val
  */
-    __pyx_v_x = __pyx_v_index_val;
+    __pyx_v_val = ((int)copysign(1.0, __pyx_v_vx));
 
-    /* "_voxel_montecarlo.pyx":190
- *         cdef float x,y,z
- *         x = base_val; y = base_val; z = base_val
- *         if index == 0:             # <<<<<<<<<<<<<<
- *             x = index_val
+    /* "_voxel_montecarlo.pyx":221
+ *         if index == 0:
+ *             val = int(copysign(1,vx))
+ *             x = x + val             # <<<<<<<<<<<<<<
  *         elif index == 1:
+ *             val = int(copysign(1,vy))
+ */
+    __pyx_v_x = (__pyx_v_x + __pyx_v_val);
+
+    /* "_voxel_montecarlo.pyx":219
+ *                            float vx, float vy, float vz):
+ *         cdef int val = 0
+ *         if index == 0:             # <<<<<<<<<<<<<<
+ *             val = int(copysign(1,vx))
+ *             x = x + val
  */
     break;
     case 1:
 
-    /* "_voxel_montecarlo.pyx":193
- *             x = index_val
+    /* "_voxel_montecarlo.pyx":223
+ *             x = x + val
  *         elif index == 1:
- *             y = index_val             # <<<<<<<<<<<<<<
+ *             val = int(copysign(1,vy))             # <<<<<<<<<<<<<<
+ *             y = y + val
  *         elif index == 2:
- *             z = index_val
  */
-    __pyx_v_y = __pyx_v_index_val;
+    __pyx_v_val = ((int)copysign(1.0, __pyx_v_vy));
 
-    /* "_voxel_montecarlo.pyx":192
- *         if index == 0:
- *             x = index_val
- *         elif index == 1:             # <<<<<<<<<<<<<<
- *             y = index_val
+    /* "_voxel_montecarlo.pyx":224
+ *         elif index == 1:
+ *             val = int(copysign(1,vy))
+ *             y = y + val             # <<<<<<<<<<<<<<
  *         elif index == 2:
+ *             val = int(copysign(1,vz))
+ */
+    __pyx_v_y = (__pyx_v_y + __pyx_v_val);
+
+    /* "_voxel_montecarlo.pyx":222
+ *             val = int(copysign(1,vx))
+ *             x = x + val
+ *         elif index == 1:             # <<<<<<<<<<<<<<
+ *             val = int(copysign(1,vy))
+ *             y = y + val
  */
     break;
     case 2:
 
-    /* "_voxel_montecarlo.pyx":195
- *             y = index_val
+    /* "_voxel_montecarlo.pyx":226
+ *             y = y + val
  *         elif index == 2:
- *             z = index_val             # <<<<<<<<<<<<<<
+ *             val = int(copysign(1,vz))             # <<<<<<<<<<<<<<
+ *             z = z + val
+ *         return x,y,z
+ */
+    __pyx_v_val = ((int)copysign(1.0, __pyx_v_vz));
+
+    /* "_voxel_montecarlo.pyx":227
+ *         elif index == 2:
+ *             val = int(copysign(1,vz))
+ *             z = z + val             # <<<<<<<<<<<<<<
  *         return x,y,z
  * 
  */
-    __pyx_v_z = __pyx_v_index_val;
+    __pyx_v_z = (__pyx_v_z + __pyx_v_val);
 
-    /* "_voxel_montecarlo.pyx":194
- *         elif index == 1:
- *             y = index_val
+    /* "_voxel_montecarlo.pyx":225
+ *             val = int(copysign(1,vy))
+ *             y = y + val
  *         elif index == 2:             # <<<<<<<<<<<<<<
- *             z = index_val
- *         return x,y,z
+ *             val = int(copysign(1,vz))
+ *             z = z + val
  */
     break;
     default: break;
   }
 
-  /* "_voxel_montecarlo.pyx":196
- *         elif index == 2:
- *             z = index_val
+  /* "_voxel_montecarlo.pyx":228
+ *             val = int(copysign(1,vz))
+ *             z = z + val
  *         return x,y,z             # <<<<<<<<<<<<<<
  * 
- * 
+ *     cdef _create01val(self,int index, float index_val,float base_val):
  */
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 196, __pyx_L1_error)
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_y); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 196, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_y); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_z); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 196, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_z); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 196, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
@@ -4758,17 +4880,16 @@ static int __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__create01val(CYTHON
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 196, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_r = __pyx_t_5;
+  __pyx_r = __pyx_t_4;
+  __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":187
- *         return x,y,z
+  /* "_voxel_montecarlo.pyx":216
+ *         return val
  * 
- *     cdef int _create01val(self,int index, int index_val,int base_val):             # <<<<<<<<<<<<<<
- *         cdef float x,y,z
- *         x = base_val; y = base_val; z = base_val
+ *     cdef _get_next_add(self,int index, int x, int y, int z,             # <<<<<<<<<<<<<<
+ *                            float vx, float vy, float vz):
+ *         cdef int val = 0
  */
 
   /* function exit code */
@@ -4777,70 +4898,239 @@ static int __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__create01val(CYTHON
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_WriteUnraisable("_voxel_montecarlo.BaseVoxelMonteCarlo._create01val", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_AddTraceback("_voxel_montecarlo.BaseVoxelMonteCarlo._get_next_add", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":199
+/* "_voxel_montecarlo.pyx":230
+ *         return x,y,z
  * 
- * 
- *     cdef float random_uniform(self):             # <<<<<<<<<<<<<<
- *         cdef float random = float(rand())
- *         cdef float randmax = float(RAND_MAX)
+ *     cdef _create01val(self,int index, float index_val,float base_val):             # <<<<<<<<<<<<<<
+ *         cdef float x_,y_,z_
+ *         x_ = base_val; y_ = base_val; z_ = base_val
  */
 
-static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_random_uniform(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self) {
-  float __pyx_v_random;
-  float __pyx_v_randmax;
-  float __pyx_r;
+static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__create01val(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_index, float __pyx_v_index_val, float __pyx_v_base_val) {
+  float __pyx_v_x_;
+  float __pyx_v_y_;
+  float __pyx_v_z_;
+  PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("random_uniform", 0);
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  __Pyx_RefNannySetupContext("_create01val", 0);
 
-  /* "_voxel_montecarlo.pyx":200
- * 
- *     cdef float random_uniform(self):
- *         cdef float random = float(rand())             # <<<<<<<<<<<<<<
- *         cdef float randmax = float(RAND_MAX)
- *         return random/randmax
+  /* "_voxel_montecarlo.pyx":232
+ *     cdef _create01val(self,int index, float index_val,float base_val):
+ *         cdef float x_,y_,z_
+ *         x_ = base_val; y_ = base_val; z_ = base_val             # <<<<<<<<<<<<<<
+ *         if index == 0:
+ *             x_ = index_val
  */
-  __pyx_v_random = ((double)rand());
+  __pyx_v_x_ = __pyx_v_base_val;
+  __pyx_v_y_ = __pyx_v_base_val;
+  __pyx_v_z_ = __pyx_v_base_val;
 
-  /* "_voxel_montecarlo.pyx":201
- *     cdef float random_uniform(self):
- *         cdef float random = float(rand())
- *         cdef float randmax = float(RAND_MAX)             # <<<<<<<<<<<<<<
- *         return random/randmax
- * 
+  /* "_voxel_montecarlo.pyx":233
+ *         cdef float x_,y_,z_
+ *         x_ = base_val; y_ = base_val; z_ = base_val
+ *         if index == 0:             # <<<<<<<<<<<<<<
+ *             x_ = index_val
+ *         elif index == 1:
  */
-  __pyx_v_randmax = ((double)RAND_MAX);
+  switch (__pyx_v_index) {
+    case 0:
 
-  /* "_voxel_montecarlo.pyx":202
- *         cdef float random = float(rand())
- *         cdef float randmax = float(RAND_MAX)
- *         return random/randmax             # <<<<<<<<<<<<<<
+    /* "_voxel_montecarlo.pyx":234
+ *         x_ = base_val; y_ = base_val; z_ = base_val
+ *         if index == 0:
+ *             x_ = index_val             # <<<<<<<<<<<<<<
+ *         elif index == 1:
+ *             y_ = index_val
+ */
+    __pyx_v_x_ = __pyx_v_index_val;
+
+    /* "_voxel_montecarlo.pyx":233
+ *         cdef float x_,y_,z_
+ *         x_ = base_val; y_ = base_val; z_ = base_val
+ *         if index == 0:             # <<<<<<<<<<<<<<
+ *             x_ = index_val
+ *         elif index == 1:
+ */
+    break;
+    case 1:
+
+    /* "_voxel_montecarlo.pyx":236
+ *             x_ = index_val
+ *         elif index == 1:
+ *             y_ = index_val             # <<<<<<<<<<<<<<
+ *         elif index == 2:
+ *             z_ = index_val
+ */
+    __pyx_v_y_ = __pyx_v_index_val;
+
+    /* "_voxel_montecarlo.pyx":235
+ *         if index == 0:
+ *             x_ = index_val
+ *         elif index == 1:             # <<<<<<<<<<<<<<
+ *             y_ = index_val
+ *         elif index == 2:
+ */
+    break;
+    case 2:
+
+    /* "_voxel_montecarlo.pyx":238
+ *             y_ = index_val
+ *         elif index == 2:
+ *             z_ = index_val             # <<<<<<<<<<<<<<
  * 
+ *         return x_, y_, z_
+ */
+    __pyx_v_z_ = __pyx_v_index_val;
+
+    /* "_voxel_montecarlo.pyx":237
+ *         elif index == 1:
+ *             y_ = index_val
+ *         elif index == 2:             # <<<<<<<<<<<<<<
+ *             z_ = index_val
  * 
  */
-  if (unlikely(__pyx_v_randmax == 0)) {
-    PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 202, __pyx_L1_error)
+    break;
+    default: break;
   }
-  __pyx_r = (__pyx_v_random / __pyx_v_randmax);
+
+  /* "_voxel_montecarlo.pyx":240
+ *             z_ = index_val
+ * 
+ *         return x_, y_, z_             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_x_); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 240, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_y_); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 240, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_z_); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 240, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = PyTuple_New(3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 240, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_4, 2, __pyx_t_3);
+  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
+  __pyx_t_3 = 0;
+  __pyx_r = __pyx_t_4;
+  __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":199
+  /* "_voxel_montecarlo.pyx":230
+ *         return x,y,z
  * 
- * 
- *     cdef float random_uniform(self):             # <<<<<<<<<<<<<<
- *         cdef float random = float(rand())
- *         cdef float randmax = float(RAND_MAX)
+ *     cdef _create01val(self,int index, float index_val,float base_val):             # <<<<<<<<<<<<<<
+ *         cdef float x_,y_,z_
+ *         x_ = base_val; y_ = base_val; z_ = base_val
  */
 
   /* function exit code */
   __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_AddTraceback("_voxel_montecarlo.BaseVoxelMonteCarlo._create01val", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "_voxel_montecarlo.pyx":248
+ *         return random/randmax"""
+ * 
+ *     cdef np.float32_t random_uniform(self):             # <<<<<<<<<<<<<<
+ *         cdef np.float32_t r = np.random.rand()
+ *         return r
+ */
+
+static __pyx_t_5numpy_float32_t __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_random_uniform(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self) {
+  __pyx_t_5numpy_float32_t __pyx_v_r;
+  __pyx_t_5numpy_float32_t __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  __pyx_t_5numpy_float32_t __pyx_t_4;
+  __Pyx_RefNannySetupContext("random_uniform", 0);
+
+  /* "_voxel_montecarlo.pyx":249
+ * 
+ *     cdef np.float32_t random_uniform(self):
+ *         cdef np.float32_t r = np.random.rand()             # <<<<<<<<<<<<<<
+ *         return r
+ * 
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 249, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_random); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 249, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_rand); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 249, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = NULL;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_3)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_3);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+    }
+  }
+  __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3) : __Pyx_PyObject_CallNoArg(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 249, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_4 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_4 == ((npy_float32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 249, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_r = __pyx_t_4;
+
+  /* "_voxel_montecarlo.pyx":250
+ *     cdef np.float32_t random_uniform(self):
+ *         cdef np.float32_t r = np.random.rand()
+ *         return r             # <<<<<<<<<<<<<<
+ * 
+ *     cdef vectorUpdate(self,float vx,float vy,float vz,float g):
+ */
+  __pyx_r = __pyx_v_r;
+  goto __pyx_L0;
+
+  /* "_voxel_montecarlo.pyx":248
+ *         return random/randmax"""
+ * 
+ *     cdef np.float32_t random_uniform(self):             # <<<<<<<<<<<<<<
+ *         cdef np.float32_t r = np.random.rand()
+ *         return r
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
   __Pyx_WriteUnraisable("_voxel_montecarlo.BaseVoxelMonteCarlo.random_uniform", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_r = 0;
   __pyx_L0:;
@@ -4848,87 +5138,86 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_random_uniform(CY
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":205
+/* "_voxel_montecarlo.pyx":252
+ *         return r
  * 
- * 
- *     cdef float vectorUpdate(self,float vx,float vy,float vz,float g):             # <<<<<<<<<<<<<<
- *         cdef float randnum1, randnum2
- *         randnum1 = self.random_uniform()
+ *     cdef vectorUpdate(self,float vx,float vy,float vz,float g):             # <<<<<<<<<<<<<<
+ *         cdef:
+ *             float randnum1, randnum2
  */
 
-static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_vectorUpdate(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, float __pyx_v_vx, float __pyx_v_vy, float __pyx_v_vz, float __pyx_v_g) {
+static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_vectorUpdate(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, float __pyx_v_vx, float __pyx_v_vy, float __pyx_v_vz, float __pyx_v_g) {
   float __pyx_v_randnum1;
   float __pyx_v_randnum2;
   float __pyx_v_cosTh;
   float __pyx_v_sinTh;
   float __pyx_v_cosFi;
   float __pyx_v_sinFi;
+  float __pyx_v_val_f;
   float __pyx_v_th;
-  float __pyx_v_Fi;
   float __pyx_v_distance;
-  float __pyx_r;
+  float __pyx_v_Fi;
+  PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  float __pyx_t_1;
-  int __pyx_t_2;
+  int __pyx_t_1;
+  float __pyx_t_2;
   float __pyx_t_3;
   float __pyx_t_4;
-  double __pyx_t_5;
+  PyObject *__pyx_t_5 = NULL;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
   PyObject *__pyx_t_8 = NULL;
-  PyObject *__pyx_t_9 = NULL;
   __Pyx_RefNannySetupContext("vectorUpdate", 0);
 
-  /* "_voxel_montecarlo.pyx":207
- *     cdef float vectorUpdate(self,float vx,float vy,float vz,float g):
- *         cdef float randnum1, randnum2
+  /* "_voxel_montecarlo.pyx":256
+ *             float randnum1, randnum2
+ *             float cosTh,sinTh, cosFi, sinFi,val_f
+ *             float th = 0.99999             # <<<<<<<<<<<<<<
+ *             float distance
+ * 
+ */
+  __pyx_v_th = 0.99999;
+
+  /* "_voxel_montecarlo.pyx":259
+ *             float distance
+ * 
  *         randnum1 = self.random_uniform()             # <<<<<<<<<<<<<<
  *         randnum2 = self.random_uniform()
- *         cdef float cosTh,sinTh, cosFi, sinFi
+ * 
  */
   __pyx_v_randnum1 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->random_uniform(__pyx_v_self);
 
-  /* "_voxel_montecarlo.pyx":208
- *         cdef float randnum1, randnum2
+  /* "_voxel_montecarlo.pyx":260
+ * 
  *         randnum1 = self.random_uniform()
  *         randnum2 = self.random_uniform()             # <<<<<<<<<<<<<<
- *         cdef float cosTh,sinTh, cosFi, sinFi
- *         cdef float th = self.vectorTh
+ * 
+ *         if g == 0:
  */
   __pyx_v_randnum2 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->random_uniform(__pyx_v_self);
 
-  /* "_voxel_montecarlo.pyx":210
+  /* "_voxel_montecarlo.pyx":262
  *         randnum2 = self.random_uniform()
- *         cdef float cosTh,sinTh, cosFi, sinFi
- *         cdef float th = self.vectorTh             # <<<<<<<<<<<<<<
- *         if g == 0:
- *             cosTh = 2*randnum1-1
- */
-  __pyx_t_1 = __pyx_v_self->vectorTh;
-  __pyx_v_th = __pyx_t_1;
-
-  /* "_voxel_montecarlo.pyx":211
- *         cdef float cosTh,sinTh, cosFi, sinFi
- *         cdef float th = self.vectorTh
+ * 
  *         if g == 0:             # <<<<<<<<<<<<<<
  *             cosTh = 2*randnum1-1
  *         else:
  */
-  __pyx_t_2 = ((__pyx_v_g == 0.0) != 0);
-  if (__pyx_t_2) {
+  __pyx_t_1 = ((__pyx_v_g == 0.0) != 0);
+  if (__pyx_t_1) {
 
-    /* "_voxel_montecarlo.pyx":212
- *         cdef float th = self.vectorTh
+    /* "_voxel_montecarlo.pyx":263
+ * 
  *         if g == 0:
  *             cosTh = 2*randnum1-1             # <<<<<<<<<<<<<<
  *         else:
- *             cosTh = (1+g**2-((1-g**2)/(1-g+2*g*randnum1**2)))/(2*g)
+ *             cosTh = (1+g**2-((1-g**2)/(1-g+2*g*randnum1))**2)/(2*g)
  */
     __pyx_v_cosTh = ((2.0 * __pyx_v_randnum1) - 1.0);
 
-    /* "_voxel_montecarlo.pyx":211
- *         cdef float cosTh,sinTh, cosFi, sinFi
- *         cdef float th = self.vectorTh
+    /* "_voxel_montecarlo.pyx":262
+ *         randnum2 = self.random_uniform()
+ * 
  *         if g == 0:             # <<<<<<<<<<<<<<
  *             cosTh = 2*randnum1-1
  *         else:
@@ -4936,50 +5225,50 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_vectorUpdate(stru
     goto __pyx_L3;
   }
 
-  /* "_voxel_montecarlo.pyx":214
+  /* "_voxel_montecarlo.pyx":265
  *             cosTh = 2*randnum1-1
  *         else:
- *             cosTh = (1+g**2-((1-g**2)/(1-g+2*g*randnum1**2)))/(2*g)             # <<<<<<<<<<<<<<
+ *             cosTh = (1+g**2-((1-g**2)/(1-g+2*g*randnum1))**2)/(2*g)             # <<<<<<<<<<<<<<
  * 
- *         sinTh = (1-cosTh**2)**0.5
+ *         sinTh = sqrt(1-cosTh**2)
  */
   /*else*/ {
-    __pyx_t_1 = (1.0 - powf(__pyx_v_g, 2.0));
-    __pyx_t_3 = ((1.0 - __pyx_v_g) + ((2.0 * __pyx_v_g) * powf(__pyx_v_randnum1, 2.0)));
+    __pyx_t_2 = (1.0 - powf(__pyx_v_g, 2.0));
+    __pyx_t_3 = ((1.0 - __pyx_v_g) + ((2.0 * __pyx_v_g) * __pyx_v_randnum1));
     if (unlikely(__pyx_t_3 == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 214, __pyx_L1_error)
+      __PYX_ERR(0, 265, __pyx_L1_error)
     }
-    __pyx_t_4 = ((1.0 + powf(__pyx_v_g, 2.0)) - (__pyx_t_1 / __pyx_t_3));
+    __pyx_t_4 = ((1.0 + powf(__pyx_v_g, 2.0)) - powf((__pyx_t_2 / __pyx_t_3), 2.0));
     __pyx_t_3 = (2.0 * __pyx_v_g);
     if (unlikely(__pyx_t_3 == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 214, __pyx_L1_error)
+      __PYX_ERR(0, 265, __pyx_L1_error)
     }
     __pyx_v_cosTh = (__pyx_t_4 / __pyx_t_3);
   }
   __pyx_L3:;
 
-  /* "_voxel_montecarlo.pyx":216
- *             cosTh = (1+g**2-((1-g**2)/(1-g+2*g*randnum1**2)))/(2*g)
+  /* "_voxel_montecarlo.pyx":267
+ *             cosTh = (1+g**2-((1-g**2)/(1-g+2*g*randnum1))**2)/(2*g)
  * 
- *         sinTh = (1-cosTh**2)**0.5             # <<<<<<<<<<<<<<
+ *         sinTh = sqrt(1-cosTh**2)             # <<<<<<<<<<<<<<
  * 
- *         #cos(fai)sin(fai)
+ *         cdef float Fi = 2*3.141592*randnum2
  */
-  __pyx_v_sinTh = pow(((double)(1.0 - powf(__pyx_v_cosTh, 2.0))), 0.5);
+  __pyx_v_sinTh = sqrt((1.0 - powf(__pyx_v_cosTh, 2.0)));
 
-  /* "_voxel_montecarlo.pyx":219
+  /* "_voxel_montecarlo.pyx":269
+ *         sinTh = sqrt(1-cosTh**2)
  * 
- *         #cos(fai)sin(fai)
  *         cdef float Fi = 2*3.141592*randnum2             # <<<<<<<<<<<<<<
  *         cosFi = cos(Fi)
  *         sinFi = sin(Fi)
  */
   __pyx_v_Fi = ((2.0 * 3.141592) * __pyx_v_randnum2);
 
-  /* "_voxel_montecarlo.pyx":220
- *         #cos(fai)sin(fai)
+  /* "_voxel_montecarlo.pyx":270
+ * 
  *         cdef float Fi = 2*3.141592*randnum2
  *         cosFi = cos(Fi)             # <<<<<<<<<<<<<<
  *         sinFi = sin(Fi)
@@ -4987,115 +5276,122 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_vectorUpdate(stru
  */
   __pyx_v_cosFi = cos(__pyx_v_Fi);
 
-  /* "_voxel_montecarlo.pyx":221
+  /* "_voxel_montecarlo.pyx":271
  *         cdef float Fi = 2*3.141592*randnum2
  *         cosFi = cos(Fi)
  *         sinFi = sin(Fi)             # <<<<<<<<<<<<<<
  * 
- *         #Z
+ *         if abs(vz) <= th:
  */
   __pyx_v_sinFi = sin(__pyx_v_Fi);
 
-  /* "_voxel_montecarlo.pyx":224
+  /* "_voxel_montecarlo.pyx":273
+ *         sinFi = sin(Fi)
  * 
- *         #Z
- *         if vz <= th:             # <<<<<<<<<<<<<<
- *             vx = sinTh*(vx*vz*cosFi-vy*sinFi)/sqrt(1-vz**2) + vx*cosTh
- *             vy = sinTh*(vy*vz*cosFi+vx*sinFi)/sqrt(1-vz**2) + vy*cosTh
+ *         if abs(vz) <= th:             # <<<<<<<<<<<<<<
+ *             val_f = sqrt(1.-vz**2)
+ * 
  */
-  __pyx_t_2 = ((__pyx_v_vz <= __pyx_v_th) != 0);
-  if (__pyx_t_2) {
+  __pyx_t_1 = ((fabsf(__pyx_v_vz) <= __pyx_v_th) != 0);
+  if (__pyx_t_1) {
 
-    /* "_voxel_montecarlo.pyx":225
- *         #Z
- *         if vz <= th:
- *             vx = sinTh*(vx*vz*cosFi-vy*sinFi)/sqrt(1-vz**2) + vx*cosTh             # <<<<<<<<<<<<<<
- *             vy = sinTh*(vy*vz*cosFi+vx*sinFi)/sqrt(1-vz**2) + vy*cosTh
- *             vz = -sinTh*cosFi*sqrt(1-vz**2) + vz*cosTh
+    /* "_voxel_montecarlo.pyx":274
+ * 
+ *         if abs(vz) <= th:
+ *             val_f = sqrt(1.-vz**2)             # <<<<<<<<<<<<<<
+ * 
+ *             vx = sinTh*(vx*vz*cosFi-vy*sinFi)/val_f + vx*cosTh
+ */
+    __pyx_v_val_f = sqrt((1. - powf(__pyx_v_vz, 2.0)));
+
+    /* "_voxel_montecarlo.pyx":276
+ *             val_f = sqrt(1.-vz**2)
+ * 
+ *             vx = sinTh*(vx*vz*cosFi-vy*sinFi)/val_f + vx*cosTh             # <<<<<<<<<<<<<<
+ *             vy = sinTh*(vy*vz*cosFi+vx*sinFi)/val_f + vy*cosTh
+ *             vz = -sinTh*cosFi*val_f + vz*cosTh
  */
     __pyx_t_3 = (__pyx_v_sinTh * (((__pyx_v_vx * __pyx_v_vz) * __pyx_v_cosFi) - (__pyx_v_vy * __pyx_v_sinFi)));
-    __pyx_t_5 = sqrt((1.0 - powf(__pyx_v_vz, 2.0)));
-    if (unlikely(__pyx_t_5 == 0)) {
+    if (unlikely(__pyx_v_val_f == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 225, __pyx_L1_error)
+      __PYX_ERR(0, 276, __pyx_L1_error)
     }
-    __pyx_v_vx = ((__pyx_t_3 / __pyx_t_5) + (__pyx_v_vx * __pyx_v_cosTh));
+    __pyx_v_vx = ((__pyx_t_3 / __pyx_v_val_f) + (__pyx_v_vx * __pyx_v_cosTh));
 
-    /* "_voxel_montecarlo.pyx":226
- *         if vz <= th:
- *             vx = sinTh*(vx*vz*cosFi-vy*sinFi)/sqrt(1-vz**2) + vx*cosTh
- *             vy = sinTh*(vy*vz*cosFi+vx*sinFi)/sqrt(1-vz**2) + vy*cosTh             # <<<<<<<<<<<<<<
- *             vz = -sinTh*cosFi*sqrt(1-vz**2) + vz*cosTh
+    /* "_voxel_montecarlo.pyx":277
+ * 
+ *             vx = sinTh*(vx*vz*cosFi-vy*sinFi)/val_f + vx*cosTh
+ *             vy = sinTh*(vy*vz*cosFi+vx*sinFi)/val_f + vy*cosTh             # <<<<<<<<<<<<<<
+ *             vz = -sinTh*cosFi*val_f + vz*cosTh
  * 
  */
     __pyx_t_3 = (__pyx_v_sinTh * (((__pyx_v_vy * __pyx_v_vz) * __pyx_v_cosFi) + (__pyx_v_vx * __pyx_v_sinFi)));
-    __pyx_t_5 = sqrt((1.0 - powf(__pyx_v_vz, 2.0)));
-    if (unlikely(__pyx_t_5 == 0)) {
+    if (unlikely(__pyx_v_val_f == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 226, __pyx_L1_error)
+      __PYX_ERR(0, 277, __pyx_L1_error)
     }
-    __pyx_v_vy = ((__pyx_t_3 / __pyx_t_5) + (__pyx_v_vy * __pyx_v_cosTh));
+    __pyx_v_vy = ((__pyx_t_3 / __pyx_v_val_f) + (__pyx_v_vy * __pyx_v_cosTh));
 
-    /* "_voxel_montecarlo.pyx":227
- *             vx = sinTh*(vx*vz*cosFi-vy*sinFi)/sqrt(1-vz**2) + vx*cosTh
- *             vy = sinTh*(vy*vz*cosFi+vx*sinFi)/sqrt(1-vz**2) + vy*cosTh
- *             vz = -sinTh*cosFi*sqrt(1-vz**2) + vz*cosTh             # <<<<<<<<<<<<<<
+    /* "_voxel_montecarlo.pyx":278
+ *             vx = sinTh*(vx*vz*cosFi-vy*sinFi)/val_f + vx*cosTh
+ *             vy = sinTh*(vy*vz*cosFi+vx*sinFi)/val_f + vy*cosTh
+ *             vz = -sinTh*cosFi*val_f + vz*cosTh             # <<<<<<<<<<<<<<
  * 
  *         else:#Z0.99999
  */
-    __pyx_v_vz = ((((-__pyx_v_sinTh) * __pyx_v_cosFi) * sqrt((1.0 - powf(__pyx_v_vz, 2.0)))) + (__pyx_v_vz * __pyx_v_cosTh));
+    __pyx_v_vz = ((((-__pyx_v_sinTh) * __pyx_v_cosFi) * __pyx_v_val_f) + (__pyx_v_vz * __pyx_v_cosTh));
 
-    /* "_voxel_montecarlo.pyx":224
+    /* "_voxel_montecarlo.pyx":273
+ *         sinFi = sin(Fi)
  * 
- *         #Z
- *         if vz <= th:             # <<<<<<<<<<<<<<
- *             vx = sinTh*(vx*vz*cosFi-vy*sinFi)/sqrt(1-vz**2) + vx*cosTh
- *             vy = sinTh*(vy*vz*cosFi+vx*sinFi)/sqrt(1-vz**2) + vy*cosTh
+ *         if abs(vz) <= th:             # <<<<<<<<<<<<<<
+ *             val_f = sqrt(1.-vz**2)
+ * 
  */
     goto __pyx_L4;
   }
 
-  /* "_voxel_montecarlo.pyx":230
+  /* "_voxel_montecarlo.pyx":281
  * 
  *         else:#Z0.99999
  *             vx = sinTh*cosFi             # <<<<<<<<<<<<<<
  *             vy = sinTh*sinFi
- *             vz = copysign(cosTh,vz)
+ *             vz = cosTh*copysign(1,vz)
  */
   /*else*/ {
     __pyx_v_vx = (__pyx_v_sinTh * __pyx_v_cosFi);
 
-    /* "_voxel_montecarlo.pyx":231
+    /* "_voxel_montecarlo.pyx":282
  *         else:#Z0.99999
  *             vx = sinTh*cosFi
  *             vy = sinTh*sinFi             # <<<<<<<<<<<<<<
- *             vz = copysign(cosTh,vz)
- *         cdef float distance
+ *             vz = cosTh*copysign(1,vz)
+ * 
  */
     __pyx_v_vy = (__pyx_v_sinTh * __pyx_v_sinFi);
 
-    /* "_voxel_montecarlo.pyx":232
+    /* "_voxel_montecarlo.pyx":283
  *             vx = sinTh*cosFi
  *             vy = sinTh*sinFi
- *             vz = copysign(cosTh,vz)             # <<<<<<<<<<<<<<
- *         cdef float distance
+ *             vz = cosTh*copysign(1,vz)             # <<<<<<<<<<<<<<
+ * 
  *         distance = sqrt(vx**2 + vy**2 + vz**2)
  */
-    __pyx_v_vz = copysign(__pyx_v_cosTh, __pyx_v_vz);
+    __pyx_v_vz = (__pyx_v_cosTh * copysign(1.0, __pyx_v_vz));
   }
   __pyx_L4:;
 
-  /* "_voxel_montecarlo.pyx":234
- *             vz = copysign(cosTh,vz)
- *         cdef float distance
+  /* "_voxel_montecarlo.pyx":285
+ *             vz = cosTh*copysign(1,vz)
+ * 
  *         distance = sqrt(vx**2 + vy**2 + vz**2)             # <<<<<<<<<<<<<<
  *         vx = vx/distance
  *         vy = vy/distance
  */
   __pyx_v_distance = sqrt(((powf(__pyx_v_vx, 2.0) + powf(__pyx_v_vy, 2.0)) + powf(__pyx_v_vz, 2.0)));
 
-  /* "_voxel_montecarlo.pyx":235
- *         cdef float distance
+  /* "_voxel_montecarlo.pyx":286
+ * 
  *         distance = sqrt(vx**2 + vy**2 + vz**2)
  *         vx = vx/distance             # <<<<<<<<<<<<<<
  *         vy = vy/distance
@@ -5103,11 +5399,11 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_vectorUpdate(stru
  */
   if (unlikely(__pyx_v_distance == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 235, __pyx_L1_error)
+    __PYX_ERR(0, 286, __pyx_L1_error)
   }
   __pyx_v_vx = (__pyx_v_vx / __pyx_v_distance);
 
-  /* "_voxel_montecarlo.pyx":236
+  /* "_voxel_montecarlo.pyx":287
  *         distance = sqrt(vx**2 + vy**2 + vz**2)
  *         vx = vx/distance
  *         vy = vy/distance             # <<<<<<<<<<<<<<
@@ -5116,11 +5412,11 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_vectorUpdate(stru
  */
   if (unlikely(__pyx_v_distance == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 236, __pyx_L1_error)
+    __PYX_ERR(0, 287, __pyx_L1_error)
   }
   __pyx_v_vy = (__pyx_v_vy / __pyx_v_distance);
 
-  /* "_voxel_montecarlo.pyx":237
+  /* "_voxel_montecarlo.pyx":288
  *         vx = vx/distance
  *         vy = vy/distance
  *         vz = vz/distance             # <<<<<<<<<<<<<<
@@ -5129,66 +5425,158 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_vectorUpdate(stru
  */
   if (unlikely(__pyx_v_distance == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 237, __pyx_L1_error)
+    __PYX_ERR(0, 288, __pyx_L1_error)
   }
   __pyx_v_vz = (__pyx_v_vz / __pyx_v_distance);
 
-  /* "_voxel_montecarlo.pyx":238
+  /* "_voxel_montecarlo.pyx":289
  *         vy = vy/distance
  *         vz = vz/distance
  *         return vx,vy,vz             # <<<<<<<<<<<<<<
  * 
- *     cdef void _a_photon_movement(self,int p_id):
+ *     cdef float _distance_to_boundary(self,float x, float v, float l):
  */
-  __pyx_t_6 = PyFloat_FromDouble(__pyx_v_vx); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 238, __pyx_L1_error)
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_5 = PyFloat_FromDouble(__pyx_v_vx); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 289, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __pyx_t_6 = PyFloat_FromDouble(__pyx_v_vy); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 289, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_7 = PyFloat_FromDouble(__pyx_v_vy); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 238, __pyx_L1_error)
+  __pyx_t_7 = PyFloat_FromDouble(__pyx_v_vz); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 289, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_8 = PyFloat_FromDouble(__pyx_v_vz); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 238, __pyx_L1_error)
+  __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 289, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_9 = PyTuple_New(3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 238, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_9);
+  __Pyx_GIVEREF(__pyx_t_5);
+  PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_6);
-  PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_6);
+  PyTuple_SET_ITEM(__pyx_t_8, 1, __pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_7);
-  PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_t_7);
-  __Pyx_GIVEREF(__pyx_t_8);
-  PyTuple_SET_ITEM(__pyx_t_9, 2, __pyx_t_8);
+  PyTuple_SET_ITEM(__pyx_t_8, 2, __pyx_t_7);
+  __pyx_t_5 = 0;
   __pyx_t_6 = 0;
   __pyx_t_7 = 0;
+  __pyx_r = __pyx_t_8;
   __pyx_t_8 = 0;
-  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_9); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 238, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_r = __pyx_t_3;
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":205
+  /* "_voxel_montecarlo.pyx":252
+ *         return r
  * 
- * 
- *     cdef float vectorUpdate(self,float vx,float vy,float vz,float g):             # <<<<<<<<<<<<<<
- *         cdef float randnum1, randnum2
- *         randnum1 = self.random_uniform()
+ *     cdef vectorUpdate(self,float vx,float vy,float vz,float g):             # <<<<<<<<<<<<<<
+ *         cdef:
+ *             float randnum1, randnum2
  */
 
   /* function exit code */
   __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_XDECREF(__pyx_t_8);
-  __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_WriteUnraisable("_voxel_montecarlo.BaseVoxelMonteCarlo.vectorUpdate", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_AddTraceback("_voxel_montecarlo.BaseVoxelMonteCarlo.vectorUpdate", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "_voxel_montecarlo.pyx":291
+ *         return vx,vy,vz
+ * 
+ *     cdef float _distance_to_boundary(self,float x, float v, float l):             # <<<<<<<<<<<<<<
+ *         cdef float db
+ *         if v == 0:
+ */
+
+static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__distance_to_boundary(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, float __pyx_v_x, float __pyx_v_v, float __pyx_v_l) {
+  float __pyx_v_db;
+  float __pyx_r;
+  __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  double __pyx_t_2;
+  double __pyx_t_3;
+  __Pyx_RefNannySetupContext("_distance_to_boundary", 0);
+
+  /* "_voxel_montecarlo.pyx":293
+ *     cdef float _distance_to_boundary(self,float x, float v, float l):
+ *         cdef float db
+ *         if v == 0:             # <<<<<<<<<<<<<<
+ *             db = 1000.
+ *         else:
+ */
+  __pyx_t_1 = ((__pyx_v_v == 0.0) != 0);
+  if (__pyx_t_1) {
+
+    /* "_voxel_montecarlo.pyx":294
+ *         cdef float db
+ *         if v == 0:
+ *             db = 1000.             # <<<<<<<<<<<<<<
+ *         else:
+ *             db = (l/2.-x*copysign(1,v))/fabs(v)
+ */
+    __pyx_v_db = 1000.;
+
+    /* "_voxel_montecarlo.pyx":293
+ *     cdef float _distance_to_boundary(self,float x, float v, float l):
+ *         cdef float db
+ *         if v == 0:             # <<<<<<<<<<<<<<
+ *             db = 1000.
+ *         else:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "_voxel_montecarlo.pyx":296
+ *             db = 1000.
+ *         else:
+ *             db = (l/2.-x*copysign(1,v))/fabs(v)             # <<<<<<<<<<<<<<
+ *         return db
+ * 
+ */
+  /*else*/ {
+    __pyx_t_2 = ((__pyx_v_l / 2.) - (__pyx_v_x * copysign(1.0, __pyx_v_v)));
+    __pyx_t_3 = fabs(__pyx_v_v);
+    if (unlikely(__pyx_t_3 == 0)) {
+      PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+      __PYX_ERR(0, 296, __pyx_L1_error)
+    }
+    __pyx_v_db = (__pyx_t_2 / __pyx_t_3);
+  }
+  __pyx_L3:;
+
+  /* "_voxel_montecarlo.pyx":297
+ *         else:
+ *             db = (l/2.-x*copysign(1,v))/fabs(v)
+ *         return db             # <<<<<<<<<<<<<<
+ * 
+ *     cdef void _a_photon_movement(self,int p_id):
+ */
+  __pyx_r = __pyx_v_db;
+  goto __pyx_L0;
+
+  /* "_voxel_montecarlo.pyx":291
+ *         return vx,vy,vz
+ * 
+ *     cdef float _distance_to_boundary(self,float x, float v, float l):             # <<<<<<<<<<<<<<
+ *         cdef float db
+ *         if v == 0:
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_WriteUnraisable("_voxel_montecarlo.BaseVoxelMonteCarlo._distance_to_boundary", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":240
- *         return vx,vy,vz
+/* "_voxel_montecarlo.pyx":299
+ *         return db
  * 
  *     cdef void _a_photon_movement(self,int p_id):             # <<<<<<<<<<<<<<
- *         cdef float px,py,pz
- *         cdef float vx,vy,vz
+ *         cdef:
+ *             float px,py,pz
  */
 
 static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_p_id) {
@@ -5221,6 +5609,9 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
   int __pyx_v_val_yi;
   int __pyx_v_val_zi;
   float __pyx_v_val_f;
+  float __pyx_v_val_xf;
+  float __pyx_v_val_yf;
+  float __pyx_v_val_zf;
   int __pyx_v_flag_1;
   int __pyx_v_flag_2;
   double __pyx_v_s;
@@ -5231,142 +5622,142 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
   float __pyx_t_3;
   int __pyx_t_4;
   int __pyx_t_5;
-  double __pyx_t_6;
-  double __pyx_t_7;
-  int __pyx_t_8;
+  int __pyx_t_6;
+  PyObject *__pyx_t_7 = NULL;
+  PyObject *__pyx_t_8 = NULL;
   PyObject *__pyx_t_9 = NULL;
-  PyObject *__pyx_t_10 = NULL;
-  PyObject *__pyx_t_11 = NULL;
-  PyObject *(*__pyx_t_12)(PyObject *);
+  PyObject *(*__pyx_t_10)(PyObject *);
+  float __pyx_t_11;
+  float __pyx_t_12;
   int __pyx_t_13;
   int __pyx_t_14;
   double __pyx_t_15;
   double __pyx_t_16;
-  float __pyx_t_17;
-  float __pyx_t_18;
+  double __pyx_t_17;
+  double __pyx_t_18;
   __Pyx_RefNannySetupContext("_a_photon_movement", 0);
 
-  /* "_voxel_montecarlo.pyx":245
- *         cdef int adx,ady,adz
- *         cdef float w
+  /* "_voxel_montecarlo.pyx":314
+ *             int flag_1,flag_2
+ * 
  *         px = self.p[0][p_id]; py = self.p[1][p_id]; pz = self.p[2][p_id]             # <<<<<<<<<<<<<<
  *         vx = self.v[0][p_id]; vy = self.v[1][p_id]; vz = self.v[2][p_id]
  *         adx = self.add[0][p_id]; ady = self.add[1][p_id]; adz = self.add[2][p_id]
  */
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->p), 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->p), 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_2); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_2); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_px = __pyx_t_3;
-  __pyx_t_2 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->p), 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->p), 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_py = __pyx_t_3;
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->p), 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->p), 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_2); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_2); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_pz = __pyx_t_3;
 
-  /* "_voxel_montecarlo.pyx":246
- *         cdef float w
+  /* "_voxel_montecarlo.pyx":315
+ * 
  *         px = self.p[0][p_id]; py = self.p[1][p_id]; pz = self.p[2][p_id]
  *         vx = self.v[0][p_id]; vy = self.v[1][p_id]; vz = self.v[2][p_id]             # <<<<<<<<<<<<<<
  *         adx = self.add[0][p_id]; ady = self.add[1][p_id]; adz = self.add[2][p_id]
  *         w = self.w[p_id]
  */
-  __pyx_t_2 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->v), 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->v), 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_vx = __pyx_t_3;
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->v), 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->v), 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_2); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_2); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_vy = __pyx_t_3;
-  __pyx_t_2 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->v), 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->v), 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_vz = __pyx_t_3;
 
-  /* "_voxel_montecarlo.pyx":247
+  /* "_voxel_montecarlo.pyx":316
  *         px = self.p[0][p_id]; py = self.p[1][p_id]; pz = self.p[2][p_id]
  *         vx = self.v[0][p_id]; vy = self.v[1][p_id]; vz = self.v[2][p_id]
  *         adx = self.add[0][p_id]; ady = self.add[1][p_id]; adz = self.add[2][p_id]             # <<<<<<<<<<<<<<
  *         w = self.w[p_id]
  * 
  */
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->add), 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 247, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->add), 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 247, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 247, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_adx = __pyx_t_4;
-  __pyx_t_2 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->add), 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 247, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->add), 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 247, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 247, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_ady = __pyx_t_4;
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->add), 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 247, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->add), 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 247, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 247, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_adz = __pyx_t_4;
 
-  /* "_voxel_montecarlo.pyx":248
+  /* "_voxel_montecarlo.pyx":317
  *         vx = self.v[0][p_id]; vy = self.v[1][p_id]; vz = self.v[2][p_id]
  *         adx = self.add[0][p_id]; ady = self.add[1][p_id]; adz = self.add[2][p_id]
  *         w = self.w[p_id]             # <<<<<<<<<<<<<<
  * 
- *         cdef float ma, ms, mt, ni, nt
+ *         l = self.voxel_space
  */
-  __pyx_t_2 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->w), __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 248, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->w), __pyx_v_p_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 317, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_2); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 248, __pyx_L1_error)
+  __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_2); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 317, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_w = __pyx_t_3;
 
-  /* "_voxel_montecarlo.pyx":253
- *         cdef float ai, at, Ra
- *         cdef float dby,dbx,dbz,db_min,l
+  /* "_voxel_montecarlo.pyx":319
+ *         w = self.w[p_id]
+ * 
  *         l = self.voxel_space             # <<<<<<<<<<<<<<
  * 
- *         cdef int index,val_i,val_xi, val_yi, val_zi
+ *         flag_1 = 1
  */
   __pyx_t_3 = __pyx_v_self->voxel_space;
   __pyx_v_l = __pyx_t_3;
 
-  /* "_voxel_montecarlo.pyx":260
- *         cdef int flag_1,flag_2
+  /* "_voxel_montecarlo.pyx":321
+ *         l = self.voxel_space
  * 
  *         flag_1 = 1             # <<<<<<<<<<<<<<
  *         while flag_1:
@@ -5374,7 +5765,7 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
  */
   __pyx_v_flag_1 = 1;
 
-  /* "_voxel_montecarlo.pyx":261
+  /* "_voxel_montecarlo.pyx":322
  * 
  *         flag_1 = 1
  *         while flag_1:             # <<<<<<<<<<<<<<
@@ -5385,35 +5776,35 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
     __pyx_t_5 = (__pyx_v_flag_1 != 0);
     if (!__pyx_t_5) break;
 
-    /* "_voxel_montecarlo.pyx":262
+    /* "_voxel_montecarlo.pyx":323
  *         flag_1 = 1
  *         while flag_1:
  *             s = self.random_uniform()             # <<<<<<<<<<<<<<
  *             s = -log(s)
- * 
+ *             flag_2 = 1
  */
     __pyx_v_s = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->random_uniform(__pyx_v_self);
 
-    /* "_voxel_montecarlo.pyx":263
+    /* "_voxel_montecarlo.pyx":324
  *         while flag_1:
  *             s = self.random_uniform()
  *             s = -log(s)             # <<<<<<<<<<<<<<
- * 
  *             flag_2 = 1
+ *             while flag_2:
  */
     __pyx_v_s = (-log(__pyx_v_s));
 
-    /* "_voxel_montecarlo.pyx":265
+    /* "_voxel_montecarlo.pyx":325
+ *             s = self.random_uniform()
  *             s = -log(s)
- * 
  *             flag_2 = 1             # <<<<<<<<<<<<<<
  *             while flag_2:
  *                 ma = self._getAbsorptionCoeff(adx,ady,adz)
  */
     __pyx_v_flag_2 = 1;
 
-    /* "_voxel_montecarlo.pyx":266
- * 
+    /* "_voxel_montecarlo.pyx":326
+ *             s = -log(s)
  *             flag_2 = 1
  *             while flag_2:             # <<<<<<<<<<<<<<
  *                 ma = self._getAbsorptionCoeff(adx,ady,adz)
@@ -5423,7 +5814,7 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
       __pyx_t_5 = (__pyx_v_flag_2 != 0);
       if (!__pyx_t_5) break;
 
-      /* "_voxel_montecarlo.pyx":267
+      /* "_voxel_montecarlo.pyx":327
  *             flag_2 = 1
  *             while flag_2:
  *                 ma = self._getAbsorptionCoeff(adx,ady,adz)             # <<<<<<<<<<<<<<
@@ -5432,102 +5823,84 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
  */
       __pyx_v_ma = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_getAbsorptionCoeff(__pyx_v_self, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz);
 
-      /* "_voxel_montecarlo.pyx":268
+      /* "_voxel_montecarlo.pyx":328
  *             while flag_2:
  *                 ma = self._getAbsorptionCoeff(adx,ady,adz)
  *                 ms = self._getScatteringCoeff(adx,ady,adz)             # <<<<<<<<<<<<<<
  *                 mt = ma + ms
- *                 s = s/mt
+ *                 s /= mt
  */
       __pyx_v_ms = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_getScatteringCoeff(__pyx_v_self, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz);
 
-      /* "_voxel_montecarlo.pyx":269
+      /* "_voxel_montecarlo.pyx":329
  *                 ma = self._getAbsorptionCoeff(adx,ady,adz)
  *                 ms = self._getScatteringCoeff(adx,ady,adz)
  *                 mt = ma + ms             # <<<<<<<<<<<<<<
- *                 s = s/mt
- * 
+ *                 s /= mt
+ *                 dbx = self._distance_to_boundary(px,vx,l)
  */
       __pyx_v_mt = (__pyx_v_ma + __pyx_v_ms);
 
-      /* "_voxel_montecarlo.pyx":270
+      /* "_voxel_montecarlo.pyx":330
  *                 ms = self._getScatteringCoeff(adx,ady,adz)
  *                 mt = ma + ms
- *                 s = s/mt             # <<<<<<<<<<<<<<
- * 
- *                 dbx = (l/2-copysign(px,vx))/fabs(vx)
+ *                 s /= mt             # <<<<<<<<<<<<<<
+ *                 dbx = self._distance_to_boundary(px,vx,l)
+ *                 dby = self._distance_to_boundary(py,vy,l)
  */
       if (unlikely(__pyx_v_mt == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-        __PYX_ERR(0, 270, __pyx_L1_error)
+        __PYX_ERR(0, 330, __pyx_L1_error)
       }
       __pyx_v_s = (__pyx_v_s / __pyx_v_mt);
 
-      /* "_voxel_montecarlo.pyx":272
- *                 s = s/mt
- * 
- *                 dbx = (l/2-copysign(px,vx))/fabs(vx)             # <<<<<<<<<<<<<<
- *                 dby = (l/2-copysign(py,vy))/fabs(vy)
- *                 dbz = (l/2-copysign(pz,vz))/fabs(vz)
+      /* "_voxel_montecarlo.pyx":331
+ *                 mt = ma + ms
+ *                 s /= mt
+ *                 dbx = self._distance_to_boundary(px,vx,l)             # <<<<<<<<<<<<<<
+ *                 dby = self._distance_to_boundary(py,vy,l)
+ *                 dbz = self._distance_to_boundary(pz,vz,l)
  */
-      __pyx_t_6 = ((__pyx_v_l / 2.0) - copysign(__pyx_v_px, __pyx_v_vx));
-      __pyx_t_7 = fabs(__pyx_v_vx);
-      if (unlikely(__pyx_t_7 == 0)) {
-        PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-        __PYX_ERR(0, 272, __pyx_L1_error)
-      }
-      __pyx_v_dbx = (__pyx_t_6 / __pyx_t_7);
+      __pyx_v_dbx = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_distance_to_boundary(__pyx_v_self, __pyx_v_px, __pyx_v_vx, __pyx_v_l);
 
-      /* "_voxel_montecarlo.pyx":273
+      /* "_voxel_montecarlo.pyx":332
+ *                 s /= mt
+ *                 dbx = self._distance_to_boundary(px,vx,l)
+ *                 dby = self._distance_to_boundary(py,vy,l)             # <<<<<<<<<<<<<<
+ *                 dbz = self._distance_to_boundary(pz,vz,l)
  * 
- *                 dbx = (l/2-copysign(px,vx))/fabs(vx)
- *                 dby = (l/2-copysign(py,vy))/fabs(vy)             # <<<<<<<<<<<<<<
- *                 dbz = (l/2-copysign(pz,vz))/fabs(vz)
+ */
+      __pyx_v_dby = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_distance_to_boundary(__pyx_v_self, __pyx_v_py, __pyx_v_vy, __pyx_v_l);
+
+      /* "_voxel_montecarlo.pyx":333
+ *                 dbx = self._distance_to_boundary(px,vx,l)
+ *                 dby = self._distance_to_boundary(py,vy,l)
+ *                 dbz = self._distance_to_boundary(pz,vz,l)             # <<<<<<<<<<<<<<
+ * 
  *                 if dbz < dbx and dbz < dby:
  */
-      __pyx_t_7 = ((__pyx_v_l / 2.0) - copysign(__pyx_v_py, __pyx_v_vy));
-      __pyx_t_6 = fabs(__pyx_v_vy);
-      if (unlikely(__pyx_t_6 == 0)) {
-        PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-        __PYX_ERR(0, 273, __pyx_L1_error)
-      }
-      __pyx_v_dby = (__pyx_t_7 / __pyx_t_6);
+      __pyx_v_dbz = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_distance_to_boundary(__pyx_v_self, __pyx_v_pz, __pyx_v_vz, __pyx_v_l);
 
-      /* "_voxel_montecarlo.pyx":274
- *                 dbx = (l/2-copysign(px,vx))/fabs(vx)
- *                 dby = (l/2-copysign(py,vy))/fabs(vy)
- *                 dbz = (l/2-copysign(pz,vz))/fabs(vz)             # <<<<<<<<<<<<<<
- *                 if dbz < dbx and dbz < dby:
- *                     db_min = dbz
- */
-      __pyx_t_6 = ((__pyx_v_l / 2.0) - copysign(__pyx_v_pz, __pyx_v_vz));
-      __pyx_t_7 = fabs(__pyx_v_vz);
-      if (unlikely(__pyx_t_7 == 0)) {
-        PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-        __PYX_ERR(0, 274, __pyx_L1_error)
-      }
-      __pyx_v_dbz = (__pyx_t_6 / __pyx_t_7);
-
-      /* "_voxel_montecarlo.pyx":275
- *                 dby = (l/2-copysign(py,vy))/fabs(vy)
- *                 dbz = (l/2-copysign(pz,vz))/fabs(vz)
+      /* "_voxel_montecarlo.pyx":335
+ *                 dbz = self._distance_to_boundary(pz,vz,l)
+ * 
  *                 if dbz < dbx and dbz < dby:             # <<<<<<<<<<<<<<
  *                     db_min = dbz
  *                     index = 2
  */
-      __pyx_t_8 = ((__pyx_v_dbz < __pyx_v_dbx) != 0);
-      if (__pyx_t_8) {
+      __pyx_t_6 = ((__pyx_v_dbz < __pyx_v_dbx) != 0);
+      if (__pyx_t_6) {
       } else {
-        __pyx_t_5 = __pyx_t_8;
+        __pyx_t_5 = __pyx_t_6;
         goto __pyx_L8_bool_binop_done;
       }
-      __pyx_t_8 = ((__pyx_v_dbz < __pyx_v_dby) != 0);
-      __pyx_t_5 = __pyx_t_8;
+      __pyx_t_6 = ((__pyx_v_dbz < __pyx_v_dby) != 0);
+      __pyx_t_5 = __pyx_t_6;
       __pyx_L8_bool_binop_done:;
       if (__pyx_t_5) {
 
-        /* "_voxel_montecarlo.pyx":276
- *                 dbz = (l/2-copysign(pz,vz))/fabs(vz)
+        /* "_voxel_montecarlo.pyx":336
+ * 
  *                 if dbz < dbx and dbz < dby:
  *                     db_min = dbz             # <<<<<<<<<<<<<<
  *                     index = 2
@@ -5535,7 +5908,7 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
  */
         __pyx_v_db_min = __pyx_v_dbz;
 
-        /* "_voxel_montecarlo.pyx":277
+        /* "_voxel_montecarlo.pyx":337
  *                 if dbz < dbx and dbz < dby:
  *                     db_min = dbz
  *                     index = 2             # <<<<<<<<<<<<<<
@@ -5544,9 +5917,9 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
  */
         __pyx_v_index = 2;
 
-        /* "_voxel_montecarlo.pyx":275
- *                 dby = (l/2-copysign(py,vy))/fabs(vy)
- *                 dbz = (l/2-copysign(pz,vz))/fabs(vz)
+        /* "_voxel_montecarlo.pyx":335
+ *                 dbz = self._distance_to_boundary(pz,vz,l)
+ * 
  *                 if dbz < dbx and dbz < dby:             # <<<<<<<<<<<<<<
  *                     db_min = dbz
  *                     index = 2
@@ -5554,25 +5927,25 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
         goto __pyx_L7;
       }
 
-      /* "_voxel_montecarlo.pyx":278
+      /* "_voxel_montecarlo.pyx":338
  *                     db_min = dbz
  *                     index = 2
  *                 elif dby < dbx and dby < dbz:             # <<<<<<<<<<<<<<
  *                     db_min = dby
  *                     index = 1
  */
-      __pyx_t_8 = ((__pyx_v_dby < __pyx_v_dbx) != 0);
-      if (__pyx_t_8) {
+      __pyx_t_6 = ((__pyx_v_dby < __pyx_v_dbx) != 0);
+      if (__pyx_t_6) {
       } else {
-        __pyx_t_5 = __pyx_t_8;
+        __pyx_t_5 = __pyx_t_6;
         goto __pyx_L10_bool_binop_done;
       }
-      __pyx_t_8 = ((__pyx_v_dby < __pyx_v_dbz) != 0);
-      __pyx_t_5 = __pyx_t_8;
+      __pyx_t_6 = ((__pyx_v_dby < __pyx_v_dbz) != 0);
+      __pyx_t_5 = __pyx_t_6;
       __pyx_L10_bool_binop_done:;
       if (__pyx_t_5) {
 
-        /* "_voxel_montecarlo.pyx":279
+        /* "_voxel_montecarlo.pyx":339
  *                     index = 2
  *                 elif dby < dbx and dby < dbz:
  *                     db_min = dby             # <<<<<<<<<<<<<<
@@ -5581,7 +5954,7 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
  */
         __pyx_v_db_min = __pyx_v_dby;
 
-        /* "_voxel_montecarlo.pyx":280
+        /* "_voxel_montecarlo.pyx":340
  *                 elif dby < dbx and dby < dbz:
  *                     db_min = dby
  *                     index = 1             # <<<<<<<<<<<<<<
@@ -5590,7 +5963,7 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
  */
         __pyx_v_index = 1;
 
-        /* "_voxel_montecarlo.pyx":278
+        /* "_voxel_montecarlo.pyx":338
  *                     db_min = dbz
  *                     index = 2
  *                 elif dby < dbx and dby < dbz:             # <<<<<<<<<<<<<<
@@ -5600,43 +5973,43 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
         goto __pyx_L7;
       }
 
-      /* "_voxel_montecarlo.pyx":281
+      /* "_voxel_montecarlo.pyx":341
  *                     db_min = dby
  *                     index = 1
  *                 elif dbx < dby and dbx < dbz:             # <<<<<<<<<<<<<<
  *                     db_min = dbx
  *                     index = 0
  */
-      __pyx_t_8 = ((__pyx_v_dbx < __pyx_v_dby) != 0);
-      if (__pyx_t_8) {
+      __pyx_t_6 = ((__pyx_v_dbx < __pyx_v_dby) != 0);
+      if (__pyx_t_6) {
       } else {
-        __pyx_t_5 = __pyx_t_8;
+        __pyx_t_5 = __pyx_t_6;
         goto __pyx_L12_bool_binop_done;
       }
-      __pyx_t_8 = ((__pyx_v_dbx < __pyx_v_dbz) != 0);
-      __pyx_t_5 = __pyx_t_8;
+      __pyx_t_6 = ((__pyx_v_dbx < __pyx_v_dbz) != 0);
+      __pyx_t_5 = __pyx_t_6;
       __pyx_L12_bool_binop_done:;
       if (__pyx_t_5) {
 
-        /* "_voxel_montecarlo.pyx":282
+        /* "_voxel_montecarlo.pyx":342
  *                     index = 1
  *                 elif dbx < dby and dbx < dbz:
  *                     db_min = dbx             # <<<<<<<<<<<<<<
  *                     index = 0
- *                 val_f = db_min-s
+ *                 val_f = s-db_min
  */
         __pyx_v_db_min = __pyx_v_dbx;
 
-        /* "_voxel_montecarlo.pyx":283
+        /* "_voxel_montecarlo.pyx":343
  *                 elif dbx < dby and dbx < dbz:
  *                     db_min = dbx
  *                     index = 0             # <<<<<<<<<<<<<<
- *                 val_f = db_min-s
+ *                 val_f = s-db_min
  * 
  */
         __pyx_v_index = 0;
 
-        /* "_voxel_montecarlo.pyx":281
+        /* "_voxel_montecarlo.pyx":341
  *                     db_min = dby
  *                     index = 1
  *                 elif dbx < dby and dbx < dbz:             # <<<<<<<<<<<<<<
@@ -5646,51 +6019,33 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
       }
       __pyx_L7:;
 
-      /* "_voxel_montecarlo.pyx":284
+      /* "_voxel_montecarlo.pyx":344
  *                     db_min = dbx
  *                     index = 0
- *                 val_f = db_min-s             # <<<<<<<<<<<<<<
+ *                 val_f = s-db_min             # <<<<<<<<<<<<<<
  * 
- *                 if val_f <= 0:
+ *                 if val_f >= 0:
  */
-      __pyx_v_val_f = (__pyx_v_db_min - __pyx_v_s);
+      __pyx_v_val_f = (__pyx_v_s - __pyx_v_db_min);
 
-      /* "_voxel_montecarlo.pyx":286
- *                 val_f = db_min-s
+      /* "_voxel_montecarlo.pyx":346
+ *                 val_f = s-db_min
  * 
- *                 if val_f <= 0:             # <<<<<<<<<<<<<<
- *                     s -= db_min
- *                     ni = self._getReflectiveIndex(adx,ady,adz)
+ *                 if val_f >= 0:             # <<<<<<<<<<<<<<
+ * 
+ *                     px,py,pz = self._p_movement_to_bouder(index,px,py,pz,vx,vy,vz,db_min,l)
  */
-      __pyx_t_5 = ((__pyx_v_val_f <= 0.0) != 0);
+      __pyx_t_5 = ((__pyx_v_val_f >= 0.0) != 0);
       if (__pyx_t_5) {
 
-        /* "_voxel_montecarlo.pyx":287
+        /* "_voxel_montecarlo.pyx":348
+ *                 if val_f >= 0:
  * 
- *                 if val_f <= 0:
- *                     s -= db_min             # <<<<<<<<<<<<<<
+ *                     px,py,pz = self._p_movement_to_bouder(index,px,py,pz,vx,vy,vz,db_min,l)             # <<<<<<<<<<<<<<
+ * 
  *                     ni = self._getReflectiveIndex(adx,ady,adz)
- *                     val_xi, val_yi, val_zi = self._get_next_add(
  */
-        __pyx_v_s = (__pyx_v_s - __pyx_v_db_min);
-
-        /* "_voxel_montecarlo.pyx":288
- *                 if val_f <= 0:
- *                     s -= db_min
- *                     ni = self._getReflectiveIndex(adx,ady,adz)             # <<<<<<<<<<<<<<
- *                     val_xi, val_yi, val_zi = self._get_next_add(
- *                         index,adx,ady,adz,vx,vy,vz)
- */
-        __pyx_v_ni = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_getReflectiveIndex(__pyx_v_self, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz);
-
-        /* "_voxel_montecarlo.pyx":289
- *                     s -= db_min
- *                     ni = self._getReflectiveIndex(adx,ady,adz)
- *                     val_xi, val_yi, val_zi = self._get_next_add(             # <<<<<<<<<<<<<<
- *                         index,adx,ady,adz,vx,vy,vz)
- *                     nt = self._getReflectiveIndex(val_xi,val_yi,val_zi)
- */
-        __pyx_t_2 = __Pyx_PyInt_From_int(((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_get_next_add(__pyx_v_self, __pyx_v_index, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz, __pyx_v_vx, __pyx_v_vy, __pyx_v_vz)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 289, __pyx_L1_error)
+        __pyx_t_2 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_p_movement_to_bouder(__pyx_v_self, __pyx_v_index, __pyx_v_px, __pyx_v_py, __pyx_v_pz, __pyx_v_vx, __pyx_v_vy, __pyx_v_vz, __pyx_v_db_min, __pyx_v_l); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 348, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
           PyObject* sequence = __pyx_t_2;
@@ -5698,111 +6053,192 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
           if (unlikely(size != 3)) {
             if (size > 3) __Pyx_RaiseTooManyValuesError(3);
             else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-            __PYX_ERR(0, 289, __pyx_L1_error)
+            __PYX_ERR(0, 348, __pyx_L1_error)
           }
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
           if (likely(PyTuple_CheckExact(sequence))) {
             __pyx_t_1 = PyTuple_GET_ITEM(sequence, 0); 
-            __pyx_t_9 = PyTuple_GET_ITEM(sequence, 1); 
-            __pyx_t_10 = PyTuple_GET_ITEM(sequence, 2); 
+            __pyx_t_7 = PyTuple_GET_ITEM(sequence, 1); 
+            __pyx_t_8 = PyTuple_GET_ITEM(sequence, 2); 
           } else {
             __pyx_t_1 = PyList_GET_ITEM(sequence, 0); 
-            __pyx_t_9 = PyList_GET_ITEM(sequence, 1); 
-            __pyx_t_10 = PyList_GET_ITEM(sequence, 2); 
+            __pyx_t_7 = PyList_GET_ITEM(sequence, 1); 
+            __pyx_t_8 = PyList_GET_ITEM(sequence, 2); 
           }
           __Pyx_INCREF(__pyx_t_1);
-          __Pyx_INCREF(__pyx_t_9);
-          __Pyx_INCREF(__pyx_t_10);
+          __Pyx_INCREF(__pyx_t_7);
+          __Pyx_INCREF(__pyx_t_8);
           #else
-          __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 289, __pyx_L1_error)
+          __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 348, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 289, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_9);
-          __pyx_t_10 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 289, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_10);
+          __pyx_t_7 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 348, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_7);
+          __pyx_t_8 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 348, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_8);
           #endif
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         } else {
           Py_ssize_t index = -1;
-          __pyx_t_11 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 289, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_11);
-          __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-          __pyx_t_12 = Py_TYPE(__pyx_t_11)->tp_iternext;
-          index = 0; __pyx_t_1 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_1)) goto __pyx_L15_unpacking_failed;
-          __Pyx_GOTREF(__pyx_t_1);
-          index = 1; __pyx_t_9 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_9)) goto __pyx_L15_unpacking_failed;
+          __pyx_t_9 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 348, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
-          index = 2; __pyx_t_10 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_10)) goto __pyx_L15_unpacking_failed;
-          __Pyx_GOTREF(__pyx_t_10);
-          if (__Pyx_IternextUnpackEndCheck(__pyx_t_12(__pyx_t_11), 3) < 0) __PYX_ERR(0, 289, __pyx_L1_error)
-          __pyx_t_12 = NULL;
-          __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+          __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+          __pyx_t_10 = Py_TYPE(__pyx_t_9)->tp_iternext;
+          index = 0; __pyx_t_1 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_1)) goto __pyx_L15_unpacking_failed;
+          __Pyx_GOTREF(__pyx_t_1);
+          index = 1; __pyx_t_7 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_7)) goto __pyx_L15_unpacking_failed;
+          __Pyx_GOTREF(__pyx_t_7);
+          index = 2; __pyx_t_8 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_8)) goto __pyx_L15_unpacking_failed;
+          __Pyx_GOTREF(__pyx_t_8);
+          if (__Pyx_IternextUnpackEndCheck(__pyx_t_10(__pyx_t_9), 3) < 0) __PYX_ERR(0, 348, __pyx_L1_error)
+          __pyx_t_10 = NULL;
+          __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
           goto __pyx_L16_unpacking_done;
           __pyx_L15_unpacking_failed:;
-          __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-          __pyx_t_12 = NULL;
+          __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+          __pyx_t_10 = NULL;
           if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-          __PYX_ERR(0, 289, __pyx_L1_error)
+          __PYX_ERR(0, 348, __pyx_L1_error)
           __pyx_L16_unpacking_done:;
         }
-        __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 289, __pyx_L1_error)
+        __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 348, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-        __pyx_t_13 = __Pyx_PyInt_As_int(__pyx_t_9); if (unlikely((__pyx_t_13 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 289, __pyx_L1_error)
-        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-        __pyx_t_14 = __Pyx_PyInt_As_int(__pyx_t_10); if (unlikely((__pyx_t_14 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 289, __pyx_L1_error)
-        __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+        __pyx_t_11 = __pyx_PyFloat_AsFloat(__pyx_t_7); if (unlikely((__pyx_t_11 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 348, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        __pyx_t_12 = __pyx_PyFloat_AsFloat(__pyx_t_8); if (unlikely((__pyx_t_12 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 348, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+        __pyx_v_px = __pyx_t_3;
+        __pyx_v_py = __pyx_t_11;
+        __pyx_v_pz = __pyx_t_12;
+
+        /* "_voxel_montecarlo.pyx":350
+ *                     px,py,pz = self._p_movement_to_bouder(index,px,py,pz,vx,vy,vz,db_min,l)
+ * 
+ *                     ni = self._getReflectiveIndex(adx,ady,adz)             # <<<<<<<<<<<<<<
+ *                     val_xi, val_yi, val_zi = self._get_next_add(index,adx,ady,adz,vx,vy,vz)
+ * 
+ */
+        __pyx_v_ni = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_getReflectiveIndex(__pyx_v_self, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz);
+
+        /* "_voxel_montecarlo.pyx":351
+ * 
+ *                     ni = self._getReflectiveIndex(adx,ady,adz)
+ *                     val_xi, val_yi, val_zi = self._get_next_add(index,adx,ady,adz,vx,vy,vz)             # <<<<<<<<<<<<<<
+ * 
+ *                     nt = self._getReflectiveIndex(val_xi,val_yi,val_zi)
+ */
+        __pyx_t_2 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_get_next_add(__pyx_v_self, __pyx_v_index, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz, __pyx_v_vx, __pyx_v_vy, __pyx_v_vz); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 351, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
+          PyObject* sequence = __pyx_t_2;
+          Py_ssize_t size = __Pyx_PySequence_SIZE(sequence);
+          if (unlikely(size != 3)) {
+            if (size > 3) __Pyx_RaiseTooManyValuesError(3);
+            else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
+            __PYX_ERR(0, 351, __pyx_L1_error)
+          }
+          #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+          if (likely(PyTuple_CheckExact(sequence))) {
+            __pyx_t_8 = PyTuple_GET_ITEM(sequence, 0); 
+            __pyx_t_7 = PyTuple_GET_ITEM(sequence, 1); 
+            __pyx_t_1 = PyTuple_GET_ITEM(sequence, 2); 
+          } else {
+            __pyx_t_8 = PyList_GET_ITEM(sequence, 0); 
+            __pyx_t_7 = PyList_GET_ITEM(sequence, 1); 
+            __pyx_t_1 = PyList_GET_ITEM(sequence, 2); 
+          }
+          __Pyx_INCREF(__pyx_t_8);
+          __Pyx_INCREF(__pyx_t_7);
+          __Pyx_INCREF(__pyx_t_1);
+          #else
+          __pyx_t_8 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 351, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_8);
+          __pyx_t_7 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 351, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_7);
+          __pyx_t_1 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 351, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_1);
+          #endif
+          __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+        } else {
+          Py_ssize_t index = -1;
+          __pyx_t_9 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 351, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_9);
+          __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+          __pyx_t_10 = Py_TYPE(__pyx_t_9)->tp_iternext;
+          index = 0; __pyx_t_8 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_8)) goto __pyx_L17_unpacking_failed;
+          __Pyx_GOTREF(__pyx_t_8);
+          index = 1; __pyx_t_7 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_7)) goto __pyx_L17_unpacking_failed;
+          __Pyx_GOTREF(__pyx_t_7);
+          index = 2; __pyx_t_1 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_1)) goto __pyx_L17_unpacking_failed;
+          __Pyx_GOTREF(__pyx_t_1);
+          if (__Pyx_IternextUnpackEndCheck(__pyx_t_10(__pyx_t_9), 3) < 0) __PYX_ERR(0, 351, __pyx_L1_error)
+          __pyx_t_10 = NULL;
+          __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+          goto __pyx_L18_unpacking_done;
+          __pyx_L17_unpacking_failed:;
+          __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+          __pyx_t_10 = NULL;
+          if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
+          __PYX_ERR(0, 351, __pyx_L1_error)
+          __pyx_L18_unpacking_done:;
+        }
+        __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 351, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+        __pyx_t_13 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_13 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 351, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        __pyx_t_14 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_14 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 351, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
         __pyx_v_val_xi = __pyx_t_4;
         __pyx_v_val_yi = __pyx_t_13;
         __pyx_v_val_zi = __pyx_t_14;
 
-        /* "_voxel_montecarlo.pyx":291
- *                     val_xi, val_yi, val_zi = self._get_next_add(
- *                         index,adx,ady,adz,vx,vy,vz)
- *                     nt = self._getReflectiveIndex(val_xi,val_yi,val_zi)             # <<<<<<<<<<<<<<
+        /* "_voxel_montecarlo.pyx":353
+ *                     val_xi, val_yi, val_zi = self._get_next_add(index,adx,ady,adz,vx,vy,vz)
  * 
- *                     if ni != nt:
+ *                     nt = self._getReflectiveIndex(val_xi,val_yi,val_zi)             # <<<<<<<<<<<<<<
+ *                     s -= db_min
+ * 
  */
         __pyx_v_nt = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_getReflectiveIndex(__pyx_v_self, __pyx_v_val_xi, __pyx_v_val_yi, __pyx_v_val_zi);
 
-        /* "_voxel_montecarlo.pyx":293
+        /* "_voxel_montecarlo.pyx":354
+ * 
  *                     nt = self._getReflectiveIndex(val_xi,val_yi,val_zi)
+ *                     s -= db_min             # <<<<<<<<<<<<<<
+ * 
+ *                     if ni != nt:
+ */
+        __pyx_v_s = (__pyx_v_s - __pyx_v_db_min);
+
+        /* "_voxel_montecarlo.pyx":356
+ *                     s -= db_min
  * 
  *                     if ni != nt:             # <<<<<<<<<<<<<<
- *                         ai = self._get_index_val(index,vx,vy,vz)
- *                         ai = fabs(ai)
+ * 
+ *                         ai = fabs(self._get_index_val(index,vx,vy,vz))
  */
         __pyx_t_5 = ((__pyx_v_ni != __pyx_v_nt) != 0);
         if (__pyx_t_5) {
 
-          /* "_voxel_montecarlo.pyx":294
+          /* "_voxel_montecarlo.pyx":358
+ *                     if ni != nt:
  * 
- *                     if ni != nt:
- *                         ai = self._get_index_val(index,vx,vy,vz)             # <<<<<<<<<<<<<<
- *                         ai = fabs(ai)
- *                         ai = acos(ai)
- */
-          __pyx_v_ai = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_get_index_val(__pyx_v_self, __pyx_v_index, __pyx_v_vx, __pyx_v_vy, __pyx_v_vz);
-
-          /* "_voxel_montecarlo.pyx":295
- *                     if ni != nt:
- *                         ai = self._get_index_val(index,vx,vy,vz)
- *                         ai = fabs(ai)             # <<<<<<<<<<<<<<
+ *                         ai = fabs(self._get_index_val(index,vx,vy,vz))             # <<<<<<<<<<<<<<
  *                         ai = acos(ai)
  *                         val_f = asin(nt/ni)
  */
-          __pyx_v_ai = fabs(__pyx_v_ai);
+          __pyx_v_ai = fabs(((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_get_index_val(__pyx_v_self, __pyx_v_index, __pyx_v_vx, __pyx_v_vy, __pyx_v_vz));
 
-          /* "_voxel_montecarlo.pyx":296
- *                         ai = self._get_index_val(index,vx,vy,vz)
- *                         ai = fabs(ai)
+          /* "_voxel_montecarlo.pyx":359
+ * 
+ *                         ai = fabs(self._get_index_val(index,vx,vy,vz))
  *                         ai = acos(ai)             # <<<<<<<<<<<<<<
  *                         val_f = asin(nt/ni)
  *                         if ai < val_f:
  */
           __pyx_v_ai = acos(__pyx_v_ai);
 
-          /* "_voxel_montecarlo.pyx":297
- *                         ai = fabs(ai)
+          /* "_voxel_montecarlo.pyx":360
+ *                         ai = fabs(self._get_index_val(index,vx,vy,vz))
  *                         ai = acos(ai)
  *                         val_f = asin(nt/ni)             # <<<<<<<<<<<<<<
  *                         if ai < val_f:
@@ -5810,120 +6246,115 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
  */
           if (unlikely(__pyx_v_ni == 0)) {
             PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-            __PYX_ERR(0, 297, __pyx_L1_error)
+            __PYX_ERR(0, 360, __pyx_L1_error)
           }
           __pyx_v_val_f = asin((__pyx_v_nt / __pyx_v_ni));
 
-          /* "_voxel_montecarlo.pyx":298
+          /* "_voxel_montecarlo.pyx":361
  *                         ai = acos(ai)
  *                         val_f = asin(nt/ni)
  *                         if ai < val_f:             # <<<<<<<<<<<<<<
  *                             val_f = self.random_uniform()
- *                             at = asin(ni*sin(ai)/nt)
+ *                             self.logger_float[p_id] = val_f
  */
           __pyx_t_5 = ((__pyx_v_ai < __pyx_v_val_f) != 0);
           if (__pyx_t_5) {
 
-            /* "_voxel_montecarlo.pyx":299
+            /* "_voxel_montecarlo.pyx":362
  *                         val_f = asin(nt/ni)
  *                         if ai < val_f:
  *                             val_f = self.random_uniform()             # <<<<<<<<<<<<<<
- *                             at = asin(ni*sin(ai)/nt)
- *                             Ra = val_f-0.5*((sin(ai-at)/sin(ai+at))**2\
+ *                             self.logger_float[p_id] = val_f
+ *                             at = asin(sin(ai)*(ni/nt))
  */
             __pyx_v_val_f = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->random_uniform(__pyx_v_self);
 
-            /* "_voxel_montecarlo.pyx":300
+            /* "_voxel_montecarlo.pyx":363
  *                         if ai < val_f:
  *                             val_f = self.random_uniform()
- *                             at = asin(ni*sin(ai)/nt)             # <<<<<<<<<<<<<<
- *                             Ra = val_f-0.5*((sin(ai-at)/sin(ai+at))**2\
- *                                             + (tan(ai-at)/tan(ai+at))**2)
+ *                             self.logger_float[p_id] = val_f             # <<<<<<<<<<<<<<
+ *                             at = asin(sin(ai)*(ni/nt))
+ *                             Ra = val_f - 0.5*((sin(ai-at)/sin(ai+at))**2+(tan(ai-at)/tan(ai+at))**2)
  */
-            __pyx_t_7 = (__pyx_v_ni * sin(__pyx_v_ai));
-            if (unlikely(__pyx_v_nt == 0)) {
-              PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-              __PYX_ERR(0, 300, __pyx_L1_error)
-            }
-            __pyx_v_at = asin((__pyx_t_7 / __pyx_v_nt));
+            __pyx_t_2 = PyFloat_FromDouble(__pyx_v_val_f); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 363, __pyx_L1_error)
+            __Pyx_GOTREF(__pyx_t_2);
+            if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_self->logger_float), __pyx_v_p_id, __pyx_t_2, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 363, __pyx_L1_error)
+            __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-            /* "_voxel_montecarlo.pyx":301
+            /* "_voxel_montecarlo.pyx":364
  *                             val_f = self.random_uniform()
- *                             at = asin(ni*sin(ai)/nt)
- *                             Ra = val_f-0.5*((sin(ai-at)/sin(ai+at))**2\             # <<<<<<<<<<<<<<
- *                                             + (tan(ai-at)/tan(ai+at))**2)
- * 
- */
-            __pyx_t_7 = sin((__pyx_v_ai - __pyx_v_at));
-            __pyx_t_6 = sin((__pyx_v_ai + __pyx_v_at));
-            if (unlikely(__pyx_t_6 == 0)) {
-              PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-              __PYX_ERR(0, 301, __pyx_L1_error)
-            }
-
-            /* "_voxel_montecarlo.pyx":302
- *                             at = asin(ni*sin(ai)/nt)
- *                             Ra = val_f-0.5*((sin(ai-at)/sin(ai+at))**2\
- *                                             + (tan(ai-at)/tan(ai+at))**2)             # <<<<<<<<<<<<<<
- * 
+ *                             self.logger_float[p_id] = val_f
+ *                             at = asin(sin(ai)*(ni/nt))             # <<<<<<<<<<<<<<
+ *                             Ra = val_f - 0.5*((sin(ai-at)/sin(ai+at))**2+(tan(ai-at)/tan(ai+at))**2)
  *                         else:
  */
-            __pyx_t_15 = tan((__pyx_v_ai - __pyx_v_at));
-            __pyx_t_16 = tan((__pyx_v_ai + __pyx_v_at));
+            if (unlikely(__pyx_v_nt == 0)) {
+              PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+              __PYX_ERR(0, 364, __pyx_L1_error)
+            }
+            __pyx_v_at = asin((sin(__pyx_v_ai) * (__pyx_v_ni / __pyx_v_nt)));
+
+            /* "_voxel_montecarlo.pyx":365
+ *                             self.logger_float[p_id] = val_f
+ *                             at = asin(sin(ai)*(ni/nt))
+ *                             Ra = val_f - 0.5*((sin(ai-at)/sin(ai+at))**2+(tan(ai-at)/tan(ai+at))**2)             # <<<<<<<<<<<<<<
+ *                         else:
+ *                             Ra = -1
+ */
+            __pyx_t_15 = sin((__pyx_v_ai - __pyx_v_at));
+            __pyx_t_16 = sin((__pyx_v_ai + __pyx_v_at));
             if (unlikely(__pyx_t_16 == 0)) {
               PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-              __PYX_ERR(0, 302, __pyx_L1_error)
+              __PYX_ERR(0, 365, __pyx_L1_error)
             }
+            __pyx_t_17 = tan((__pyx_v_ai - __pyx_v_at));
+            __pyx_t_18 = tan((__pyx_v_ai + __pyx_v_at));
+            if (unlikely(__pyx_t_18 == 0)) {
+              PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+              __PYX_ERR(0, 365, __pyx_L1_error)
+            }
+            __pyx_v_Ra = (__pyx_v_val_f - (0.5 * (pow((__pyx_t_15 / __pyx_t_16), 2.0) + pow((__pyx_t_17 / __pyx_t_18), 2.0))));
 
-            /* "_voxel_montecarlo.pyx":301
- *                             val_f = self.random_uniform()
- *                             at = asin(ni*sin(ai)/nt)
- *                             Ra = val_f-0.5*((sin(ai-at)/sin(ai+at))**2\             # <<<<<<<<<<<<<<
- *                                             + (tan(ai-at)/tan(ai+at))**2)
- * 
- */
-            __pyx_v_Ra = (__pyx_v_val_f - (0.5 * (pow((__pyx_t_7 / __pyx_t_6), 2.0) + pow((__pyx_t_15 / __pyx_t_16), 2.0))));
-
-            /* "_voxel_montecarlo.pyx":298
+            /* "_voxel_montecarlo.pyx":361
  *                         ai = acos(ai)
  *                         val_f = asin(nt/ni)
  *                         if ai < val_f:             # <<<<<<<<<<<<<<
  *                             val_f = self.random_uniform()
- *                             at = asin(ni*sin(ai)/nt)
+ *                             self.logger_float[p_id] = val_f
  */
-            goto __pyx_L18;
+            goto __pyx_L20;
           }
 
-          /* "_voxel_montecarlo.pyx":305
- * 
+          /* "_voxel_montecarlo.pyx":367
+ *                             Ra = val_f - 0.5*((sin(ai-at)/sin(ai+at))**2+(tan(ai-at)/tan(ai+at))**2)
  *                         else:
  *                             Ra = -1             # <<<<<<<<<<<<<<
  * 
- *                         if Ra <= 0:
+ *                         if Ra <= 0: #Internally reflect
  */
           /*else*/ {
             __pyx_v_Ra = -1.0;
           }
-          __pyx_L18:;
+          __pyx_L20:;
 
-          /* "_voxel_montecarlo.pyx":307
+          /* "_voxel_montecarlo.pyx":369
  *                             Ra = -1
  * 
- *                         if Ra <= 0:             # <<<<<<<<<<<<<<
- *                             val_xi,val_yi,val_zi = self._create01val(index,-1,1)
- *                             vx *= val_xi
+ *                         if Ra <= 0: #Internally reflect             # <<<<<<<<<<<<<<
+ *                             val_xf,val_yf,val_zf = self._create01val(index,-1.,1.)
+ *                             vx *= val_xf
  */
           __pyx_t_5 = ((__pyx_v_Ra <= 0.0) != 0);
           if (__pyx_t_5) {
 
-            /* "_voxel_montecarlo.pyx":308
+            /* "_voxel_montecarlo.pyx":370
  * 
- *                         if Ra <= 0:
- *                             val_xi,val_yi,val_zi = self._create01val(index,-1,1)             # <<<<<<<<<<<<<<
- *                             vx *= val_xi
- *                             vy *= val_yi
+ *                         if Ra <= 0: #Internally reflect
+ *                             val_xf,val_yf,val_zf = self._create01val(index,-1.,1.)             # <<<<<<<<<<<<<<
+ *                             vx *= val_xf
+ *                             vy *= val_yf
  */
-            __pyx_t_2 = __Pyx_PyInt_From_int(((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_create01val(__pyx_v_self, __pyx_v_index, -1, 1)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 308, __pyx_L1_error)
+            __pyx_t_2 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_create01val(__pyx_v_self, __pyx_v_index, -1., 1.); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 370, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_2);
             if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
               PyObject* sequence = __pyx_t_2;
@@ -5931,367 +6362,133 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
               if (unlikely(size != 3)) {
                 if (size > 3) __Pyx_RaiseTooManyValuesError(3);
                 else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-                __PYX_ERR(0, 308, __pyx_L1_error)
+                __PYX_ERR(0, 370, __pyx_L1_error)
               }
               #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
               if (likely(PyTuple_CheckExact(sequence))) {
-                __pyx_t_10 = PyTuple_GET_ITEM(sequence, 0); 
-                __pyx_t_9 = PyTuple_GET_ITEM(sequence, 1); 
-                __pyx_t_1 = PyTuple_GET_ITEM(sequence, 2); 
+                __pyx_t_1 = PyTuple_GET_ITEM(sequence, 0); 
+                __pyx_t_7 = PyTuple_GET_ITEM(sequence, 1); 
+                __pyx_t_8 = PyTuple_GET_ITEM(sequence, 2); 
               } else {
-                __pyx_t_10 = PyList_GET_ITEM(sequence, 0); 
-                __pyx_t_9 = PyList_GET_ITEM(sequence, 1); 
-                __pyx_t_1 = PyList_GET_ITEM(sequence, 2); 
+                __pyx_t_1 = PyList_GET_ITEM(sequence, 0); 
+                __pyx_t_7 = PyList_GET_ITEM(sequence, 1); 
+                __pyx_t_8 = PyList_GET_ITEM(sequence, 2); 
               }
-              __Pyx_INCREF(__pyx_t_10);
-              __Pyx_INCREF(__pyx_t_9);
               __Pyx_INCREF(__pyx_t_1);
+              __Pyx_INCREF(__pyx_t_7);
+              __Pyx_INCREF(__pyx_t_8);
               #else
-              __pyx_t_10 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 308, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_10);
-              __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 308, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_9);
-              __pyx_t_1 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 308, __pyx_L1_error)
+              __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 370, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_1);
+              __pyx_t_7 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 370, __pyx_L1_error)
+              __Pyx_GOTREF(__pyx_t_7);
+              __pyx_t_8 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 370, __pyx_L1_error)
+              __Pyx_GOTREF(__pyx_t_8);
               #endif
               __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
             } else {
               Py_ssize_t index = -1;
-              __pyx_t_11 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 308, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_11);
-              __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-              __pyx_t_12 = Py_TYPE(__pyx_t_11)->tp_iternext;
-              index = 0; __pyx_t_10 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_10)) goto __pyx_L20_unpacking_failed;
-              __Pyx_GOTREF(__pyx_t_10);
-              index = 1; __pyx_t_9 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_9)) goto __pyx_L20_unpacking_failed;
+              __pyx_t_9 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 370, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_9);
-              index = 2; __pyx_t_1 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_1)) goto __pyx_L20_unpacking_failed;
+              __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+              __pyx_t_10 = Py_TYPE(__pyx_t_9)->tp_iternext;
+              index = 0; __pyx_t_1 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_1)) goto __pyx_L22_unpacking_failed;
               __Pyx_GOTREF(__pyx_t_1);
-              if (__Pyx_IternextUnpackEndCheck(__pyx_t_12(__pyx_t_11), 3) < 0) __PYX_ERR(0, 308, __pyx_L1_error)
-              __pyx_t_12 = NULL;
-              __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-              goto __pyx_L21_unpacking_done;
-              __pyx_L20_unpacking_failed:;
-              __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-              __pyx_t_12 = NULL;
+              index = 1; __pyx_t_7 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_7)) goto __pyx_L22_unpacking_failed;
+              __Pyx_GOTREF(__pyx_t_7);
+              index = 2; __pyx_t_8 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_8)) goto __pyx_L22_unpacking_failed;
+              __Pyx_GOTREF(__pyx_t_8);
+              if (__Pyx_IternextUnpackEndCheck(__pyx_t_10(__pyx_t_9), 3) < 0) __PYX_ERR(0, 370, __pyx_L1_error)
+              __pyx_t_10 = NULL;
+              __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+              goto __pyx_L23_unpacking_done;
+              __pyx_L22_unpacking_failed:;
+              __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+              __pyx_t_10 = NULL;
               if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-              __PYX_ERR(0, 308, __pyx_L1_error)
-              __pyx_L21_unpacking_done:;
+              __PYX_ERR(0, 370, __pyx_L1_error)
+              __pyx_L23_unpacking_done:;
             }
-            __pyx_t_14 = __Pyx_PyInt_As_int(__pyx_t_10); if (unlikely((__pyx_t_14 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 308, __pyx_L1_error)
-            __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-            __pyx_t_13 = __Pyx_PyInt_As_int(__pyx_t_9); if (unlikely((__pyx_t_13 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 308, __pyx_L1_error)
-            __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-            __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 308, __pyx_L1_error)
+            __pyx_t_12 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_12 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 370, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-            __pyx_v_val_xi = __pyx_t_14;
-            __pyx_v_val_yi = __pyx_t_13;
-            __pyx_v_val_zi = __pyx_t_4;
+            __pyx_t_11 = __pyx_PyFloat_AsFloat(__pyx_t_7); if (unlikely((__pyx_t_11 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 370, __pyx_L1_error)
+            __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+            __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_8); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 370, __pyx_L1_error)
+            __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+            __pyx_v_val_xf = __pyx_t_12;
+            __pyx_v_val_yf = __pyx_t_11;
+            __pyx_v_val_zf = __pyx_t_3;
 
-            /* "_voxel_montecarlo.pyx":309
- *                         if Ra <= 0:
- *                             val_xi,val_yi,val_zi = self._create01val(index,-1,1)
- *                             vx *= val_xi             # <<<<<<<<<<<<<<
- *                             vy *= val_yi
- *                             vz *= val_zi
+            /* "_voxel_montecarlo.pyx":371
+ *                         if Ra <= 0: #Internally reflect
+ *                             val_xf,val_yf,val_zf = self._create01val(index,-1.,1.)
+ *                             vx *= val_xf             # <<<<<<<<<<<<<<
+ *                             vy *= val_yf
+ *                             vz *= val_zf
  */
-            __pyx_v_vx = (__pyx_v_vx * __pyx_v_val_xi);
+            __pyx_v_vx = (__pyx_v_vx * __pyx_v_val_xf);
 
-            /* "_voxel_montecarlo.pyx":310
- *                             val_xi,val_yi,val_zi = self._create01val(index,-1,1)
- *                             vx *= val_xi
- *                             vy *= val_yi             # <<<<<<<<<<<<<<
- *                             vz *= val_zi
+            /* "_voxel_montecarlo.pyx":372
+ *                             val_xf,val_yf,val_zf = self._create01val(index,-1.,1.)
+ *                             vx *= val_xf
+ *                             vy *= val_yf             # <<<<<<<<<<<<<<
+ *                             vz *= val_zf
  * 
  */
-            __pyx_v_vy = (__pyx_v_vy * __pyx_v_val_yi);
+            __pyx_v_vy = (__pyx_v_vy * __pyx_v_val_yf);
 
-            /* "_voxel_montecarlo.pyx":311
- *                             vx *= val_xi
- *                             vy *= val_yi
- *                             vz *= val_zi             # <<<<<<<<<<<<<<
+            /* "_voxel_montecarlo.pyx":373
+ *                             vx *= val_xf
+ *                             vy *= val_yf
+ *                             vz *= val_zf             # <<<<<<<<<<<<<<
  * 
- *                         else:
+ *                         else: #Transmit
  */
-            __pyx_v_vz = (__pyx_v_vz * __pyx_v_val_zi);
+            __pyx_v_vz = (__pyx_v_vz * __pyx_v_val_zf);
 
-            /* "_voxel_montecarlo.pyx":307
+            /* "_voxel_montecarlo.pyx":369
  *                             Ra = -1
  * 
- *                         if Ra <= 0:             # <<<<<<<<<<<<<<
- *                             val_xi,val_yi,val_zi = self._create01val(index,-1,1)
- *                             vx *= val_xi
+ *                         if Ra <= 0: #Internally reflect             # <<<<<<<<<<<<<<
+ *                             val_xf,val_yf,val_zf = self._create01val(index,-1.,1.)
+ *                             vx *= val_xf
  */
-            goto __pyx_L19;
+            goto __pyx_L21;
           }
 
-          /* "_voxel_montecarlo.pyx":314
+          /* "_voxel_montecarlo.pyx":376
  * 
- *                         else:
+ *                         else: #Transmit
  *                             adx = val_xi; ady = val_yi; adz = val_zi             # <<<<<<<<<<<<<<
  * 
- *                             val_xi,val_yi,val_zi = self._create01val(index,0,1)
+ *                             val_f = cos(ai)
  */
           /*else*/ {
             __pyx_v_adx = __pyx_v_val_xi;
             __pyx_v_ady = __pyx_v_val_yi;
             __pyx_v_adz = __pyx_v_val_zi;
 
-            /* "_voxel_montecarlo.pyx":316
+            /* "_voxel_montecarlo.pyx":378
  *                             adx = val_xi; ady = val_yi; adz = val_zi
  * 
- *                             val_xi,val_yi,val_zi = self._create01val(index,0,1)             # <<<<<<<<<<<<<<
- *                             vx = vx*val_xi
- *                             vy = vx*val_yi
- */
-            __pyx_t_2 = __Pyx_PyInt_From_int(((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_create01val(__pyx_v_self, __pyx_v_index, 0, 1)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 316, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_2);
-            if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
-              PyObject* sequence = __pyx_t_2;
-              Py_ssize_t size = __Pyx_PySequence_SIZE(sequence);
-              if (unlikely(size != 3)) {
-                if (size > 3) __Pyx_RaiseTooManyValuesError(3);
-                else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-                __PYX_ERR(0, 316, __pyx_L1_error)
-              }
-              #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-              if (likely(PyTuple_CheckExact(sequence))) {
-                __pyx_t_1 = PyTuple_GET_ITEM(sequence, 0); 
-                __pyx_t_9 = PyTuple_GET_ITEM(sequence, 1); 
-                __pyx_t_10 = PyTuple_GET_ITEM(sequence, 2); 
-              } else {
-                __pyx_t_1 = PyList_GET_ITEM(sequence, 0); 
-                __pyx_t_9 = PyList_GET_ITEM(sequence, 1); 
-                __pyx_t_10 = PyList_GET_ITEM(sequence, 2); 
-              }
-              __Pyx_INCREF(__pyx_t_1);
-              __Pyx_INCREF(__pyx_t_9);
-              __Pyx_INCREF(__pyx_t_10);
-              #else
-              __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 316, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_1);
-              __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 316, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_9);
-              __pyx_t_10 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 316, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_10);
-              #endif
-              __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-            } else {
-              Py_ssize_t index = -1;
-              __pyx_t_11 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 316, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_11);
-              __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-              __pyx_t_12 = Py_TYPE(__pyx_t_11)->tp_iternext;
-              index = 0; __pyx_t_1 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_1)) goto __pyx_L22_unpacking_failed;
-              __Pyx_GOTREF(__pyx_t_1);
-              index = 1; __pyx_t_9 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_9)) goto __pyx_L22_unpacking_failed;
-              __Pyx_GOTREF(__pyx_t_9);
-              index = 2; __pyx_t_10 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_10)) goto __pyx_L22_unpacking_failed;
-              __Pyx_GOTREF(__pyx_t_10);
-              if (__Pyx_IternextUnpackEndCheck(__pyx_t_12(__pyx_t_11), 3) < 0) __PYX_ERR(0, 316, __pyx_L1_error)
-              __pyx_t_12 = NULL;
-              __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-              goto __pyx_L23_unpacking_done;
-              __pyx_L22_unpacking_failed:;
-              __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-              __pyx_t_12 = NULL;
-              if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-              __PYX_ERR(0, 316, __pyx_L1_error)
-              __pyx_L23_unpacking_done:;
-            }
-            __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 316, __pyx_L1_error)
-            __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-            __pyx_t_13 = __Pyx_PyInt_As_int(__pyx_t_9); if (unlikely((__pyx_t_13 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 316, __pyx_L1_error)
-            __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-            __pyx_t_14 = __Pyx_PyInt_As_int(__pyx_t_10); if (unlikely((__pyx_t_14 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 316, __pyx_L1_error)
-            __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-            __pyx_v_val_xi = __pyx_t_4;
-            __pyx_v_val_yi = __pyx_t_13;
-            __pyx_v_val_zi = __pyx_t_14;
-
-            /* "_voxel_montecarlo.pyx":317
- * 
- *                             val_xi,val_yi,val_zi = self._create01val(index,0,1)
- *                             vx = vx*val_xi             # <<<<<<<<<<<<<<
- *                             vy = vx*val_yi
- *                             vz = vx*val_zi
- */
-            __pyx_v_vx = (__pyx_v_vx * __pyx_v_val_xi);
-
-            /* "_voxel_montecarlo.pyx":318
- *                             val_xi,val_yi,val_zi = self._create01val(index,0,1)
- *                             vx = vx*val_xi
- *                             vy = vx*val_yi             # <<<<<<<<<<<<<<
- *                             vz = vx*val_zi
- * 
- */
-            __pyx_v_vy = (__pyx_v_vx * __pyx_v_val_yi);
-
-            /* "_voxel_montecarlo.pyx":319
- *                             vx = vx*val_xi
- *                             vy = vx*val_yi
- *                             vz = vx*val_zi             # <<<<<<<<<<<<<<
- * 
- *                             val_xi,val_yi,val_zi = self._create01val(index,1,0)
- */
-            __pyx_v_vz = (__pyx_v_vx * __pyx_v_val_zi);
-
-            /* "_voxel_montecarlo.pyx":321
- *                             vz = vx*val_zi
- * 
- *                             val_xi,val_yi,val_zi = self._create01val(index,1,0)             # <<<<<<<<<<<<<<
- *                             val_f = cos(ai)
- *                             vx += val_xi*copysign(val_f,vx)
- */
-            __pyx_t_2 = __Pyx_PyInt_From_int(((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_create01val(__pyx_v_self, __pyx_v_index, 1, 0)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 321, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_2);
-            if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
-              PyObject* sequence = __pyx_t_2;
-              Py_ssize_t size = __Pyx_PySequence_SIZE(sequence);
-              if (unlikely(size != 3)) {
-                if (size > 3) __Pyx_RaiseTooManyValuesError(3);
-                else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-                __PYX_ERR(0, 321, __pyx_L1_error)
-              }
-              #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-              if (likely(PyTuple_CheckExact(sequence))) {
-                __pyx_t_10 = PyTuple_GET_ITEM(sequence, 0); 
-                __pyx_t_9 = PyTuple_GET_ITEM(sequence, 1); 
-                __pyx_t_1 = PyTuple_GET_ITEM(sequence, 2); 
-              } else {
-                __pyx_t_10 = PyList_GET_ITEM(sequence, 0); 
-                __pyx_t_9 = PyList_GET_ITEM(sequence, 1); 
-                __pyx_t_1 = PyList_GET_ITEM(sequence, 2); 
-              }
-              __Pyx_INCREF(__pyx_t_10);
-              __Pyx_INCREF(__pyx_t_9);
-              __Pyx_INCREF(__pyx_t_1);
-              #else
-              __pyx_t_10 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 321, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_10);
-              __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 321, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_9);
-              __pyx_t_1 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 321, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_1);
-              #endif
-              __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-            } else {
-              Py_ssize_t index = -1;
-              __pyx_t_11 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 321, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_11);
-              __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-              __pyx_t_12 = Py_TYPE(__pyx_t_11)->tp_iternext;
-              index = 0; __pyx_t_10 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_10)) goto __pyx_L24_unpacking_failed;
-              __Pyx_GOTREF(__pyx_t_10);
-              index = 1; __pyx_t_9 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_9)) goto __pyx_L24_unpacking_failed;
-              __Pyx_GOTREF(__pyx_t_9);
-              index = 2; __pyx_t_1 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_1)) goto __pyx_L24_unpacking_failed;
-              __Pyx_GOTREF(__pyx_t_1);
-              if (__Pyx_IternextUnpackEndCheck(__pyx_t_12(__pyx_t_11), 3) < 0) __PYX_ERR(0, 321, __pyx_L1_error)
-              __pyx_t_12 = NULL;
-              __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-              goto __pyx_L25_unpacking_done;
-              __pyx_L24_unpacking_failed:;
-              __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-              __pyx_t_12 = NULL;
-              if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-              __PYX_ERR(0, 321, __pyx_L1_error)
-              __pyx_L25_unpacking_done:;
-            }
-            __pyx_t_14 = __Pyx_PyInt_As_int(__pyx_t_10); if (unlikely((__pyx_t_14 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 321, __pyx_L1_error)
-            __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-            __pyx_t_13 = __Pyx_PyInt_As_int(__pyx_t_9); if (unlikely((__pyx_t_13 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 321, __pyx_L1_error)
-            __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-            __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 321, __pyx_L1_error)
-            __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-            __pyx_v_val_xi = __pyx_t_14;
-            __pyx_v_val_yi = __pyx_t_13;
-            __pyx_v_val_zi = __pyx_t_4;
-
-            /* "_voxel_montecarlo.pyx":322
- * 
- *                             val_xi,val_yi,val_zi = self._create01val(index,1,0)
  *                             val_f = cos(ai)             # <<<<<<<<<<<<<<
- *                             vx += val_xi*copysign(val_f,vx)
- *                             vy += val_yi*copysign(val_f,vy)
+ *                             vx,vy,vz = self.transmit_v(index,vx,vy,vz,ni/nt,val_f)
+ * 
  */
             __pyx_v_val_f = cos(__pyx_v_ai);
 
-            /* "_voxel_montecarlo.pyx":323
- *                             val_xi,val_yi,val_zi = self._create01val(index,1,0)
+            /* "_voxel_montecarlo.pyx":379
+ * 
  *                             val_f = cos(ai)
- *                             vx += val_xi*copysign(val_f,vx)             # <<<<<<<<<<<<<<
- *                             vy += val_yi*copysign(val_f,vy)
- *                             vz += val_zi*copysign(val_f,vz)
- */
-            __pyx_v_vx = (__pyx_v_vx + (__pyx_v_val_xi * copysign(__pyx_v_val_f, __pyx_v_vx)));
-
-            /* "_voxel_montecarlo.pyx":324
- *                             val_f = cos(ai)
- *                             vx += val_xi*copysign(val_f,vx)
- *                             vy += val_yi*copysign(val_f,vy)             # <<<<<<<<<<<<<<
- *                             vz += val_zi*copysign(val_f,vz)
+ *                             vx,vy,vz = self.transmit_v(index,vx,vy,vz,ni/nt,val_f)             # <<<<<<<<<<<<<<
  * 
- */
-            __pyx_v_vy = (__pyx_v_vy + (__pyx_v_val_yi * copysign(__pyx_v_val_f, __pyx_v_vy)));
-
-            /* "_voxel_montecarlo.pyx":325
- *                             vx += val_xi*copysign(val_f,vx)
- *                             vy += val_yi*copysign(val_f,vy)
- *                             vz += val_zi*copysign(val_f,vz)             # <<<<<<<<<<<<<<
- * 
- *                             val_f = ni/nt
- */
-            __pyx_v_vz = (__pyx_v_vz + (__pyx_v_val_zi * copysign(__pyx_v_val_f, __pyx_v_vz)));
-
-            /* "_voxel_montecarlo.pyx":327
- *                             vz += val_zi*copysign(val_f,vz)
- * 
- *                             val_f = ni/nt             # <<<<<<<<<<<<<<
- *                             vx *= val_f
- *                             vy *= val_f
+ *                             val_xf,val_yf,val_zf = self._create01val(index,-1.,1.)
  */
             if (unlikely(__pyx_v_nt == 0)) {
               PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-              __PYX_ERR(0, 327, __pyx_L1_error)
+              __PYX_ERR(0, 379, __pyx_L1_error)
             }
-            __pyx_v_val_f = (__pyx_v_ni / __pyx_v_nt);
-
-            /* "_voxel_montecarlo.pyx":328
- * 
- *                             val_f = ni/nt
- *                             vx *= val_f             # <<<<<<<<<<<<<<
- *                             vy *= val_f
- *                             vz *= val_f
- */
-            __pyx_v_vx = (__pyx_v_vx * __pyx_v_val_f);
-
-            /* "_voxel_montecarlo.pyx":329
- *                             val_f = ni/nt
- *                             vx *= val_f
- *                             vy *= val_f             # <<<<<<<<<<<<<<
- *                             vz *= val_f
- * 
- */
-            __pyx_v_vy = (__pyx_v_vy * __pyx_v_val_f);
-
-            /* "_voxel_montecarlo.pyx":330
- *                             vx *= val_f
- *                             vy *= val_f
- *                             vz *= val_f             # <<<<<<<<<<<<<<
- * 
- *                             val_xi,val_yi,val_zi = self._create01val(index,-1,1)
- */
-            __pyx_v_vz = (__pyx_v_vz * __pyx_v_val_f);
-
-            /* "_voxel_montecarlo.pyx":332
- *                             vz *= val_f
- * 
- *                             val_xi,val_yi,val_zi = self._create01val(index,-1,1)             # <<<<<<<<<<<<<<
- *                             px *= val_xi
- *                             py *= val_yi
- */
-            __pyx_t_2 = __Pyx_PyInt_From_int(((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_create01val(__pyx_v_self, __pyx_v_index, -1, 1)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 332, __pyx_L1_error)
+            __pyx_t_2 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->transmit_v(__pyx_v_self, __pyx_v_index, __pyx_v_vx, __pyx_v_vy, __pyx_v_vz, (__pyx_v_ni / __pyx_v_nt), __pyx_v_val_f); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 379, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_2);
             if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
               PyObject* sequence = __pyx_t_2;
@@ -6299,122 +6496,194 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
               if (unlikely(size != 3)) {
                 if (size > 3) __Pyx_RaiseTooManyValuesError(3);
                 else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-                __PYX_ERR(0, 332, __pyx_L1_error)
+                __PYX_ERR(0, 379, __pyx_L1_error)
               }
               #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
               if (likely(PyTuple_CheckExact(sequence))) {
-                __pyx_t_1 = PyTuple_GET_ITEM(sequence, 0); 
-                __pyx_t_9 = PyTuple_GET_ITEM(sequence, 1); 
-                __pyx_t_10 = PyTuple_GET_ITEM(sequence, 2); 
+                __pyx_t_8 = PyTuple_GET_ITEM(sequence, 0); 
+                __pyx_t_7 = PyTuple_GET_ITEM(sequence, 1); 
+                __pyx_t_1 = PyTuple_GET_ITEM(sequence, 2); 
               } else {
-                __pyx_t_1 = PyList_GET_ITEM(sequence, 0); 
-                __pyx_t_9 = PyList_GET_ITEM(sequence, 1); 
-                __pyx_t_10 = PyList_GET_ITEM(sequence, 2); 
+                __pyx_t_8 = PyList_GET_ITEM(sequence, 0); 
+                __pyx_t_7 = PyList_GET_ITEM(sequence, 1); 
+                __pyx_t_1 = PyList_GET_ITEM(sequence, 2); 
               }
+              __Pyx_INCREF(__pyx_t_8);
+              __Pyx_INCREF(__pyx_t_7);
               __Pyx_INCREF(__pyx_t_1);
-              __Pyx_INCREF(__pyx_t_9);
-              __Pyx_INCREF(__pyx_t_10);
               #else
-              __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 332, __pyx_L1_error)
+              __pyx_t_8 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 379, __pyx_L1_error)
+              __Pyx_GOTREF(__pyx_t_8);
+              __pyx_t_7 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 379, __pyx_L1_error)
+              __Pyx_GOTREF(__pyx_t_7);
+              __pyx_t_1 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 379, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_1);
-              __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 332, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_9);
-              __pyx_t_10 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 332, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_10);
               #endif
               __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
             } else {
               Py_ssize_t index = -1;
-              __pyx_t_11 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 332, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_11);
-              __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-              __pyx_t_12 = Py_TYPE(__pyx_t_11)->tp_iternext;
-              index = 0; __pyx_t_1 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_1)) goto __pyx_L26_unpacking_failed;
-              __Pyx_GOTREF(__pyx_t_1);
-              index = 1; __pyx_t_9 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_9)) goto __pyx_L26_unpacking_failed;
+              __pyx_t_9 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 379, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_9);
-              index = 2; __pyx_t_10 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_10)) goto __pyx_L26_unpacking_failed;
-              __Pyx_GOTREF(__pyx_t_10);
-              if (__Pyx_IternextUnpackEndCheck(__pyx_t_12(__pyx_t_11), 3) < 0) __PYX_ERR(0, 332, __pyx_L1_error)
-              __pyx_t_12 = NULL;
-              __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+              __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+              __pyx_t_10 = Py_TYPE(__pyx_t_9)->tp_iternext;
+              index = 0; __pyx_t_8 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_8)) goto __pyx_L24_unpacking_failed;
+              __Pyx_GOTREF(__pyx_t_8);
+              index = 1; __pyx_t_7 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_7)) goto __pyx_L24_unpacking_failed;
+              __Pyx_GOTREF(__pyx_t_7);
+              index = 2; __pyx_t_1 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_1)) goto __pyx_L24_unpacking_failed;
+              __Pyx_GOTREF(__pyx_t_1);
+              if (__Pyx_IternextUnpackEndCheck(__pyx_t_10(__pyx_t_9), 3) < 0) __PYX_ERR(0, 379, __pyx_L1_error)
+              __pyx_t_10 = NULL;
+              __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+              goto __pyx_L25_unpacking_done;
+              __pyx_L24_unpacking_failed:;
+              __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+              __pyx_t_10 = NULL;
+              if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
+              __PYX_ERR(0, 379, __pyx_L1_error)
+              __pyx_L25_unpacking_done:;
+            }
+            __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_8); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 379, __pyx_L1_error)
+            __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+            __pyx_t_11 = __pyx_PyFloat_AsFloat(__pyx_t_7); if (unlikely((__pyx_t_11 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 379, __pyx_L1_error)
+            __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+            __pyx_t_12 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_12 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 379, __pyx_L1_error)
+            __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+            __pyx_v_vx = __pyx_t_3;
+            __pyx_v_vy = __pyx_t_11;
+            __pyx_v_vz = __pyx_t_12;
+
+            /* "_voxel_montecarlo.pyx":381
+ *                             vx,vy,vz = self.transmit_v(index,vx,vy,vz,ni/nt,val_f)
+ * 
+ *                             val_xf,val_yf,val_zf = self._create01val(index,-1.,1.)             # <<<<<<<<<<<<<<
+ *                             px *= val_xf
+ *                             py *= val_yf
+ */
+            __pyx_t_2 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_create01val(__pyx_v_self, __pyx_v_index, -1., 1.); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 381, __pyx_L1_error)
+            __Pyx_GOTREF(__pyx_t_2);
+            if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
+              PyObject* sequence = __pyx_t_2;
+              Py_ssize_t size = __Pyx_PySequence_SIZE(sequence);
+              if (unlikely(size != 3)) {
+                if (size > 3) __Pyx_RaiseTooManyValuesError(3);
+                else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
+                __PYX_ERR(0, 381, __pyx_L1_error)
+              }
+              #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+              if (likely(PyTuple_CheckExact(sequence))) {
+                __pyx_t_1 = PyTuple_GET_ITEM(sequence, 0); 
+                __pyx_t_7 = PyTuple_GET_ITEM(sequence, 1); 
+                __pyx_t_8 = PyTuple_GET_ITEM(sequence, 2); 
+              } else {
+                __pyx_t_1 = PyList_GET_ITEM(sequence, 0); 
+                __pyx_t_7 = PyList_GET_ITEM(sequence, 1); 
+                __pyx_t_8 = PyList_GET_ITEM(sequence, 2); 
+              }
+              __Pyx_INCREF(__pyx_t_1);
+              __Pyx_INCREF(__pyx_t_7);
+              __Pyx_INCREF(__pyx_t_8);
+              #else
+              __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 381, __pyx_L1_error)
+              __Pyx_GOTREF(__pyx_t_1);
+              __pyx_t_7 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 381, __pyx_L1_error)
+              __Pyx_GOTREF(__pyx_t_7);
+              __pyx_t_8 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 381, __pyx_L1_error)
+              __Pyx_GOTREF(__pyx_t_8);
+              #endif
+              __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+            } else {
+              Py_ssize_t index = -1;
+              __pyx_t_9 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 381, __pyx_L1_error)
+              __Pyx_GOTREF(__pyx_t_9);
+              __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+              __pyx_t_10 = Py_TYPE(__pyx_t_9)->tp_iternext;
+              index = 0; __pyx_t_1 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_1)) goto __pyx_L26_unpacking_failed;
+              __Pyx_GOTREF(__pyx_t_1);
+              index = 1; __pyx_t_7 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_7)) goto __pyx_L26_unpacking_failed;
+              __Pyx_GOTREF(__pyx_t_7);
+              index = 2; __pyx_t_8 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_8)) goto __pyx_L26_unpacking_failed;
+              __Pyx_GOTREF(__pyx_t_8);
+              if (__Pyx_IternextUnpackEndCheck(__pyx_t_10(__pyx_t_9), 3) < 0) __PYX_ERR(0, 381, __pyx_L1_error)
+              __pyx_t_10 = NULL;
+              __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
               goto __pyx_L27_unpacking_done;
               __pyx_L26_unpacking_failed:;
-              __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-              __pyx_t_12 = NULL;
+              __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+              __pyx_t_10 = NULL;
               if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-              __PYX_ERR(0, 332, __pyx_L1_error)
+              __PYX_ERR(0, 381, __pyx_L1_error)
               __pyx_L27_unpacking_done:;
             }
-            __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 332, __pyx_L1_error)
+            __pyx_t_12 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_12 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 381, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-            __pyx_t_13 = __Pyx_PyInt_As_int(__pyx_t_9); if (unlikely((__pyx_t_13 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 332, __pyx_L1_error)
-            __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-            __pyx_t_14 = __Pyx_PyInt_As_int(__pyx_t_10); if (unlikely((__pyx_t_14 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 332, __pyx_L1_error)
-            __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-            __pyx_v_val_xi = __pyx_t_4;
-            __pyx_v_val_yi = __pyx_t_13;
-            __pyx_v_val_zi = __pyx_t_14;
+            __pyx_t_11 = __pyx_PyFloat_AsFloat(__pyx_t_7); if (unlikely((__pyx_t_11 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 381, __pyx_L1_error)
+            __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+            __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_8); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 381, __pyx_L1_error)
+            __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+            __pyx_v_val_xf = __pyx_t_12;
+            __pyx_v_val_yf = __pyx_t_11;
+            __pyx_v_val_zf = __pyx_t_3;
 
-            /* "_voxel_montecarlo.pyx":333
+            /* "_voxel_montecarlo.pyx":382
  * 
- *                             val_xi,val_yi,val_zi = self._create01val(index,-1,1)
- *                             px *= val_xi             # <<<<<<<<<<<<<<
- *                             py *= val_yi
- *                             pz *= val_zi
+ *                             val_xf,val_yf,val_zf = self._create01val(index,-1.,1.)
+ *                             px *= val_xf             # <<<<<<<<<<<<<<
+ *                             py *= val_yf
+ *                             pz *= val_zf
  */
-            __pyx_v_px = (__pyx_v_px * __pyx_v_val_xi);
+            __pyx_v_px = (__pyx_v_px * __pyx_v_val_xf);
 
-            /* "_voxel_montecarlo.pyx":334
- *                             val_xi,val_yi,val_zi = self._create01val(index,-1,1)
- *                             px *= val_xi
- *                             py *= val_yi             # <<<<<<<<<<<<<<
- *                             pz *= val_zi
+            /* "_voxel_montecarlo.pyx":383
+ *                             val_xf,val_yf,val_zf = self._create01val(index,-1.,1.)
+ *                             px *= val_xf
+ *                             py *= val_yf             # <<<<<<<<<<<<<<
+ *                             pz *= val_zf
  * 
  */
-            __pyx_v_py = (__pyx_v_py * __pyx_v_val_yi);
+            __pyx_v_py = (__pyx_v_py * __pyx_v_val_yf);
 
-            /* "_voxel_montecarlo.pyx":335
- *                             px *= val_xi
- *                             py *= val_yi
- *                             pz *= val_zi             # <<<<<<<<<<<<<<
+            /* "_voxel_montecarlo.pyx":384
+ *                             px *= val_xf
+ *                             py *= val_yf
+ *                             pz *= val_zf             # <<<<<<<<<<<<<<
  * 
  *                     else:
  */
-            __pyx_v_pz = (__pyx_v_pz * __pyx_v_val_zi);
+            __pyx_v_pz = (__pyx_v_pz * __pyx_v_val_zf);
           }
-          __pyx_L19:;
+          __pyx_L21:;
 
-          /* "_voxel_montecarlo.pyx":293
- *                     nt = self._getReflectiveIndex(val_xi,val_yi,val_zi)
+          /* "_voxel_montecarlo.pyx":356
+ *                     s -= db_min
  * 
  *                     if ni != nt:             # <<<<<<<<<<<<<<
- *                         ai = self._get_index_val(index,vx,vy,vz)
- *                         ai = fabs(ai)
+ * 
+ *                         ai = fabs(self._get_index_val(index,vx,vy,vz))
  */
-          goto __pyx_L17;
+          goto __pyx_L19;
         }
 
-        /* "_voxel_montecarlo.pyx":338
+        /* "_voxel_montecarlo.pyx":387
  * 
  *                     else:
  *                         adx = val_xi; ady = val_yi; adz = val_zi             # <<<<<<<<<<<<<<
  * 
- *                         val_xi,val_yi,val_zi = self._create01val(index,-1,1)
+ *                         val_xf,val_yf,val_zf= self._create01val(index,-1.,1.)
  */
         /*else*/ {
           __pyx_v_adx = __pyx_v_val_xi;
           __pyx_v_ady = __pyx_v_val_yi;
           __pyx_v_adz = __pyx_v_val_zi;
 
-          /* "_voxel_montecarlo.pyx":340
+          /* "_voxel_montecarlo.pyx":389
  *                         adx = val_xi; ady = val_yi; adz = val_zi
  * 
- *                         val_xi,val_yi,val_zi = self._create01val(index,-1,1)             # <<<<<<<<<<<<<<
- *                         px *= val_xi
- *                         py *= val_yi
+ *                         val_xf,val_yf,val_zf= self._create01val(index,-1.,1.)             # <<<<<<<<<<<<<<
+ *                         px *= val_xf
+ *                         py *= val_yf
  */
-          __pyx_t_2 = __Pyx_PyInt_From_int(((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_create01val(__pyx_v_self, __pyx_v_index, -1, 1)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 340, __pyx_L1_error)
+          __pyx_t_2 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_create01val(__pyx_v_self, __pyx_v_index, -1., 1.); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 389, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
             PyObject* sequence = __pyx_t_2;
@@ -6422,113 +6691,123 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
             if (unlikely(size != 3)) {
               if (size > 3) __Pyx_RaiseTooManyValuesError(3);
               else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-              __PYX_ERR(0, 340, __pyx_L1_error)
+              __PYX_ERR(0, 389, __pyx_L1_error)
             }
             #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
             if (likely(PyTuple_CheckExact(sequence))) {
-              __pyx_t_10 = PyTuple_GET_ITEM(sequence, 0); 
-              __pyx_t_9 = PyTuple_GET_ITEM(sequence, 1); 
+              __pyx_t_8 = PyTuple_GET_ITEM(sequence, 0); 
+              __pyx_t_7 = PyTuple_GET_ITEM(sequence, 1); 
               __pyx_t_1 = PyTuple_GET_ITEM(sequence, 2); 
             } else {
-              __pyx_t_10 = PyList_GET_ITEM(sequence, 0); 
-              __pyx_t_9 = PyList_GET_ITEM(sequence, 1); 
+              __pyx_t_8 = PyList_GET_ITEM(sequence, 0); 
+              __pyx_t_7 = PyList_GET_ITEM(sequence, 1); 
               __pyx_t_1 = PyList_GET_ITEM(sequence, 2); 
             }
-            __Pyx_INCREF(__pyx_t_10);
-            __Pyx_INCREF(__pyx_t_9);
+            __Pyx_INCREF(__pyx_t_8);
+            __Pyx_INCREF(__pyx_t_7);
             __Pyx_INCREF(__pyx_t_1);
             #else
-            __pyx_t_10 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 340, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_10);
-            __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 340, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_9);
-            __pyx_t_1 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 340, __pyx_L1_error)
+            __pyx_t_8 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 389, __pyx_L1_error)
+            __Pyx_GOTREF(__pyx_t_8);
+            __pyx_t_7 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 389, __pyx_L1_error)
+            __Pyx_GOTREF(__pyx_t_7);
+            __pyx_t_1 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 389, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_1);
             #endif
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           } else {
             Py_ssize_t index = -1;
-            __pyx_t_11 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 340, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_11);
-            __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-            __pyx_t_12 = Py_TYPE(__pyx_t_11)->tp_iternext;
-            index = 0; __pyx_t_10 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_10)) goto __pyx_L28_unpacking_failed;
-            __Pyx_GOTREF(__pyx_t_10);
-            index = 1; __pyx_t_9 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_9)) goto __pyx_L28_unpacking_failed;
+            __pyx_t_9 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 389, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_9);
-            index = 2; __pyx_t_1 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_1)) goto __pyx_L28_unpacking_failed;
+            __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+            __pyx_t_10 = Py_TYPE(__pyx_t_9)->tp_iternext;
+            index = 0; __pyx_t_8 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_8)) goto __pyx_L28_unpacking_failed;
+            __Pyx_GOTREF(__pyx_t_8);
+            index = 1; __pyx_t_7 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_7)) goto __pyx_L28_unpacking_failed;
+            __Pyx_GOTREF(__pyx_t_7);
+            index = 2; __pyx_t_1 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_1)) goto __pyx_L28_unpacking_failed;
             __Pyx_GOTREF(__pyx_t_1);
-            if (__Pyx_IternextUnpackEndCheck(__pyx_t_12(__pyx_t_11), 3) < 0) __PYX_ERR(0, 340, __pyx_L1_error)
-            __pyx_t_12 = NULL;
-            __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+            if (__Pyx_IternextUnpackEndCheck(__pyx_t_10(__pyx_t_9), 3) < 0) __PYX_ERR(0, 389, __pyx_L1_error)
+            __pyx_t_10 = NULL;
+            __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
             goto __pyx_L29_unpacking_done;
             __pyx_L28_unpacking_failed:;
-            __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-            __pyx_t_12 = NULL;
+            __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+            __pyx_t_10 = NULL;
             if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-            __PYX_ERR(0, 340, __pyx_L1_error)
+            __PYX_ERR(0, 389, __pyx_L1_error)
             __pyx_L29_unpacking_done:;
           }
-          __pyx_t_14 = __Pyx_PyInt_As_int(__pyx_t_10); if (unlikely((__pyx_t_14 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 340, __pyx_L1_error)
-          __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-          __pyx_t_13 = __Pyx_PyInt_As_int(__pyx_t_9); if (unlikely((__pyx_t_13 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 340, __pyx_L1_error)
-          __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-          __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 340, __pyx_L1_error)
+          __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_8); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 389, __pyx_L1_error)
+          __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+          __pyx_t_11 = __pyx_PyFloat_AsFloat(__pyx_t_7); if (unlikely((__pyx_t_11 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 389, __pyx_L1_error)
+          __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+          __pyx_t_12 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_12 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 389, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-          __pyx_v_val_xi = __pyx_t_14;
-          __pyx_v_val_yi = __pyx_t_13;
-          __pyx_v_val_zi = __pyx_t_4;
+          __pyx_v_val_xf = __pyx_t_3;
+          __pyx_v_val_yf = __pyx_t_11;
+          __pyx_v_val_zf = __pyx_t_12;
 
-          /* "_voxel_montecarlo.pyx":341
+          /* "_voxel_montecarlo.pyx":390
  * 
- *                         val_xi,val_yi,val_zi = self._create01val(index,-1,1)
- *                         px *= val_xi             # <<<<<<<<<<<<<<
- *                         py *= val_yi
- *                         pz *= val_zi
+ *                         val_xf,val_yf,val_zf= self._create01val(index,-1.,1.)
+ *                         px *= val_xf             # <<<<<<<<<<<<<<
+ *                         py *= val_yf
+ *                         pz *= val_zf
  */
-          __pyx_v_px = (__pyx_v_px * __pyx_v_val_xi);
+          __pyx_v_px = (__pyx_v_px * __pyx_v_val_xf);
 
-          /* "_voxel_montecarlo.pyx":342
- *                         val_xi,val_yi,val_zi = self._create01val(index,-1,1)
- *                         px *= val_xi
- *                         py *= val_yi             # <<<<<<<<<<<<<<
- *                         pz *= val_zi
+          /* "_voxel_montecarlo.pyx":391
+ *                         val_xf,val_yf,val_zf= self._create01val(index,-1.,1.)
+ *                         px *= val_xf
+ *                         py *= val_yf             # <<<<<<<<<<<<<<
+ *                         pz *= val_zf
  * 
  */
-          __pyx_v_py = (__pyx_v_py * __pyx_v_val_yi);
+          __pyx_v_py = (__pyx_v_py * __pyx_v_val_yf);
 
-          /* "_voxel_montecarlo.pyx":343
- *                         px *= val_xi
- *                         py *= val_yi
- *                         pz *= val_zi             # <<<<<<<<<<<<<<
+          /* "_voxel_montecarlo.pyx":392
+ *                         px *= val_xf
+ *                         py *= val_yf
+ *                         pz *= val_zf             # <<<<<<<<<<<<<<
  * 
  *                     s *= mt
  */
-          __pyx_v_pz = (__pyx_v_pz * __pyx_v_val_zi);
+          __pyx_v_pz = (__pyx_v_pz * __pyx_v_val_zf);
         }
-        __pyx_L17:;
+        __pyx_L19:;
 
-        /* "_voxel_montecarlo.pyx":345
- *                         pz *= val_zi
+        /* "_voxel_montecarlo.pyx":394
+ *                         pz *= val_zf
  * 
  *                     s *= mt             # <<<<<<<<<<<<<<
- *                     val_i = self._get_model_val_atAdd(adx,ady,adz)
- *                     if val_i < 0:
+ *                     #val_i = self._get_model_val_atAdd(adx,ady,adz)
+ *                     val_i = self.voxel_model[adx][ady][adz]
  */
         __pyx_v_s = (__pyx_v_s * __pyx_v_mt);
 
-        /* "_voxel_montecarlo.pyx":346
- * 
+        /* "_voxel_montecarlo.pyx":396
  *                     s *= mt
- *                     val_i = self._get_model_val_atAdd(adx,ady,adz)             # <<<<<<<<<<<<<<
+ *                     #val_i = self._get_model_val_atAdd(adx,ady,adz)
+ *                     val_i = self.voxel_model[adx][ady][adz]             # <<<<<<<<<<<<<<
  *                     if val_i < 0:
  *                         self._save_photon(p_id,px,py,pz,adx,ady,adz,vx,vy,vz,w)
  */
-        __pyx_v_val_i = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_get_model_val_atAdd(__pyx_v_self, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz);
+        __pyx_t_2 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->voxel_model), __pyx_v_adx, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 396, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_ady, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 396, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_1);
+        __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+        __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_adz, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 396, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+        __pyx_t_14 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_14 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 396, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+        __pyx_v_val_i = __pyx_t_14;
 
-        /* "_voxel_montecarlo.pyx":347
- *                     s *= mt
- *                     val_i = self._get_model_val_atAdd(adx,ady,adz)
+        /* "_voxel_montecarlo.pyx":397
+ *                     #val_i = self._get_model_val_atAdd(adx,ady,adz)
+ *                     val_i = self.voxel_model[adx][ady][adz]
  *                     if val_i < 0:             # <<<<<<<<<<<<<<
  *                         self._save_photon(p_id,px,py,pz,adx,ady,adz,vx,vy,vz,w)
  *                         flag_1 = 0
@@ -6536,8 +6815,8 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
         __pyx_t_5 = ((__pyx_v_val_i < 0) != 0);
         if (__pyx_t_5) {
 
-          /* "_voxel_montecarlo.pyx":348
- *                     val_i = self._get_model_val_atAdd(adx,ady,adz)
+          /* "_voxel_montecarlo.pyx":398
+ *                     val_i = self.voxel_model[adx][ady][adz]
  *                     if val_i < 0:
  *                         self._save_photon(p_id,px,py,pz,adx,ady,adz,vx,vy,vz,w)             # <<<<<<<<<<<<<<
  *                         flag_1 = 0
@@ -6545,7 +6824,7 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
  */
           ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_save_photon(__pyx_v_self, __pyx_v_p_id, __pyx_v_px, __pyx_v_py, __pyx_v_pz, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz, __pyx_v_vx, __pyx_v_vy, __pyx_v_vz, __pyx_v_w);
 
-          /* "_voxel_montecarlo.pyx":349
+          /* "_voxel_montecarlo.pyx":399
  *                     if val_i < 0:
  *                         self._save_photon(p_id,px,py,pz,adx,ady,adz,vx,vy,vz,w)
  *                         flag_1 = 0             # <<<<<<<<<<<<<<
@@ -6554,7 +6833,7 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
  */
           __pyx_v_flag_1 = 0;
 
-          /* "_voxel_montecarlo.pyx":350
+          /* "_voxel_montecarlo.pyx":400
  *                         self._save_photon(p_id,px,py,pz,adx,ady,adz,vx,vy,vz,w)
  *                         flag_1 = 0
  *                         break             # <<<<<<<<<<<<<<
@@ -6563,74 +6842,74 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
  */
           goto __pyx_L6_break;
 
-          /* "_voxel_montecarlo.pyx":347
- *                     s *= mt
- *                     val_i = self._get_model_val_atAdd(adx,ady,adz)
+          /* "_voxel_montecarlo.pyx":397
+ *                     #val_i = self._get_model_val_atAdd(adx,ady,adz)
+ *                     val_i = self.voxel_model[adx][ady][adz]
  *                     if val_i < 0:             # <<<<<<<<<<<<<<
  *                         self._save_photon(p_id,px,py,pz,adx,ady,adz,vx,vy,vz,w)
  *                         flag_1 = 0
  */
         }
 
-        /* "_voxel_montecarlo.pyx":286
- *                 val_f = db_min-s
+        /* "_voxel_montecarlo.pyx":346
+ *                 val_f = s-db_min
  * 
- *                 if val_f <= 0:             # <<<<<<<<<<<<<<
- *                     s -= db_min
- *                     ni = self._getReflectiveIndex(adx,ady,adz)
+ *                 if val_f >= 0:             # <<<<<<<<<<<<<<
+ * 
+ *                     px,py,pz = self._p_movement_to_bouder(index,px,py,pz,vx,vy,vz,db_min,l)
  */
         goto __pyx_L14;
       }
 
-      /* "_voxel_montecarlo.pyx":353
+      /* "_voxel_montecarlo.pyx":403
  * 
  *                 else:
- *                     px = px + vx*s             # <<<<<<<<<<<<<<
- *                     py = py + vy*s
- *                     pz = pz + vz*s
+ *                     px += vx*s             # <<<<<<<<<<<<<<
+ *                     py += vy*s
+ *                     pz += vz*s
  */
       /*else*/ {
         __pyx_v_px = (__pyx_v_px + (__pyx_v_vx * __pyx_v_s));
 
-        /* "_voxel_montecarlo.pyx":354
+        /* "_voxel_montecarlo.pyx":404
  *                 else:
- *                     px = px + vx*s
- *                     py = py + vy*s             # <<<<<<<<<<<<<<
- *                     pz = pz + vz*s
- * 
+ *                     px += vx*s
+ *                     py += vy*s             # <<<<<<<<<<<<<<
+ *                     pz += vz*s
+ *                     g = self._getAnisotropyCoeff(adx,ady,adz)
  */
         __pyx_v_py = (__pyx_v_py + (__pyx_v_vy * __pyx_v_s));
 
-        /* "_voxel_montecarlo.pyx":355
- *                     px = px + vx*s
- *                     py = py + vy*s
- *                     pz = pz + vz*s             # <<<<<<<<<<<<<<
- * 
+        /* "_voxel_montecarlo.pyx":405
+ *                     px += vx*s
+ *                     py += vy*s
+ *                     pz += vz*s             # <<<<<<<<<<<<<<
  *                     g = self._getAnisotropyCoeff(adx,ady,adz)
+ * 
  */
         __pyx_v_pz = (__pyx_v_pz + (__pyx_v_vz * __pyx_v_s));
 
-        /* "_voxel_montecarlo.pyx":357
- *                     pz = pz + vz*s
- * 
+        /* "_voxel_montecarlo.pyx":406
+ *                     py += vy*s
+ *                     pz += vz*s
  *                     g = self._getAnisotropyCoeff(adx,ady,adz)             # <<<<<<<<<<<<<<
+ * 
  *                     vx,vy,vz = self.vectorUpdate( vx, vy, vz, g)
- *                     w = self._wUpdate(w,ma,mt,px,py,pz,adx,ady,adz)
  */
-        __pyx_t_2 = PyFloat_FromDouble(((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_getAnisotropyCoeff(__pyx_v_self, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 357, __pyx_L1_error)
+        __pyx_t_2 = PyFloat_FromDouble(((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_getAnisotropyCoeff(__pyx_v_self, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 406, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_XDECREF_SET(__pyx_v_g, __pyx_t_2);
         __pyx_t_2 = 0;
 
-        /* "_voxel_montecarlo.pyx":358
- * 
+        /* "_voxel_montecarlo.pyx":408
  *                     g = self._getAnisotropyCoeff(adx,ady,adz)
+ * 
  *                     vx,vy,vz = self.vectorUpdate( vx, vy, vz, g)             # <<<<<<<<<<<<<<
  *                     w = self._wUpdate(w,ma,mt,px,py,pz,adx,ady,adz)
- *                     if w <= self.wTh:
+ *                     if w <= 0.0001:
  */
-        __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_v_g); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 358, __pyx_L1_error)
-        __pyx_t_2 = PyFloat_FromDouble(((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->vectorUpdate(__pyx_v_self, __pyx_v_vx, __pyx_v_vy, __pyx_v_vz, __pyx_t_3)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 358, __pyx_L1_error)
+        __pyx_t_12 = __pyx_PyFloat_AsFloat(__pyx_v_g); if (unlikely((__pyx_t_12 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 408, __pyx_L1_error)
+        __pyx_t_2 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->vectorUpdate(__pyx_v_self, __pyx_v_vx, __pyx_v_vy, __pyx_v_vz, __pyx_t_12); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 408, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
           PyObject* sequence = __pyx_t_2;
@@ -6638,93 +6917,93 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
           if (unlikely(size != 3)) {
             if (size > 3) __Pyx_RaiseTooManyValuesError(3);
             else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-            __PYX_ERR(0, 358, __pyx_L1_error)
+            __PYX_ERR(0, 408, __pyx_L1_error)
           }
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
           if (likely(PyTuple_CheckExact(sequence))) {
             __pyx_t_1 = PyTuple_GET_ITEM(sequence, 0); 
-            __pyx_t_9 = PyTuple_GET_ITEM(sequence, 1); 
-            __pyx_t_10 = PyTuple_GET_ITEM(sequence, 2); 
+            __pyx_t_7 = PyTuple_GET_ITEM(sequence, 1); 
+            __pyx_t_8 = PyTuple_GET_ITEM(sequence, 2); 
           } else {
             __pyx_t_1 = PyList_GET_ITEM(sequence, 0); 
-            __pyx_t_9 = PyList_GET_ITEM(sequence, 1); 
-            __pyx_t_10 = PyList_GET_ITEM(sequence, 2); 
+            __pyx_t_7 = PyList_GET_ITEM(sequence, 1); 
+            __pyx_t_8 = PyList_GET_ITEM(sequence, 2); 
           }
           __Pyx_INCREF(__pyx_t_1);
-          __Pyx_INCREF(__pyx_t_9);
-          __Pyx_INCREF(__pyx_t_10);
+          __Pyx_INCREF(__pyx_t_7);
+          __Pyx_INCREF(__pyx_t_8);
           #else
-          __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 358, __pyx_L1_error)
+          __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 408, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 358, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_9);
-          __pyx_t_10 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 358, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_10);
+          __pyx_t_7 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 408, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_7);
+          __pyx_t_8 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 408, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_8);
           #endif
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         } else {
           Py_ssize_t index = -1;
-          __pyx_t_11 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 358, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_11);
-          __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-          __pyx_t_12 = Py_TYPE(__pyx_t_11)->tp_iternext;
-          index = 0; __pyx_t_1 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_1)) goto __pyx_L31_unpacking_failed;
-          __Pyx_GOTREF(__pyx_t_1);
-          index = 1; __pyx_t_9 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_9)) goto __pyx_L31_unpacking_failed;
+          __pyx_t_9 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 408, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
-          index = 2; __pyx_t_10 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_10)) goto __pyx_L31_unpacking_failed;
-          __Pyx_GOTREF(__pyx_t_10);
-          if (__Pyx_IternextUnpackEndCheck(__pyx_t_12(__pyx_t_11), 3) < 0) __PYX_ERR(0, 358, __pyx_L1_error)
-          __pyx_t_12 = NULL;
-          __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+          __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+          __pyx_t_10 = Py_TYPE(__pyx_t_9)->tp_iternext;
+          index = 0; __pyx_t_1 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_1)) goto __pyx_L31_unpacking_failed;
+          __Pyx_GOTREF(__pyx_t_1);
+          index = 1; __pyx_t_7 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_7)) goto __pyx_L31_unpacking_failed;
+          __Pyx_GOTREF(__pyx_t_7);
+          index = 2; __pyx_t_8 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_8)) goto __pyx_L31_unpacking_failed;
+          __Pyx_GOTREF(__pyx_t_8);
+          if (__Pyx_IternextUnpackEndCheck(__pyx_t_10(__pyx_t_9), 3) < 0) __PYX_ERR(0, 408, __pyx_L1_error)
+          __pyx_t_10 = NULL;
+          __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
           goto __pyx_L32_unpacking_done;
           __pyx_L31_unpacking_failed:;
-          __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-          __pyx_t_12 = NULL;
+          __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+          __pyx_t_10 = NULL;
           if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-          __PYX_ERR(0, 358, __pyx_L1_error)
+          __PYX_ERR(0, 408, __pyx_L1_error)
           __pyx_L32_unpacking_done:;
         }
-        __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 358, __pyx_L1_error)
+        __pyx_t_12 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_12 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 408, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-        __pyx_t_17 = __pyx_PyFloat_AsFloat(__pyx_t_9); if (unlikely((__pyx_t_17 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 358, __pyx_L1_error)
-        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-        __pyx_t_18 = __pyx_PyFloat_AsFloat(__pyx_t_10); if (unlikely((__pyx_t_18 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 358, __pyx_L1_error)
-        __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-        __pyx_v_vx = __pyx_t_3;
-        __pyx_v_vy = __pyx_t_17;
-        __pyx_v_vz = __pyx_t_18;
+        __pyx_t_11 = __pyx_PyFloat_AsFloat(__pyx_t_7); if (unlikely((__pyx_t_11 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 408, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        __pyx_t_3 = __pyx_PyFloat_AsFloat(__pyx_t_8); if (unlikely((__pyx_t_3 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 408, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+        __pyx_v_vx = __pyx_t_12;
+        __pyx_v_vy = __pyx_t_11;
+        __pyx_v_vz = __pyx_t_3;
 
-        /* "_voxel_montecarlo.pyx":359
- *                     g = self._getAnisotropyCoeff(adx,ady,adz)
+        /* "_voxel_montecarlo.pyx":409
+ * 
  *                     vx,vy,vz = self.vectorUpdate( vx, vy, vz, g)
  *                     w = self._wUpdate(w,ma,mt,px,py,pz,adx,ady,adz)             # <<<<<<<<<<<<<<
- *                     if w <= self.wTh:
+ *                     if w <= 0.0001:
  *                         w = self._russianRoulette(w)
  */
         __pyx_v_w = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_wUpdate(__pyx_v_self, __pyx_v_w, __pyx_v_ma, __pyx_v_mt, __pyx_v_px, __pyx_v_py, __pyx_v_pz, __pyx_v_adx, __pyx_v_ady, __pyx_v_adz);
 
-        /* "_voxel_montecarlo.pyx":360
+        /* "_voxel_montecarlo.pyx":410
  *                     vx,vy,vz = self.vectorUpdate( vx, vy, vz, g)
  *                     w = self._wUpdate(w,ma,mt,px,py,pz,adx,ady,adz)
- *                     if w <= self.wTh:             # <<<<<<<<<<<<<<
+ *                     if w <= 0.0001:             # <<<<<<<<<<<<<<
  *                         w = self._russianRoulette(w)
  *                         if w == 0.:
  */
-        __pyx_t_5 = ((__pyx_v_w <= __pyx_v_self->wTh) != 0);
+        __pyx_t_5 = ((__pyx_v_w <= 0.0001) != 0);
         if (__pyx_t_5) {
 
-          /* "_voxel_montecarlo.pyx":361
+          /* "_voxel_montecarlo.pyx":411
  *                     w = self._wUpdate(w,ma,mt,px,py,pz,adx,ady,adz)
- *                     if w <= self.wTh:
+ *                     if w <= 0.0001:
  *                         w = self._russianRoulette(w)             # <<<<<<<<<<<<<<
  *                         if w == 0.:
  *                             self._save_vanish_photon(p_id)
  */
           __pyx_v_w = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_russianRoulette(__pyx_v_self, __pyx_v_w);
 
-          /* "_voxel_montecarlo.pyx":362
- *                     if w <= self.wTh:
+          /* "_voxel_montecarlo.pyx":412
+ *                     if w <= 0.0001:
  *                         w = self._russianRoulette(w)
  *                         if w == 0.:             # <<<<<<<<<<<<<<
  *                             self._save_vanish_photon(p_id)
@@ -6733,18 +7012,18 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
           __pyx_t_5 = ((__pyx_v_w == 0.) != 0);
           if (__pyx_t_5) {
 
-            /* "_voxel_montecarlo.pyx":363
+            /* "_voxel_montecarlo.pyx":413
  *                         w = self._russianRoulette(w)
  *                         if w == 0.:
  *                             self._save_vanish_photon(p_id)             # <<<<<<<<<<<<<<
  *                             flag_1 = 0
  *                             break
  */
-            __pyx_t_2 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_save_vanish_photon(__pyx_v_self, __pyx_v_p_id); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 363, __pyx_L1_error)
+            __pyx_t_2 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self->__pyx_vtab)->_save_vanish_photon(__pyx_v_self, __pyx_v_p_id); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 413, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-            /* "_voxel_montecarlo.pyx":364
+            /* "_voxel_montecarlo.pyx":414
  *                         if w == 0.:
  *                             self._save_vanish_photon(p_id)
  *                             flag_1 = 0             # <<<<<<<<<<<<<<
@@ -6753,7 +7032,7 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
  */
             __pyx_v_flag_1 = 0;
 
-            /* "_voxel_montecarlo.pyx":365
+            /* "_voxel_montecarlo.pyx":415
  *                             self._save_vanish_photon(p_id)
  *                             flag_1 = 0
  *                             break             # <<<<<<<<<<<<<<
@@ -6762,8 +7041,8 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
  */
             goto __pyx_L6_break;
 
-            /* "_voxel_montecarlo.pyx":362
- *                     if w <= self.wTh:
+            /* "_voxel_montecarlo.pyx":412
+ *                     if w <= 0.0001:
  *                         w = self._russianRoulette(w)
  *                         if w == 0.:             # <<<<<<<<<<<<<<
  *                             self._save_vanish_photon(p_id)
@@ -6771,21 +7050,21 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
  */
           }
 
-          /* "_voxel_montecarlo.pyx":360
+          /* "_voxel_montecarlo.pyx":410
  *                     vx,vy,vz = self.vectorUpdate( vx, vy, vz, g)
  *                     w = self._wUpdate(w,ma,mt,px,py,pz,adx,ady,adz)
- *                     if w <= self.wTh:             # <<<<<<<<<<<<<<
+ *                     if w <= 0.0001:             # <<<<<<<<<<<<<<
  *                         w = self._russianRoulette(w)
  *                         if w == 0.:
  */
         }
 
-        /* "_voxel_montecarlo.pyx":366
+        /* "_voxel_montecarlo.pyx":416
  *                             flag_1 = 0
  *                             break
  *                     flag_2 = 0             # <<<<<<<<<<<<<<
  * 
- *     cdef float _getAbsorptionCoeff(self, int x, int y, int z):
+ *     cdef transmit_v(self,int index, float vx,float vy, float vz,
  */
         __pyx_v_flag_2 = 0;
       }
@@ -6794,12 +7073,12 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
     __pyx_L6_break:;
   }
 
-  /* "_voxel_montecarlo.pyx":240
- *         return vx,vy,vz
+  /* "_voxel_montecarlo.pyx":299
+ *         return db
  * 
  *     cdef void _a_photon_movement(self,int p_id):             # <<<<<<<<<<<<<<
- *         cdef float px,py,pz
- *         cdef float vx,vy,vz
+ *         cdef:
+ *             float px,py,pz
  */
 
   /* function exit code */
@@ -6807,17 +7086,349 @@ static void __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_8);
   __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_XDECREF(__pyx_t_10);
-  __Pyx_XDECREF(__pyx_t_11);
   __Pyx_WriteUnraisable("_voxel_montecarlo.BaseVoxelMonteCarlo._a_photon_movement", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_g);
   __Pyx_RefNannyFinishContext();
 }
 
-/* "_voxel_montecarlo.pyx":368
+/* "_voxel_montecarlo.pyx":418
  *                     flag_2 = 0
+ * 
+ *     cdef transmit_v(self,int index, float vx,float vy, float vz,             # <<<<<<<<<<<<<<
+ *                     float ni_by_nt,float cos_ai):
+ *         if index == 0:
+ */
+
+static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_transmit_v(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_index, float __pyx_v_vx, float __pyx_v_vy, float __pyx_v_vz, float __pyx_v_ni_by_nt, float __pyx_v_cos_ai) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  __Pyx_RefNannySetupContext("transmit_v", 0);
+
+  /* "_voxel_montecarlo.pyx":420
+ *     cdef transmit_v(self,int index, float vx,float vy, float vz,
+ *                     float ni_by_nt,float cos_ai):
+ *         if index == 0:             # <<<<<<<<<<<<<<
+ *             vx = cos_ai*copysign(1,vx)
+ *             vy *= ni_by_nt; vz *= ni_by_nt
+ */
+  switch (__pyx_v_index) {
+    case 0:
+
+    /* "_voxel_montecarlo.pyx":421
+ *                     float ni_by_nt,float cos_ai):
+ *         if index == 0:
+ *             vx = cos_ai*copysign(1,vx)             # <<<<<<<<<<<<<<
+ *             vy *= ni_by_nt; vz *= ni_by_nt
+ *         elif index ==1:
+ */
+    __pyx_v_vx = (__pyx_v_cos_ai * copysign(1.0, __pyx_v_vx));
+
+    /* "_voxel_montecarlo.pyx":422
+ *         if index == 0:
+ *             vx = cos_ai*copysign(1,vx)
+ *             vy *= ni_by_nt; vz *= ni_by_nt             # <<<<<<<<<<<<<<
+ *         elif index ==1:
+ *             vy = cos_ai*copysign(1,vy)
+ */
+    __pyx_v_vy = (__pyx_v_vy * __pyx_v_ni_by_nt);
+    __pyx_v_vz = (__pyx_v_vz * __pyx_v_ni_by_nt);
+
+    /* "_voxel_montecarlo.pyx":420
+ *     cdef transmit_v(self,int index, float vx,float vy, float vz,
+ *                     float ni_by_nt,float cos_ai):
+ *         if index == 0:             # <<<<<<<<<<<<<<
+ *             vx = cos_ai*copysign(1,vx)
+ *             vy *= ni_by_nt; vz *= ni_by_nt
+ */
+    break;
+    case 1:
+
+    /* "_voxel_montecarlo.pyx":424
+ *             vy *= ni_by_nt; vz *= ni_by_nt
+ *         elif index ==1:
+ *             vy = cos_ai*copysign(1,vy)             # <<<<<<<<<<<<<<
+ *             vx *= ni_by_nt; vz *= ni_by_nt
+ *         elif index == 2:
+ */
+    __pyx_v_vy = (__pyx_v_cos_ai * copysign(1.0, __pyx_v_vy));
+
+    /* "_voxel_montecarlo.pyx":425
+ *         elif index ==1:
+ *             vy = cos_ai*copysign(1,vy)
+ *             vx *= ni_by_nt; vz *= ni_by_nt             # <<<<<<<<<<<<<<
+ *         elif index == 2:
+ *             vz = cos_ai*copysign(1,vz)
+ */
+    __pyx_v_vx = (__pyx_v_vx * __pyx_v_ni_by_nt);
+    __pyx_v_vz = (__pyx_v_vz * __pyx_v_ni_by_nt);
+
+    /* "_voxel_montecarlo.pyx":423
+ *             vx = cos_ai*copysign(1,vx)
+ *             vy *= ni_by_nt; vz *= ni_by_nt
+ *         elif index ==1:             # <<<<<<<<<<<<<<
+ *             vy = cos_ai*copysign(1,vy)
+ *             vx *= ni_by_nt; vz *= ni_by_nt
+ */
+    break;
+    case 2:
+
+    /* "_voxel_montecarlo.pyx":427
+ *             vx *= ni_by_nt; vz *= ni_by_nt
+ *         elif index == 2:
+ *             vz = cos_ai*copysign(1,vz)             # <<<<<<<<<<<<<<
+ *             vx *= ni_by_nt; vy *= ni_by_nt
+ *         return vx,vy,vz
+ */
+    __pyx_v_vz = (__pyx_v_cos_ai * copysign(1.0, __pyx_v_vz));
+
+    /* "_voxel_montecarlo.pyx":428
+ *         elif index == 2:
+ *             vz = cos_ai*copysign(1,vz)
+ *             vx *= ni_by_nt; vy *= ni_by_nt             # <<<<<<<<<<<<<<
+ *         return vx,vy,vz
+ * 
+ */
+    __pyx_v_vx = (__pyx_v_vx * __pyx_v_ni_by_nt);
+    __pyx_v_vy = (__pyx_v_vy * __pyx_v_ni_by_nt);
+
+    /* "_voxel_montecarlo.pyx":426
+ *             vy = cos_ai*copysign(1,vy)
+ *             vx *= ni_by_nt; vz *= ni_by_nt
+ *         elif index == 2:             # <<<<<<<<<<<<<<
+ *             vz = cos_ai*copysign(1,vz)
+ *             vx *= ni_by_nt; vy *= ni_by_nt
+ */
+    break;
+    default: break;
+  }
+
+  /* "_voxel_montecarlo.pyx":429
+ *             vz = cos_ai*copysign(1,vz)
+ *             vx *= ni_by_nt; vy *= ni_by_nt
+ *         return vx,vy,vz             # <<<<<<<<<<<<<<
+ * 
+ *     cdef _p_movement_to_bouder(self,int index, float px, float py, float pz,
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_vx); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 429, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_vy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 429, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_vz); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 429, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = PyTuple_New(3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 429, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_4, 2, __pyx_t_3);
+  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
+  __pyx_t_3 = 0;
+  __pyx_r = __pyx_t_4;
+  __pyx_t_4 = 0;
+  goto __pyx_L0;
+
+  /* "_voxel_montecarlo.pyx":418
+ *                     flag_2 = 0
+ * 
+ *     cdef transmit_v(self,int index, float vx,float vy, float vz,             # <<<<<<<<<<<<<<
+ *                     float ni_by_nt,float cos_ai):
+ *         if index == 0:
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_AddTraceback("_voxel_montecarlo.BaseVoxelMonteCarlo.transmit_v", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "_voxel_montecarlo.pyx":431
+ *         return vx,vy,vz
+ * 
+ *     cdef _p_movement_to_bouder(self,int index, float px, float py, float pz,             # <<<<<<<<<<<<<<
+ *                               float vx, float vy, float vz, float db_min, float l):
+ *         if index == 0:
+ */
+
+static PyObject *__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__p_movement_to_bouder(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, int __pyx_v_index, float __pyx_v_px, float __pyx_v_py, float __pyx_v_pz, float __pyx_v_vx, float __pyx_v_vy, float __pyx_v_vz, float __pyx_v_db_min, float __pyx_v_l) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  __Pyx_RefNannySetupContext("_p_movement_to_bouder", 0);
+
+  /* "_voxel_montecarlo.pyx":433
+ *     cdef _p_movement_to_bouder(self,int index, float px, float py, float pz,
+ *                               float vx, float vy, float vz, float db_min, float l):
+ *         if index == 0:             # <<<<<<<<<<<<<<
+ *             px = l*copysign(1,vx)/2.
+ *             py += vy*db_min; pz += vz*db_min
+ */
+  switch (__pyx_v_index) {
+    case 0:
+
+    /* "_voxel_montecarlo.pyx":434
+ *                               float vx, float vy, float vz, float db_min, float l):
+ *         if index == 0:
+ *             px = l*copysign(1,vx)/2.             # <<<<<<<<<<<<<<
+ *             py += vy*db_min; pz += vz*db_min
+ *         elif index ==1:
+ */
+    __pyx_v_px = ((__pyx_v_l * copysign(1.0, __pyx_v_vx)) / 2.);
+
+    /* "_voxel_montecarlo.pyx":435
+ *         if index == 0:
+ *             px = l*copysign(1,vx)/2.
+ *             py += vy*db_min; pz += vz*db_min             # <<<<<<<<<<<<<<
+ *         elif index ==1:
+ *             py = l*copysign(1,vy)/2.
+ */
+    __pyx_v_py = (__pyx_v_py + (__pyx_v_vy * __pyx_v_db_min));
+    __pyx_v_pz = (__pyx_v_pz + (__pyx_v_vz * __pyx_v_db_min));
+
+    /* "_voxel_montecarlo.pyx":433
+ *     cdef _p_movement_to_bouder(self,int index, float px, float py, float pz,
+ *                               float vx, float vy, float vz, float db_min, float l):
+ *         if index == 0:             # <<<<<<<<<<<<<<
+ *             px = l*copysign(1,vx)/2.
+ *             py += vy*db_min; pz += vz*db_min
+ */
+    break;
+    case 1:
+
+    /* "_voxel_montecarlo.pyx":437
+ *             py += vy*db_min; pz += vz*db_min
+ *         elif index ==1:
+ *             py = l*copysign(1,vy)/2.             # <<<<<<<<<<<<<<
+ *             px += vx*db_min; pz += vz*db_min
+ *         elif index == 2:
+ */
+    __pyx_v_py = ((__pyx_v_l * copysign(1.0, __pyx_v_vy)) / 2.);
+
+    /* "_voxel_montecarlo.pyx":438
+ *         elif index ==1:
+ *             py = l*copysign(1,vy)/2.
+ *             px += vx*db_min; pz += vz*db_min             # <<<<<<<<<<<<<<
+ *         elif index == 2:
+ *             pz = l*copysign(1,vz)/2.
+ */
+    __pyx_v_px = (__pyx_v_px + (__pyx_v_vx * __pyx_v_db_min));
+    __pyx_v_pz = (__pyx_v_pz + (__pyx_v_vz * __pyx_v_db_min));
+
+    /* "_voxel_montecarlo.pyx":436
+ *             px = l*copysign(1,vx)/2.
+ *             py += vy*db_min; pz += vz*db_min
+ *         elif index ==1:             # <<<<<<<<<<<<<<
+ *             py = l*copysign(1,vy)/2.
+ *             px += vx*db_min; pz += vz*db_min
+ */
+    break;
+    case 2:
+
+    /* "_voxel_montecarlo.pyx":440
+ *             px += vx*db_min; pz += vz*db_min
+ *         elif index == 2:
+ *             pz = l*copysign(1,vz)/2.             # <<<<<<<<<<<<<<
+ *             px += vx*db_min; py += vy*db_min
+ *         return px,py,pz
+ */
+    __pyx_v_pz = ((__pyx_v_l * copysign(1.0, __pyx_v_vz)) / 2.);
+
+    /* "_voxel_montecarlo.pyx":441
+ *         elif index == 2:
+ *             pz = l*copysign(1,vz)/2.
+ *             px += vx*db_min; py += vy*db_min             # <<<<<<<<<<<<<<
+ *         return px,py,pz
+ * 
+ */
+    __pyx_v_px = (__pyx_v_px + (__pyx_v_vx * __pyx_v_db_min));
+    __pyx_v_py = (__pyx_v_py + (__pyx_v_vy * __pyx_v_db_min));
+
+    /* "_voxel_montecarlo.pyx":439
+ *             py = l*copysign(1,vy)/2.
+ *             px += vx*db_min; pz += vz*db_min
+ *         elif index == 2:             # <<<<<<<<<<<<<<
+ *             pz = l*copysign(1,vz)/2.
+ *             px += vx*db_min; py += vy*db_min
+ */
+    break;
+    default: break;
+  }
+
+  /* "_voxel_montecarlo.pyx":442
+ *             pz = l*copysign(1,vz)/2.
+ *             px += vx*db_min; py += vy*db_min
+ *         return px,py,pz             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_px); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 442, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_py); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 442, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_pz); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 442, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = PyTuple_New(3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 442, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_4, 2, __pyx_t_3);
+  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
+  __pyx_t_3 = 0;
+  __pyx_r = __pyx_t_4;
+  __pyx_t_4 = 0;
+  goto __pyx_L0;
+
+  /* "_voxel_montecarlo.pyx":431
+ *         return vx,vy,vz
+ * 
+ *     cdef _p_movement_to_bouder(self,int index, float px, float py, float pz,             # <<<<<<<<<<<<<<
+ *                               float vx, float vy, float vz, float db_min, float l):
+ *         if index == 0:
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_AddTraceback("_voxel_montecarlo.BaseVoxelMonteCarlo._p_movement_to_bouder", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "_voxel_montecarlo.pyx":445
+ * 
  * 
  *     cdef float _getAbsorptionCoeff(self, int x, int y, int z):             # <<<<<<<<<<<<<<
  *         pass
@@ -6835,7 +7446,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__getAbsorptionCoe
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":371
+/* "_voxel_montecarlo.pyx":448
  *         pass
  * 
  *     cdef float _getScatteringCoeff(self, int x, int y, int z):             # <<<<<<<<<<<<<<
@@ -6854,7 +7465,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__getScatteringCoe
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":374
+/* "_voxel_montecarlo.pyx":451
  *         pass
  * 
  *     cdef float _getAnisotropyCoeff(self, int x, int y, int z):             # <<<<<<<<<<<<<<
@@ -6873,7 +7484,7 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__getAnisotropyCoe
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":377
+/* "_voxel_montecarlo.pyx":454
  *         pass
  * 
  *     cdef float _getReflectiveIndex(self, int x, int y, int z):             # <<<<<<<<<<<<<<
@@ -6899,19 +7510,19 @@ static float __pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__getReflectiveInd
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_17__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_17__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_21__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_21__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__reduce_cython__ (wrapper)", 0);
-  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_16__reduce_cython__(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self));
+  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_20__reduce_cython__(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_16__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self) {
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_20__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -6923,7 +7534,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_16__reduce_c
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6953,19 +7564,19 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_16__reduce_c
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_19__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state); /*proto*/
-static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_19__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_23__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_23__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__setstate_cython__ (wrapper)", 0);
-  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_18__setstate_cython__(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self), ((PyObject *)__pyx_v___pyx_state));
+  __pyx_r = __pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_22__setstate_cython__(((struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *)__pyx_v_self), ((PyObject *)__pyx_v___pyx_state));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_18__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_22__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -6976,7 +7587,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_18__setstate
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6999,7 +7610,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_19BaseVoxelMonteCarlo_18__setstate
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":388
+/* "_voxel_montecarlo.pyx":465
  *         np.ndarray ma,ms,g,n
  * 
  *     def setParams(self,             # <<<<<<<<<<<<<<
@@ -7044,23 +7655,23 @@ static PyObject *__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_1setParams(
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_ms)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("setParams", 1, 4, 4, 1); __PYX_ERR(0, 388, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("setParams", 1, 4, 4, 1); __PYX_ERR(0, 465, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_g)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("setParams", 1, 4, 4, 2); __PYX_ERR(0, 388, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("setParams", 1, 4, 4, 2); __PYX_ERR(0, 465, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_n)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("setParams", 1, 4, 4, 3); __PYX_ERR(0, 388, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("setParams", 1, 4, 4, 3); __PYX_ERR(0, 465, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "setParams") < 0)) __PYX_ERR(0, 388, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "setParams") < 0)) __PYX_ERR(0, 465, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -7077,16 +7688,16 @@ static PyObject *__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_1setParams(
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("setParams", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 388, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("setParams", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 465, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("_voxel_montecarlo.VoxelPlateMonteCarlo.setParams", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_ma), __pyx_ptype_5numpy_ndarray, 1, "ma", 0))) __PYX_ERR(0, 389, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_ms), __pyx_ptype_5numpy_ndarray, 1, "ms", 0))) __PYX_ERR(0, 390, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_g), __pyx_ptype_5numpy_ndarray, 1, "g", 0))) __PYX_ERR(0, 391, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_n), __pyx_ptype_5numpy_ndarray, 1, "n", 0))) __PYX_ERR(0, 392, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_ma), __pyx_ptype_5numpy_ndarray, 1, "ma", 0))) __PYX_ERR(0, 466, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_ms), __pyx_ptype_5numpy_ndarray, 1, "ms", 0))) __PYX_ERR(0, 467, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_g), __pyx_ptype_5numpy_ndarray, 1, "g", 0))) __PYX_ERR(0, 468, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_n), __pyx_ptype_5numpy_ndarray, 1, "n", 0))) __PYX_ERR(0, 469, __pyx_L1_error)
   __pyx_r = __pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_setParams(((struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *)__pyx_v_self), __pyx_v_ma, __pyx_v_ms, __pyx_v_g, __pyx_v_n);
 
   /* function exit code */
@@ -7128,26 +7739,26 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_setParams(s
   __pyx_pybuffernd_n.rcbuffer = &__pyx_pybuffer_n;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_ma.rcbuffer->pybuffer, (PyObject*)__pyx_v_ma, &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 388, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_ma.rcbuffer->pybuffer, (PyObject*)__pyx_v_ma, &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 465, __pyx_L1_error)
   }
   __pyx_pybuffernd_ma.diminfo[0].strides = __pyx_pybuffernd_ma.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_ma.diminfo[0].shape = __pyx_pybuffernd_ma.rcbuffer->pybuffer.shape[0];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_ms.rcbuffer->pybuffer, (PyObject*)__pyx_v_ms, &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 388, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_ms.rcbuffer->pybuffer, (PyObject*)__pyx_v_ms, &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 465, __pyx_L1_error)
   }
   __pyx_pybuffernd_ms.diminfo[0].strides = __pyx_pybuffernd_ms.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_ms.diminfo[0].shape = __pyx_pybuffernd_ms.rcbuffer->pybuffer.shape[0];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_g.rcbuffer->pybuffer, (PyObject*)__pyx_v_g, &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 388, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_g.rcbuffer->pybuffer, (PyObject*)__pyx_v_g, &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 465, __pyx_L1_error)
   }
   __pyx_pybuffernd_g.diminfo[0].strides = __pyx_pybuffernd_g.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_g.diminfo[0].shape = __pyx_pybuffernd_g.rcbuffer->pybuffer.shape[0];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_n.rcbuffer->pybuffer, (PyObject*)__pyx_v_n, &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 388, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_n.rcbuffer->pybuffer, (PyObject*)__pyx_v_n, &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 465, __pyx_L1_error)
   }
   __pyx_pybuffernd_n.diminfo[0].strides = __pyx_pybuffernd_n.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_n.diminfo[0].shape = __pyx_pybuffernd_n.rcbuffer->pybuffer.shape[0];
 
-  /* "_voxel_montecarlo.pyx":393
+  /* "_voxel_montecarlo.pyx":470
  *                   np.ndarray[ndim = 1, dtype=DTYPE_t] g,
  *                   np.ndarray[ndim = 1, dtype=DTYPE_t] n):
  *         self.ma = ma             # <<<<<<<<<<<<<<
@@ -7160,7 +7771,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_setParams(s
   __Pyx_DECREF(((PyObject *)__pyx_v_self->ma));
   __pyx_v_self->ma = ((PyArrayObject *)__pyx_v_ma);
 
-  /* "_voxel_montecarlo.pyx":394
+  /* "_voxel_montecarlo.pyx":471
  *                   np.ndarray[ndim = 1, dtype=DTYPE_t] n):
  *         self.ma = ma
  *         self.ms = ms             # <<<<<<<<<<<<<<
@@ -7173,12 +7784,12 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_setParams(s
   __Pyx_DECREF(((PyObject *)__pyx_v_self->ms));
   __pyx_v_self->ms = ((PyArrayObject *)__pyx_v_ms);
 
-  /* "_voxel_montecarlo.pyx":395
+  /* "_voxel_montecarlo.pyx":472
  *         self.ma = ma
  *         self.ms = ms
  *         self.g = g             # <<<<<<<<<<<<<<
  *         self.n = n
- * 
+ *     def getParams(self):
  */
   __Pyx_INCREF(((PyObject *)__pyx_v_g));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_g));
@@ -7186,12 +7797,12 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_setParams(s
   __Pyx_DECREF(((PyObject *)__pyx_v_self->g));
   __pyx_v_self->g = ((PyArrayObject *)__pyx_v_g);
 
-  /* "_voxel_montecarlo.pyx":396
+  /* "_voxel_montecarlo.pyx":473
  *         self.ms = ms
  *         self.g = g
  *         self.n = n             # <<<<<<<<<<<<<<
- * 
- *     cdef float _getAbsorptionCoeff(self, int x, int y, int z):
+ *     def getParams(self):
+ *         return {
  */
   __Pyx_INCREF(((PyObject *)__pyx_v_n));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_n));
@@ -7199,7 +7810,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_setParams(s
   __Pyx_DECREF(((PyObject *)__pyx_v_self->n));
   __pyx_v_self->n = ((PyArrayObject *)__pyx_v_n);
 
-  /* "_voxel_montecarlo.pyx":388
+  /* "_voxel_montecarlo.pyx":465
  *         np.ndarray ma,ms,g,n
  * 
  *     def setParams(self,             # <<<<<<<<<<<<<<
@@ -7234,8 +7845,104 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_setParams(s
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":398
+/* "_voxel_montecarlo.pyx":474
+ *         self.g = g
  *         self.n = n
+ *     def getParams(self):             # <<<<<<<<<<<<<<
+ *         return {
+ *             "ma":self.ma,
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_3getParams(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_3getParams(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("getParams (wrapper)", 0);
+  __pyx_r = __pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_2getParams(((struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_2getParams(struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("getParams", 0);
+
+  /* "_voxel_montecarlo.pyx":475
+ *         self.n = n
+ *     def getParams(self):
+ *         return {             # <<<<<<<<<<<<<<
+ *             "ma":self.ma,
+ *             "ms":self.ms,
+ */
+  __Pyx_XDECREF(__pyx_r);
+
+  /* "_voxel_montecarlo.pyx":476
+ *     def getParams(self):
+ *         return {
+ *             "ma":self.ma,             # <<<<<<<<<<<<<<
+ *             "ms":self.ms,
+ *             "g":self.g,
+ */
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 476, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_ma, ((PyObject *)__pyx_v_self->ma)) < 0) __PYX_ERR(0, 476, __pyx_L1_error)
+
+  /* "_voxel_montecarlo.pyx":477
+ *         return {
+ *             "ma":self.ma,
+ *             "ms":self.ms,             # <<<<<<<<<<<<<<
+ *             "g":self.g,
+ *             "n":self.n,
+ */
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_ms, ((PyObject *)__pyx_v_self->ms)) < 0) __PYX_ERR(0, 476, __pyx_L1_error)
+
+  /* "_voxel_montecarlo.pyx":478
+ *             "ma":self.ma,
+ *             "ms":self.ms,
+ *             "g":self.g,             # <<<<<<<<<<<<<<
+ *             "n":self.n,
+ *             }
+ */
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_g, ((PyObject *)__pyx_v_self->g)) < 0) __PYX_ERR(0, 476, __pyx_L1_error)
+
+  /* "_voxel_montecarlo.pyx":479
+ *             "ms":self.ms,
+ *             "g":self.g,
+ *             "n":self.n,             # <<<<<<<<<<<<<<
+ *             }
+ * 
+ */
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_n, ((PyObject *)__pyx_v_self->n)) < 0) __PYX_ERR(0, 476, __pyx_L1_error)
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "_voxel_montecarlo.pyx":474
+ *         self.g = g
+ *         self.n = n
+ *     def getParams(self):             # <<<<<<<<<<<<<<
+ *         return {
+ *             "ma":self.ma,
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("_voxel_montecarlo.VoxelPlateMonteCarlo.getParams", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "_voxel_montecarlo.pyx":482
+ *             }
  * 
  *     cdef float _getAbsorptionCoeff(self, int x, int y, int z):             # <<<<<<<<<<<<<<
  *         cdef int index = self.voxel_model[x][y][z]
@@ -7252,41 +7959,41 @@ static float __pyx_f_17_voxel_montecarlo_20VoxelPlateMonteCarlo__getAbsorptionCo
   float __pyx_t_4;
   __Pyx_RefNannySetupContext("_getAbsorptionCoeff", 0);
 
-  /* "_voxel_montecarlo.pyx":399
+  /* "_voxel_montecarlo.pyx":483
  * 
  *     cdef float _getAbsorptionCoeff(self, int x, int y, int z):
  *         cdef int index = self.voxel_model[x][y][z]             # <<<<<<<<<<<<<<
  *         return self.ma[index]
  * 
  */
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->__pyx_base.voxel_model), __pyx_v_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 399, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->__pyx_base.voxel_model), __pyx_v_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 483, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 399, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 483, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_z, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 399, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_z, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 483, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 399, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 483, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_index = __pyx_t_3;
 
-  /* "_voxel_montecarlo.pyx":400
+  /* "_voxel_montecarlo.pyx":484
  *     cdef float _getAbsorptionCoeff(self, int x, int y, int z):
  *         cdef int index = self.voxel_model[x][y][z]
  *         return self.ma[index]             # <<<<<<<<<<<<<<
  * 
  *     cdef float _getScatteringCoeff(self, int x, int y, int z):
  */
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->ma), __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 400, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->ma), __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 484, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_4 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 400, __pyx_L1_error)
+  __pyx_t_4 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_4 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 484, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_4;
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":398
- *         self.n = n
+  /* "_voxel_montecarlo.pyx":482
+ *             }
  * 
  *     cdef float _getAbsorptionCoeff(self, int x, int y, int z):             # <<<<<<<<<<<<<<
  *         cdef int index = self.voxel_model[x][y][z]
@@ -7304,7 +8011,7 @@ static float __pyx_f_17_voxel_montecarlo_20VoxelPlateMonteCarlo__getAbsorptionCo
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":402
+/* "_voxel_montecarlo.pyx":486
  *         return self.ma[index]
  * 
  *     cdef float _getScatteringCoeff(self, int x, int y, int z):             # <<<<<<<<<<<<<<
@@ -7322,40 +8029,40 @@ static float __pyx_f_17_voxel_montecarlo_20VoxelPlateMonteCarlo__getScatteringCo
   float __pyx_t_4;
   __Pyx_RefNannySetupContext("_getScatteringCoeff", 0);
 
-  /* "_voxel_montecarlo.pyx":403
+  /* "_voxel_montecarlo.pyx":487
  * 
  *     cdef float _getScatteringCoeff(self, int x, int y, int z):
  *         cdef int index = self.voxel_model[x][y][z]             # <<<<<<<<<<<<<<
  *         return self.ms[index]
  * 
  */
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->__pyx_base.voxel_model), __pyx_v_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 403, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->__pyx_base.voxel_model), __pyx_v_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 487, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 403, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 487, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_z, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 403, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_z, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 487, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 403, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 487, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_index = __pyx_t_3;
 
-  /* "_voxel_montecarlo.pyx":404
+  /* "_voxel_montecarlo.pyx":488
  *     cdef float _getScatteringCoeff(self, int x, int y, int z):
  *         cdef int index = self.voxel_model[x][y][z]
  *         return self.ms[index]             # <<<<<<<<<<<<<<
  * 
  *     cdef float _getAnisotropyCoeff(self, int x, int y, int z):
  */
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->ms), __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 404, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->ms), __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 488, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_4 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 404, __pyx_L1_error)
+  __pyx_t_4 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_4 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 488, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_4;
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":402
+  /* "_voxel_montecarlo.pyx":486
  *         return self.ma[index]
  * 
  *     cdef float _getScatteringCoeff(self, int x, int y, int z):             # <<<<<<<<<<<<<<
@@ -7374,7 +8081,7 @@ static float __pyx_f_17_voxel_montecarlo_20VoxelPlateMonteCarlo__getScatteringCo
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":406
+/* "_voxel_montecarlo.pyx":490
  *         return self.ms[index]
  * 
  *     cdef float _getAnisotropyCoeff(self, int x, int y, int z):             # <<<<<<<<<<<<<<
@@ -7392,40 +8099,40 @@ static float __pyx_f_17_voxel_montecarlo_20VoxelPlateMonteCarlo__getAnisotropyCo
   float __pyx_t_4;
   __Pyx_RefNannySetupContext("_getAnisotropyCoeff", 0);
 
-  /* "_voxel_montecarlo.pyx":407
+  /* "_voxel_montecarlo.pyx":491
  * 
  *     cdef float _getAnisotropyCoeff(self, int x, int y, int z):
  *         cdef int index = self.voxel_model[x][y][z]             # <<<<<<<<<<<<<<
  *         return self.g[index]
  * 
  */
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->__pyx_base.voxel_model), __pyx_v_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 407, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->__pyx_base.voxel_model), __pyx_v_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 407, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_z, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 407, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_z, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 407, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_index = __pyx_t_3;
 
-  /* "_voxel_montecarlo.pyx":408
+  /* "_voxel_montecarlo.pyx":492
  *     cdef float _getAnisotropyCoeff(self, int x, int y, int z):
  *         cdef int index = self.voxel_model[x][y][z]
  *         return self.g[index]             # <<<<<<<<<<<<<<
  * 
  *     cdef float _getReflectiveIndex(self, int x, int y, int z):
  */
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->g), __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 408, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->g), __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 492, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_4 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 408, __pyx_L1_error)
+  __pyx_t_4 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_4 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 492, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_4;
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":406
+  /* "_voxel_montecarlo.pyx":490
  *         return self.ms[index]
  * 
  *     cdef float _getAnisotropyCoeff(self, int x, int y, int z):             # <<<<<<<<<<<<<<
@@ -7444,12 +8151,12 @@ static float __pyx_f_17_voxel_montecarlo_20VoxelPlateMonteCarlo__getAnisotropyCo
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":410
+/* "_voxel_montecarlo.pyx":494
  *         return self.g[index]
  * 
  *     cdef float _getReflectiveIndex(self, int x, int y, int z):             # <<<<<<<<<<<<<<
- *         cdef int index = self.voxel_model[x][y][z]+1
- *         return self.n[index]
+ *         cdef int index = int(self.voxel_model[x][y][z])
+ *         index += 1
  */
 
 static float __pyx_f_17_voxel_montecarlo_20VoxelPlateMonteCarlo__getReflectiveIndex(struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *__pyx_v_self, int __pyx_v_x, int __pyx_v_y, int __pyx_v_z) {
@@ -7462,48 +8169,57 @@ static float __pyx_f_17_voxel_montecarlo_20VoxelPlateMonteCarlo__getReflectiveIn
   float __pyx_t_4;
   __Pyx_RefNannySetupContext("_getReflectiveIndex", 0);
 
-  /* "_voxel_montecarlo.pyx":411
+  /* "_voxel_montecarlo.pyx":495
  * 
  *     cdef float _getReflectiveIndex(self, int x, int y, int z):
- *         cdef int index = self.voxel_model[x][y][z]+1             # <<<<<<<<<<<<<<
+ *         cdef int index = int(self.voxel_model[x][y][z])             # <<<<<<<<<<<<<<
+ *         index += 1
  *         return self.n[index]
- * 
  */
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->__pyx_base.voxel_model), __pyx_v_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 411, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->__pyx_base.voxel_model), __pyx_v_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 495, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 411, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 495, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_z, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 411, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_z, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 495, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_AddObjC(__pyx_t_1, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 411, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 495, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 411, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 495, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_index = __pyx_t_3;
 
-  /* "_voxel_montecarlo.pyx":412
+  /* "_voxel_montecarlo.pyx":496
  *     cdef float _getReflectiveIndex(self, int x, int y, int z):
- *         cdef int index = self.voxel_model[x][y][z]+1
+ *         cdef int index = int(self.voxel_model[x][y][z])
+ *         index += 1             # <<<<<<<<<<<<<<
+ *         return self.n[index]
+ * 
+ */
+  __pyx_v_index = (__pyx_v_index + 1);
+
+  /* "_voxel_montecarlo.pyx":497
+ *         cdef int index = int(self.voxel_model[x][y][z])
+ *         index += 1
  *         return self.n[index]             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_2 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->n), __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 412, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->n), __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 497, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __pyx_PyFloat_AsFloat(__pyx_t_2); if (unlikely((__pyx_t_4 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 412, __pyx_L1_error)
+  __pyx_t_4 = __pyx_PyFloat_AsFloat(__pyx_t_2); if (unlikely((__pyx_t_4 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 497, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_r = __pyx_t_4;
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":410
+  /* "_voxel_montecarlo.pyx":494
  *         return self.g[index]
  * 
  *     cdef float _getReflectiveIndex(self, int x, int y, int z):             # <<<<<<<<<<<<<<
- *         cdef int index = self.voxel_model[x][y][z]+1
- *         return self.n[index]
+ *         cdef int index = int(self.voxel_model[x][y][z])
+ *         index += 1
  */
 
   /* function exit code */
@@ -7524,19 +8240,19 @@ static float __pyx_f_17_voxel_montecarlo_20VoxelPlateMonteCarlo__getReflectiveIn
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_3__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_3__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_5__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_5__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__reduce_cython__ (wrapper)", 0);
-  __pyx_r = __pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_2__reduce_cython__(((struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *)__pyx_v_self));
+  __pyx_r = __pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_4__reduce_cython__(((struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_2__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *__pyx_v_self) {
+static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_4__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -7548,7 +8264,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_2__reduce_c
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -7578,19 +8294,19 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_2__reduce_c
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_5__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state); /*proto*/
-static PyObject *__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_5__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_7__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state); /*proto*/
+static PyObject *__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_7__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__setstate_cython__ (wrapper)", 0);
-  __pyx_r = __pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_4__setstate_cython__(((struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *)__pyx_v_self), ((PyObject *)__pyx_v___pyx_state));
+  __pyx_r = __pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_6__setstate_cython__(((struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *)__pyx_v_self), ((PyObject *)__pyx_v___pyx_state));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_4__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_6__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_17_voxel_montecarlo_VoxelPlateMonteCarlo *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -7601,7 +8317,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_4__setstate
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -7624,7 +8340,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_20VoxelPlateMonteCarlo_4__setstate
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":425
+/* "_voxel_montecarlo.pyx":510
  *     cdef np.ndarray Arz
  * 
  *     def __cinit__(self,int nr,int nz,float dr,float dz):             # <<<<<<<<<<<<<<
@@ -7669,23 +8385,23 @@ static int __pyx_pw_17_voxel_montecarlo_7Fluence_1__cinit__(PyObject *__pyx_v_se
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_nz)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 4, 4, 1); __PYX_ERR(0, 425, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 4, 4, 1); __PYX_ERR(0, 510, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_dr)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 4, 4, 2); __PYX_ERR(0, 425, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 4, 4, 2); __PYX_ERR(0, 510, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_dz)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 4, 4, 3); __PYX_ERR(0, 425, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 4, 4, 3); __PYX_ERR(0, 510, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) __PYX_ERR(0, 425, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) __PYX_ERR(0, 510, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -7695,14 +8411,14 @@ static int __pyx_pw_17_voxel_montecarlo_7Fluence_1__cinit__(PyObject *__pyx_v_se
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
     }
-    __pyx_v_nr = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_nr == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 425, __pyx_L3_error)
-    __pyx_v_nz = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_nz == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 425, __pyx_L3_error)
-    __pyx_v_dr = __pyx_PyFloat_AsFloat(values[2]); if (unlikely((__pyx_v_dr == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 425, __pyx_L3_error)
-    __pyx_v_dz = __pyx_PyFloat_AsFloat(values[3]); if (unlikely((__pyx_v_dz == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 425, __pyx_L3_error)
+    __pyx_v_nr = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_nr == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 510, __pyx_L3_error)
+    __pyx_v_nz = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_nz == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 510, __pyx_L3_error)
+    __pyx_v_dr = __pyx_PyFloat_AsFloat(values[2]); if (unlikely((__pyx_v_dr == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 510, __pyx_L3_error)
+    __pyx_v_dz = __pyx_PyFloat_AsFloat(values[3]); if (unlikely((__pyx_v_dz == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 510, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 425, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 510, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("_voxel_montecarlo.Fluence.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -7730,7 +8446,7 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
   PyObject *__pyx_t_9 = NULL;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "_voxel_montecarlo.pyx":427
+  /* "_voxel_montecarlo.pyx":512
  *     def __cinit__(self,int nr,int nz,float dr,float dz):
  * 
  *         self.nr = nr             # <<<<<<<<<<<<<<
@@ -7739,7 +8455,7 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
  */
   __pyx_v_self->nr = __pyx_v_nr;
 
-  /* "_voxel_montecarlo.pyx":428
+  /* "_voxel_montecarlo.pyx":513
  * 
  *         self.nr = nr
  *         self.nz = nz             # <<<<<<<<<<<<<<
@@ -7748,7 +8464,7 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
  */
   __pyx_v_self->nz = __pyx_v_nz;
 
-  /* "_voxel_montecarlo.pyx":429
+  /* "_voxel_montecarlo.pyx":514
  *         self.nr = nr
  *         self.nz = nz
  *         self.dr = dr             # <<<<<<<<<<<<<<
@@ -7757,7 +8473,7 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
  */
   __pyx_v_self->dr = __pyx_v_dr;
 
-  /* "_voxel_montecarlo.pyx":430
+  /* "_voxel_montecarlo.pyx":515
  *         self.nz = nz
  *         self.dr = dr
  *         self.dz = dz             # <<<<<<<<<<<<<<
@@ -7766,32 +8482,32 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
  */
   __pyx_v_self->dz = __pyx_v_dz;
 
-  /* "_voxel_montecarlo.pyx":432
+  /* "_voxel_montecarlo.pyx":517
  *         self.dz = dz
  * 
  *         self.r = np.array([(i)*dr for i in range(nr+1)]).astype('float32')             # <<<<<<<<<<<<<<
  *         self.z = np.array([(i)*dz for i in range(nz+1)]).astype('float32')
  *         self.Arz = np.zeros((nr,nz),dtype = 'float32')
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 432, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 432, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 432, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyInt_From_long((__pyx_v_nr + 1)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 432, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_long((__pyx_v_nr + 1)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 432, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   if (likely(PyList_CheckExact(__pyx_t_6)) || PyTuple_CheckExact(__pyx_t_6)) {
     __pyx_t_5 = __pyx_t_6; __Pyx_INCREF(__pyx_t_5); __pyx_t_7 = 0;
     __pyx_t_8 = NULL;
   } else {
-    __pyx_t_7 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 432, __pyx_L1_error)
+    __pyx_t_7 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 517, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_8 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 432, __pyx_L1_error)
+    __pyx_t_8 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 517, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   for (;;) {
@@ -7799,17 +8515,17 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
       if (likely(PyList_CheckExact(__pyx_t_5))) {
         if (__pyx_t_7 >= PyList_GET_SIZE(__pyx_t_5)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_6 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_7); __Pyx_INCREF(__pyx_t_6); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 432, __pyx_L1_error)
+        __pyx_t_6 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_7); __Pyx_INCREF(__pyx_t_6); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 517, __pyx_L1_error)
         #else
-        __pyx_t_6 = PySequence_ITEM(__pyx_t_5, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 432, __pyx_L1_error)
+        __pyx_t_6 = PySequence_ITEM(__pyx_t_5, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 517, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         #endif
       } else {
         if (__pyx_t_7 >= PyTuple_GET_SIZE(__pyx_t_5)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_7); __Pyx_INCREF(__pyx_t_6); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 432, __pyx_L1_error)
+        __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_7); __Pyx_INCREF(__pyx_t_6); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 517, __pyx_L1_error)
         #else
-        __pyx_t_6 = PySequence_ITEM(__pyx_t_5, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 432, __pyx_L1_error)
+        __pyx_t_6 = PySequence_ITEM(__pyx_t_5, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 517, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         #endif
       }
@@ -7819,7 +8535,7 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 432, __pyx_L1_error)
+          else __PYX_ERR(0, 517, __pyx_L1_error)
         }
         break;
       }
@@ -7827,12 +8543,12 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
     }
     __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_6 = PyFloat_FromDouble(__pyx_v_dr); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 432, __pyx_L1_error)
+    __pyx_t_6 = PyFloat_FromDouble(__pyx_v_dr); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 517, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_9 = PyNumber_Multiply(__pyx_v_i, __pyx_t_6); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 432, __pyx_L1_error)
+    __pyx_t_9 = PyNumber_Multiply(__pyx_v_i, __pyx_t_6); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 517, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_3, (PyObject*)__pyx_t_9))) __PYX_ERR(0, 432, __pyx_L1_error)
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_3, (PyObject*)__pyx_t_9))) __PYX_ERR(0, 517, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   }
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -7849,10 +8565,10 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
   __pyx_t_2 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_5, __pyx_t_3) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_3);
   __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 432, __pyx_L1_error)
+  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_astype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 432, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_astype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = NULL;
@@ -7867,42 +8583,42 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
   }
   __pyx_t_1 = (__pyx_t_2) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_2, __pyx_n_s_float32) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_n_s_float32);
   __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 432, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 432, __pyx_L1_error)
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 517, __pyx_L1_error)
   __Pyx_GIVEREF(__pyx_t_1);
   __Pyx_GOTREF(__pyx_v_self->r);
   __Pyx_DECREF(((PyObject *)__pyx_v_self->r));
   __pyx_v_self->r = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":433
+  /* "_voxel_montecarlo.pyx":518
  * 
  *         self.r = np.array([(i)*dr for i in range(nr+1)]).astype('float32')
  *         self.z = np.array([(i)*dz for i in range(nz+1)]).astype('float32')             # <<<<<<<<<<<<<<
  *         self.Arz = np.zeros((nr,nz),dtype = 'float32')
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 433, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 518, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 433, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 518, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 433, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 518, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = __Pyx_PyInt_From_long((__pyx_v_nz + 1)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 433, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_long((__pyx_v_nz + 1)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 518, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_5); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 433, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_5); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 518, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   if (likely(PyList_CheckExact(__pyx_t_9)) || PyTuple_CheckExact(__pyx_t_9)) {
     __pyx_t_5 = __pyx_t_9; __Pyx_INCREF(__pyx_t_5); __pyx_t_7 = 0;
     __pyx_t_8 = NULL;
   } else {
-    __pyx_t_7 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_t_9); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 433, __pyx_L1_error)
+    __pyx_t_7 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_t_9); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 518, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_8 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 433, __pyx_L1_error)
+    __pyx_t_8 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 518, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   for (;;) {
@@ -7910,17 +8626,17 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
       if (likely(PyList_CheckExact(__pyx_t_5))) {
         if (__pyx_t_7 >= PyList_GET_SIZE(__pyx_t_5)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_9 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_7); __Pyx_INCREF(__pyx_t_9); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 433, __pyx_L1_error)
+        __pyx_t_9 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_7); __Pyx_INCREF(__pyx_t_9); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 518, __pyx_L1_error)
         #else
-        __pyx_t_9 = PySequence_ITEM(__pyx_t_5, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 433, __pyx_L1_error)
+        __pyx_t_9 = PySequence_ITEM(__pyx_t_5, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 518, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         #endif
       } else {
         if (__pyx_t_7 >= PyTuple_GET_SIZE(__pyx_t_5)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_9 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_7); __Pyx_INCREF(__pyx_t_9); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 433, __pyx_L1_error)
+        __pyx_t_9 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_7); __Pyx_INCREF(__pyx_t_9); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 518, __pyx_L1_error)
         #else
-        __pyx_t_9 = PySequence_ITEM(__pyx_t_5, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 433, __pyx_L1_error)
+        __pyx_t_9 = PySequence_ITEM(__pyx_t_5, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 518, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         #endif
       }
@@ -7930,7 +8646,7 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 433, __pyx_L1_error)
+          else __PYX_ERR(0, 518, __pyx_L1_error)
         }
         break;
       }
@@ -7938,12 +8654,12 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
     }
     __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_9);
     __pyx_t_9 = 0;
-    __pyx_t_9 = PyFloat_FromDouble(__pyx_v_dz); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 433, __pyx_L1_error)
+    __pyx_t_9 = PyFloat_FromDouble(__pyx_v_dz); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 518, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
-    __pyx_t_6 = PyNumber_Multiply(__pyx_v_i, __pyx_t_9); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 433, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_Multiply(__pyx_v_i, __pyx_t_9); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 518, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_2, (PyObject*)__pyx_t_6))) __PYX_ERR(0, 433, __pyx_L1_error)
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_2, (PyObject*)__pyx_t_6))) __PYX_ERR(0, 518, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -7960,10 +8676,10 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
   __pyx_t_4 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_5, __pyx_t_2) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2);
   __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 433, __pyx_L1_error)
+  if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 518, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_astype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 433, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_astype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 518, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_4 = NULL;
@@ -7978,33 +8694,33 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
   }
   __pyx_t_1 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_4, __pyx_n_s_float32) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_n_s_float32);
   __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 433, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 518, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 433, __pyx_L1_error)
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 518, __pyx_L1_error)
   __Pyx_GIVEREF(__pyx_t_1);
   __Pyx_GOTREF(__pyx_v_self->z);
   __Pyx_DECREF(((PyObject *)__pyx_v_self->z));
   __pyx_v_self->z = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":434
+  /* "_voxel_montecarlo.pyx":519
  *         self.r = np.array([(i)*dr for i in range(nr+1)]).astype('float32')
  *         self.z = np.array([(i)*dz for i in range(nz+1)]).astype('float32')
  *         self.Arz = np.zeros((nr,nz),dtype = 'float32')             # <<<<<<<<<<<<<<
  * 
  *     cpdef getArz(self):
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 434, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 434, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_nr); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 434, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_nr); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_nz); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 434, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_nz); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 434, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
@@ -8012,27 +8728,27 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
   PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_t_4);
   __pyx_t_1 = 0;
   __pyx_t_4 = 0;
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 434, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 434, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_n_s_float32) < 0) __PYX_ERR(0, 434, __pyx_L1_error)
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 434, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_n_s_float32) < 0) __PYX_ERR(0, 519, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 434, __pyx_L1_error)
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GIVEREF(__pyx_t_1);
   __Pyx_GOTREF(__pyx_v_self->Arz);
   __Pyx_DECREF(((PyObject *)__pyx_v_self->Arz));
   __pyx_v_self->Arz = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":425
+  /* "_voxel_montecarlo.pyx":510
  *     cdef np.ndarray Arz
  * 
  *     def __cinit__(self,int nr,int nz,float dr,float dz):             # <<<<<<<<<<<<<<
@@ -8059,7 +8775,7 @@ static int __pyx_pf_17_voxel_montecarlo_7Fluence___cinit__(struct __pyx_obj_17_v
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":436
+/* "_voxel_montecarlo.pyx":521
  *         self.Arz = np.zeros((nr,nz),dtype = 'float32')
  * 
  *     cpdef getArz(self):             # <<<<<<<<<<<<<<
@@ -8085,7 +8801,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_getArz(struct __pyx_obj_17
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_type_dict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_getArz); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 436, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_getArz); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 521, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_17_voxel_montecarlo_7Fluence_3getArz)) {
         __Pyx_XDECREF(__pyx_r);
@@ -8102,7 +8818,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_getArz(struct __pyx_obj_17
         }
         __pyx_t_2 = (__pyx_t_4) ? __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4) : __Pyx_PyObject_CallNoArg(__pyx_t_3);
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-        if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 436, __pyx_L1_error)
+        if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 521, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         __pyx_r = __pyx_t_2;
@@ -8123,7 +8839,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_getArz(struct __pyx_obj_17
     #endif
   }
 
-  /* "_voxel_montecarlo.pyx":437
+  /* "_voxel_montecarlo.pyx":522
  * 
  *     cpdef getArz(self):
  *         return self.Arz             # <<<<<<<<<<<<<<
@@ -8135,7 +8851,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_getArz(struct __pyx_obj_17
   __pyx_r = ((PyObject *)__pyx_v_self->Arz);
   goto __pyx_L0;
 
-  /* "_voxel_montecarlo.pyx":436
+  /* "_voxel_montecarlo.pyx":521
  *         self.Arz = np.zeros((nr,nz),dtype = 'float32')
  * 
  *     cpdef getArz(self):             # <<<<<<<<<<<<<<
@@ -8176,7 +8892,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_7Fluence_2getArz(struct __pyx_obj_
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("getArz", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_17_voxel_montecarlo_7Fluence_getArz(__pyx_v_self, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 436, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_17_voxel_montecarlo_7Fluence_getArz(__pyx_v_self, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 521, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -8193,7 +8909,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_7Fluence_2getArz(struct __pyx_obj_
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":439
+/* "_voxel_montecarlo.pyx":524
  *         return self.Arz
  * 
  *     cpdef test(self,float w,             # <<<<<<<<<<<<<<
@@ -8225,17 +8941,17 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_test(struct __pyx_obj_17_v
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_type_dict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_test); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 439, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_test); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 524, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_17_voxel_montecarlo_7Fluence_5test)) {
         __Pyx_XDECREF(__pyx_r);
-        __pyx_t_3 = PyFloat_FromDouble(__pyx_v_w); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 439, __pyx_L1_error)
+        __pyx_t_3 = PyFloat_FromDouble(__pyx_v_w); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 524, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_4 = PyFloat_FromDouble(__pyx_v_x); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 439, __pyx_L1_error)
+        __pyx_t_4 = PyFloat_FromDouble(__pyx_v_x); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 524, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = PyFloat_FromDouble(__pyx_v_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 439, __pyx_L1_error)
+        __pyx_t_5 = PyFloat_FromDouble(__pyx_v_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 524, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_6 = PyFloat_FromDouble(__pyx_v_zz); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 439, __pyx_L1_error)
+        __pyx_t_6 = PyFloat_FromDouble(__pyx_v_zz); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 524, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_INCREF(__pyx_t_1);
         __pyx_t_7 = __pyx_t_1; __pyx_t_8 = NULL;
@@ -8253,7 +8969,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_test(struct __pyx_obj_17_v
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_7)) {
           PyObject *__pyx_temp[5] = {__pyx_t_8, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6};
-          __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 439, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 524, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -8265,7 +8981,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_test(struct __pyx_obj_17_v
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_7)) {
           PyObject *__pyx_temp[5] = {__pyx_t_8, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6};
-          __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 439, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 524, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -8275,7 +8991,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_test(struct __pyx_obj_17_v
         } else
         #endif
         {
-          __pyx_t_10 = PyTuple_New(4+__pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 439, __pyx_L1_error)
+          __pyx_t_10 = PyTuple_New(4+__pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 524, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_10);
           if (__pyx_t_8) {
             __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_8); __pyx_t_8 = NULL;
@@ -8292,7 +9008,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_test(struct __pyx_obj_17_v
           __pyx_t_4 = 0;
           __pyx_t_5 = 0;
           __pyx_t_6 = 0;
-          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_10, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 439, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_10, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 524, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
         }
@@ -8315,18 +9031,18 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_test(struct __pyx_obj_17_v
     #endif
   }
 
-  /* "_voxel_montecarlo.pyx":441
+  /* "_voxel_montecarlo.pyx":526
  *     cpdef test(self,float w,
  *                      float x,float y,float zz):
  *         self.saveFluence(w,x,y,zz)             # <<<<<<<<<<<<<<
  * 
  *     cdef saveFluence(self,float w,
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_Fluence *)__pyx_v_self->__pyx_vtab)->saveFluence(__pyx_v_self, __pyx_v_w, __pyx_v_x, __pyx_v_y, __pyx_v_zz); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 441, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_17_voxel_montecarlo_Fluence *)__pyx_v_self->__pyx_vtab)->saveFluence(__pyx_v_self, __pyx_v_w, __pyx_v_x, __pyx_v_y, __pyx_v_zz); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 526, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":439
+  /* "_voxel_montecarlo.pyx":524
  *         return self.Arz
  * 
  *     cpdef test(self,float w,             # <<<<<<<<<<<<<<
@@ -8392,23 +9108,23 @@ static PyObject *__pyx_pw_17_voxel_montecarlo_7Fluence_5test(PyObject *__pyx_v_s
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_x)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("test", 1, 4, 4, 1); __PYX_ERR(0, 439, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("test", 1, 4, 4, 1); __PYX_ERR(0, 524, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("test", 1, 4, 4, 2); __PYX_ERR(0, 439, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("test", 1, 4, 4, 2); __PYX_ERR(0, 524, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_zz)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("test", 1, 4, 4, 3); __PYX_ERR(0, 439, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("test", 1, 4, 4, 3); __PYX_ERR(0, 524, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "test") < 0)) __PYX_ERR(0, 439, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "test") < 0)) __PYX_ERR(0, 524, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -8418,14 +9134,14 @@ static PyObject *__pyx_pw_17_voxel_montecarlo_7Fluence_5test(PyObject *__pyx_v_s
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
     }
-    __pyx_v_w = __pyx_PyFloat_AsFloat(values[0]); if (unlikely((__pyx_v_w == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 439, __pyx_L3_error)
-    __pyx_v_x = __pyx_PyFloat_AsFloat(values[1]); if (unlikely((__pyx_v_x == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 440, __pyx_L3_error)
-    __pyx_v_y = __pyx_PyFloat_AsFloat(values[2]); if (unlikely((__pyx_v_y == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 440, __pyx_L3_error)
-    __pyx_v_zz = __pyx_PyFloat_AsFloat(values[3]); if (unlikely((__pyx_v_zz == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 440, __pyx_L3_error)
+    __pyx_v_w = __pyx_PyFloat_AsFloat(values[0]); if (unlikely((__pyx_v_w == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 524, __pyx_L3_error)
+    __pyx_v_x = __pyx_PyFloat_AsFloat(values[1]); if (unlikely((__pyx_v_x == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 525, __pyx_L3_error)
+    __pyx_v_y = __pyx_PyFloat_AsFloat(values[2]); if (unlikely((__pyx_v_y == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 525, __pyx_L3_error)
+    __pyx_v_zz = __pyx_PyFloat_AsFloat(values[3]); if (unlikely((__pyx_v_zz == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 525, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("test", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 439, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("test", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 524, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("_voxel_montecarlo.Fluence.test", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -8444,7 +9160,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_7Fluence_4test(struct __pyx_obj_17
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("test", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_17_voxel_montecarlo_7Fluence_test(__pyx_v_self, __pyx_v_w, __pyx_v_x, __pyx_v_y, __pyx_v_zz, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 439, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_17_voxel_montecarlo_7Fluence_test(__pyx_v_self, __pyx_v_w, __pyx_v_x, __pyx_v_y, __pyx_v_zz, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 524, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -8461,7 +9177,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_7Fluence_4test(struct __pyx_obj_17
   return __pyx_r;
 }
 
-/* "_voxel_montecarlo.pyx":443
+/* "_voxel_montecarlo.pyx":528
  *         self.saveFluence(w,x,y,zz)
  * 
  *     cdef saveFluence(self,float w,             # <<<<<<<<<<<<<<
@@ -8504,7 +9220,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
   __pyx_pybuffernd_z.data = NULL;
   __pyx_pybuffernd_z.rcbuffer = &__pyx_pybuffer_z;
 
-  /* "_voxel_montecarlo.pyx":445
+  /* "_voxel_montecarlo.pyx":530
  *     cdef saveFluence(self,float w,
  *                      float x,float y,float zz):
  *         cdef float rr = sqrt(x**2 + y**2)             # <<<<<<<<<<<<<<
@@ -8513,7 +9229,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
  */
   __pyx_v_rr = sqrt((powf(__pyx_v_x, 2.0) + powf(__pyx_v_y, 2.0)));
 
-  /* "_voxel_montecarlo.pyx":449
+  /* "_voxel_montecarlo.pyx":534
  * 
  *         cdef int num_r, num_z
  *         cdef np.ndarray[ndim=1, dtype=DTYPE_t] r = self.r             # <<<<<<<<<<<<<<
@@ -8526,14 +9242,14 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_r.rcbuffer->pybuffer, (PyObject*)((PyArrayObject *)__pyx_t_1), &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_r = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_r.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 449, __pyx_L1_error)
+      __PYX_ERR(0, 534, __pyx_L1_error)
     } else {__pyx_pybuffernd_r.diminfo[0].strides = __pyx_pybuffernd_r.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_r.diminfo[0].shape = __pyx_pybuffernd_r.rcbuffer->pybuffer.shape[0];
     }
   }
   __pyx_v_r = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":450
+  /* "_voxel_montecarlo.pyx":535
  *         cdef int num_r, num_z
  *         cdef np.ndarray[ndim=1, dtype=DTYPE_t] r = self.r
  *         cdef np.ndarray[ndim=1, dtype=DTYPE_t] z = self.z             # <<<<<<<<<<<<<<
@@ -8546,14 +9262,14 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_z.rcbuffer->pybuffer, (PyObject*)((PyArrayObject *)__pyx_t_1), &__Pyx_TypeInfo_nn___pyx_t_17_voxel_montecarlo_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_z = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_z.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 450, __pyx_L1_error)
+      __PYX_ERR(0, 535, __pyx_L1_error)
     } else {__pyx_pybuffernd_z.diminfo[0].strides = __pyx_pybuffernd_z.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_z.diminfo[0].shape = __pyx_pybuffernd_z.rcbuffer->pybuffer.shape[0];
     }
   }
   __pyx_v_z = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":452
+  /* "_voxel_montecarlo.pyx":537
  *         cdef np.ndarray[ndim=1, dtype=DTYPE_t] z = self.z
  *         cdef int nz, nr
  *         nz = self.nz; nr = self.nr             # <<<<<<<<<<<<<<
@@ -8565,7 +9281,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
   __pyx_t_2 = __pyx_v_self->nr;
   __pyx_v_nr = __pyx_t_2;
 
-  /* "_voxel_montecarlo.pyx":454
+  /* "_voxel_montecarlo.pyx":539
  *         nz = self.nz; nr = self.nr
  * 
  *         flag = 1             # <<<<<<<<<<<<<<
@@ -8574,25 +9290,25 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
  */
   __pyx_v_flag = 1;
 
-  /* "_voxel_montecarlo.pyx":456
+  /* "_voxel_montecarlo.pyx":541
  *         flag = 1
  * 
  *         for i in range(nr):             # <<<<<<<<<<<<<<
  *             if i == nr-1:
  *                 flag = 0
  */
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_nr); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 456, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_nr); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 541, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 456, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 541, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (likely(PyList_CheckExact(__pyx_t_3)) || PyTuple_CheckExact(__pyx_t_3)) {
     __pyx_t_1 = __pyx_t_3; __Pyx_INCREF(__pyx_t_1); __pyx_t_4 = 0;
     __pyx_t_5 = NULL;
   } else {
-    __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 456, __pyx_L1_error)
+    __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 541, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_5 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 456, __pyx_L1_error)
+    __pyx_t_5 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 541, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   for (;;) {
@@ -8600,17 +9316,17 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
       if (likely(PyList_CheckExact(__pyx_t_1))) {
         if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 456, __pyx_L1_error)
+        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 541, __pyx_L1_error)
         #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 456, __pyx_L1_error)
+        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 541, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         #endif
       } else {
         if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 456, __pyx_L1_error)
+        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 541, __pyx_L1_error)
         #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 456, __pyx_L1_error)
+        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 541, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         #endif
       }
@@ -8620,7 +9336,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 456, __pyx_L1_error)
+          else __PYX_ERR(0, 541, __pyx_L1_error)
         }
         break;
       }
@@ -8629,22 +9345,22 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
     __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "_voxel_montecarlo.pyx":457
+    /* "_voxel_montecarlo.pyx":542
  * 
  *         for i in range(nr):
  *             if i == nr-1:             # <<<<<<<<<<<<<<
  *                 flag = 0
  *                 break
  */
-    __pyx_t_3 = __Pyx_PyInt_From_long((__pyx_v_nr - 1)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 457, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_From_long((__pyx_v_nr - 1)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 542, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_6 = PyObject_RichCompare(__pyx_v_i, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 457, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_v_i, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 542, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 457, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 542, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (__pyx_t_7) {
 
-      /* "_voxel_montecarlo.pyx":458
+      /* "_voxel_montecarlo.pyx":543
  *         for i in range(nr):
  *             if i == nr-1:
  *                 flag = 0             # <<<<<<<<<<<<<<
@@ -8653,7 +9369,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
  */
       __pyx_v_flag = 0;
 
-      /* "_voxel_montecarlo.pyx":459
+      /* "_voxel_montecarlo.pyx":544
  *             if i == nr-1:
  *                 flag = 0
  *                 break             # <<<<<<<<<<<<<<
@@ -8662,7 +9378,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
  */
       goto __pyx_L4_break;
 
-      /* "_voxel_montecarlo.pyx":457
+      /* "_voxel_montecarlo.pyx":542
  * 
  *         for i in range(nr):
  *             if i == nr-1:             # <<<<<<<<<<<<<<
@@ -8671,54 +9387,54 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
  */
     }
 
-    /* "_voxel_montecarlo.pyx":461
+    /* "_voxel_montecarlo.pyx":546
  *                 break
  * 
  *             if (rr >= r[i])and(rr < r[i+1]):             # <<<<<<<<<<<<<<
  *                 num_r = i
  *                 break
  */
-    __pyx_t_6 = PyFloat_FromDouble(__pyx_v_rr); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 461, __pyx_L1_error)
+    __pyx_t_6 = PyFloat_FromDouble(__pyx_v_rr); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 546, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_3 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_r), __pyx_v_i); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 461, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_r), __pyx_v_i); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 546, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_8 = PyObject_RichCompare(__pyx_t_6, __pyx_t_3, Py_GE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 461, __pyx_L1_error)
+    __pyx_t_8 = PyObject_RichCompare(__pyx_t_6, __pyx_t_3, Py_GE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 546, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 461, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 546, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     if (__pyx_t_9) {
     } else {
       __pyx_t_7 = __pyx_t_9;
       goto __pyx_L7_bool_binop_done;
     }
-    __pyx_t_8 = PyFloat_FromDouble(__pyx_v_rr); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 461, __pyx_L1_error)
+    __pyx_t_8 = PyFloat_FromDouble(__pyx_v_rr); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 546, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_3 = __Pyx_PyInt_AddObjC(__pyx_v_i, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 461, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_AddObjC(__pyx_v_i, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 546, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_6 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_r), __pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 461, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_r), __pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 546, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = PyObject_RichCompare(__pyx_t_8, __pyx_t_6, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 461, __pyx_L1_error)
+    __pyx_t_3 = PyObject_RichCompare(__pyx_t_8, __pyx_t_6, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 546, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 461, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 546, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_7 = __pyx_t_9;
     __pyx_L7_bool_binop_done:;
     if (__pyx_t_7) {
 
-      /* "_voxel_montecarlo.pyx":462
+      /* "_voxel_montecarlo.pyx":547
  * 
  *             if (rr >= r[i])and(rr < r[i+1]):
  *                 num_r = i             # <<<<<<<<<<<<<<
  *                 break
  *         if flag:
  */
-      __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_i); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 462, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_i); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 547, __pyx_L1_error)
       __pyx_v_num_r = __pyx_t_2;
 
-      /* "_voxel_montecarlo.pyx":463
+      /* "_voxel_montecarlo.pyx":548
  *             if (rr >= r[i])and(rr < r[i+1]):
  *                 num_r = i
  *                 break             # <<<<<<<<<<<<<<
@@ -8727,7 +9443,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
  */
       goto __pyx_L4_break;
 
-      /* "_voxel_montecarlo.pyx":461
+      /* "_voxel_montecarlo.pyx":546
  *                 break
  * 
  *             if (rr >= r[i])and(rr < r[i+1]):             # <<<<<<<<<<<<<<
@@ -8736,7 +9452,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
  */
     }
 
-    /* "_voxel_montecarlo.pyx":456
+    /* "_voxel_montecarlo.pyx":541
  *         flag = 1
  * 
  *         for i in range(nr):             # <<<<<<<<<<<<<<
@@ -8747,7 +9463,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
   __pyx_L4_break:;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "_voxel_montecarlo.pyx":464
+  /* "_voxel_montecarlo.pyx":549
  *                 num_r = i
  *                 break
  *         if flag:             # <<<<<<<<<<<<<<
@@ -8757,25 +9473,25 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
   __pyx_t_7 = (__pyx_v_flag != 0);
   if (__pyx_t_7) {
 
-    /* "_voxel_montecarlo.pyx":465
+    /* "_voxel_montecarlo.pyx":550
  *                 break
  *         if flag:
  *             for i in range(nz):             # <<<<<<<<<<<<<<
  *                 if i == nz-1:
  *                     flag = 0
  */
-    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_nz); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 465, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_nz); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 550, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 465, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 550, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     if (likely(PyList_CheckExact(__pyx_t_3)) || PyTuple_CheckExact(__pyx_t_3)) {
       __pyx_t_1 = __pyx_t_3; __Pyx_INCREF(__pyx_t_1); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 465, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 550, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_5 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 465, __pyx_L1_error)
+      __pyx_t_5 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 550, __pyx_L1_error)
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     for (;;) {
@@ -8783,17 +9499,17 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
         if (likely(PyList_CheckExact(__pyx_t_1))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_1)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 465, __pyx_L1_error)
+          __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 550, __pyx_L1_error)
           #else
-          __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 465, __pyx_L1_error)
+          __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 550, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 465, __pyx_L1_error)
+          __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 550, __pyx_L1_error)
           #else
-          __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 465, __pyx_L1_error)
+          __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 550, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
           #endif
         }
@@ -8803,7 +9519,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 465, __pyx_L1_error)
+            else __PYX_ERR(0, 550, __pyx_L1_error)
           }
           break;
         }
@@ -8812,22 +9528,22 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
       __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_3);
       __pyx_t_3 = 0;
 
-      /* "_voxel_montecarlo.pyx":466
+      /* "_voxel_montecarlo.pyx":551
  *         if flag:
  *             for i in range(nz):
  *                 if i == nz-1:             # <<<<<<<<<<<<<<
  *                     flag = 0
  *                     break
  */
-      __pyx_t_3 = __Pyx_PyInt_From_long((__pyx_v_nz - 1)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 466, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyInt_From_long((__pyx_v_nz - 1)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 551, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_6 = PyObject_RichCompare(__pyx_v_i, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 466, __pyx_L1_error)
+      __pyx_t_6 = PyObject_RichCompare(__pyx_v_i, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 551, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 466, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 551, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       if (__pyx_t_7) {
 
-        /* "_voxel_montecarlo.pyx":467
+        /* "_voxel_montecarlo.pyx":552
  *             for i in range(nz):
  *                 if i == nz-1:
  *                     flag = 0             # <<<<<<<<<<<<<<
@@ -8836,7 +9552,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
  */
         __pyx_v_flag = 0;
 
-        /* "_voxel_montecarlo.pyx":468
+        /* "_voxel_montecarlo.pyx":553
  *                 if i == nz-1:
  *                     flag = 0
  *                     break             # <<<<<<<<<<<<<<
@@ -8845,7 +9561,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
  */
         goto __pyx_L11_break;
 
-        /* "_voxel_montecarlo.pyx":466
+        /* "_voxel_montecarlo.pyx":551
  *         if flag:
  *             for i in range(nz):
  *                 if i == nz-1:             # <<<<<<<<<<<<<<
@@ -8854,54 +9570,54 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
  */
       }
 
-      /* "_voxel_montecarlo.pyx":469
+      /* "_voxel_montecarlo.pyx":554
  *                     flag = 0
  *                     break
  *                 if (zz >= z[i])and(zz < z[i+1]):             # <<<<<<<<<<<<<<
  *                     num_z = i
  *                     break
  */
-      __pyx_t_6 = PyFloat_FromDouble(__pyx_v_zz); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 469, __pyx_L1_error)
+      __pyx_t_6 = PyFloat_FromDouble(__pyx_v_zz); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 554, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_3 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_z), __pyx_v_i); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 469, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_z), __pyx_v_i); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 554, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_8 = PyObject_RichCompare(__pyx_t_6, __pyx_t_3, Py_GE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 469, __pyx_L1_error)
+      __pyx_t_8 = PyObject_RichCompare(__pyx_t_6, __pyx_t_3, Py_GE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 554, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 469, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 554, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       if (__pyx_t_9) {
       } else {
         __pyx_t_7 = __pyx_t_9;
         goto __pyx_L14_bool_binop_done;
       }
-      __pyx_t_8 = PyFloat_FromDouble(__pyx_v_zz); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 469, __pyx_L1_error)
+      __pyx_t_8 = PyFloat_FromDouble(__pyx_v_zz); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 554, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_3 = __Pyx_PyInt_AddObjC(__pyx_v_i, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 469, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyInt_AddObjC(__pyx_v_i, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 554, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_6 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_z), __pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 469, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_z), __pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 554, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = PyObject_RichCompare(__pyx_t_8, __pyx_t_6, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 469, __pyx_L1_error)
+      __pyx_t_3 = PyObject_RichCompare(__pyx_t_8, __pyx_t_6, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 554, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 469, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 554, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __pyx_t_7 = __pyx_t_9;
       __pyx_L14_bool_binop_done:;
       if (__pyx_t_7) {
 
-        /* "_voxel_montecarlo.pyx":470
+        /* "_voxel_montecarlo.pyx":555
  *                     break
  *                 if (zz >= z[i])and(zz < z[i+1]):
  *                     num_z = i             # <<<<<<<<<<<<<<
  *                     break
  * 
  */
-        __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_i); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 470, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_i); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 555, __pyx_L1_error)
         __pyx_v_num_z = __pyx_t_2;
 
-        /* "_voxel_montecarlo.pyx":471
+        /* "_voxel_montecarlo.pyx":556
  *                 if (zz >= z[i])and(zz < z[i+1]):
  *                     num_z = i
  *                     break             # <<<<<<<<<<<<<<
@@ -8910,7 +9626,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
  */
         goto __pyx_L11_break;
 
-        /* "_voxel_montecarlo.pyx":469
+        /* "_voxel_montecarlo.pyx":554
  *                     flag = 0
  *                     break
  *                 if (zz >= z[i])and(zz < z[i+1]):             # <<<<<<<<<<<<<<
@@ -8919,7 +9635,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
  */
       }
 
-      /* "_voxel_montecarlo.pyx":465
+      /* "_voxel_montecarlo.pyx":550
  *                 break
  *         if flag:
  *             for i in range(nz):             # <<<<<<<<<<<<<<
@@ -8930,7 +9646,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
     __pyx_L11_break:;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "_voxel_montecarlo.pyx":473
+    /* "_voxel_montecarlo.pyx":558
  *                     break
  * 
  *             if flag:             # <<<<<<<<<<<<<<
@@ -8939,27 +9655,27 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
     __pyx_t_7 = (__pyx_v_flag != 0);
     if (__pyx_t_7) {
 
-      /* "_voxel_montecarlo.pyx":474
+      /* "_voxel_montecarlo.pyx":559
  * 
  *             if flag:
  *                 self.Arz[num_r][num_z] += w             # <<<<<<<<<<<<<<
  */
-      __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->Arz), __pyx_v_num_r, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 474, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_self->Arz), __pyx_v_num_r, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 559, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __pyx_t_2 = __pyx_v_num_z;
-      __pyx_t_3 = __Pyx_GetItemInt(__pyx_t_1, __pyx_t_2, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 474, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_GetItemInt(__pyx_t_1, __pyx_t_2, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 559, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_6 = PyFloat_FromDouble(__pyx_v_w); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 474, __pyx_L1_error)
+      __pyx_t_6 = PyFloat_FromDouble(__pyx_v_w); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 559, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_8 = PyNumber_InPlaceAdd(__pyx_t_3, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 474, __pyx_L1_error)
+      __pyx_t_8 = PyNumber_InPlaceAdd(__pyx_t_3, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 559, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      if (unlikely(__Pyx_SetItemInt(__pyx_t_1, __pyx_t_2, __pyx_t_8, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 474, __pyx_L1_error)
+      if (unlikely(__Pyx_SetItemInt(__pyx_t_1, __pyx_t_2, __pyx_t_8, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) __PYX_ERR(0, 559, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-      /* "_voxel_montecarlo.pyx":473
+      /* "_voxel_montecarlo.pyx":558
  *                     break
  * 
  *             if flag:             # <<<<<<<<<<<<<<
@@ -8967,7 +9683,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
  */
     }
 
-    /* "_voxel_montecarlo.pyx":464
+    /* "_voxel_montecarlo.pyx":549
  *                 num_r = i
  *                 break
  *         if flag:             # <<<<<<<<<<<<<<
@@ -8976,7 +9692,7 @@ static PyObject *__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence(struct __pyx_o
  */
   }
 
-  /* "_voxel_montecarlo.pyx":443
+  /* "_voxel_montecarlo.pyx":528
  *         self.saveFluence(w,x,y,zz)
  * 
  *     cdef saveFluence(self,float w,             # <<<<<<<<<<<<<<
@@ -9045,7 +9761,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_7Fluence_6__reduce_cython__(CYTHON
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -9098,7 +9814,7 @@ static PyObject *__pyx_pf_17_voxel_montecarlo_7Fluence_8__setstate_cython__(CYTH
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -9238,7 +9954,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  * 
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 272, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 272, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -9294,7 +10010,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  * 
  *             info.buf = PyArray_DATA(self)
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 276, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 276, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -9552,7 +10268,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  *                 if   t == NPY_BYTE:        f = "b"
  *                 elif t == NPY_UBYTE:       f = "B"
  */
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 306, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 306, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_Raise(__pyx_t_3, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -10432,7 +11148,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  * 
  *         if ((child.byteorder == c'>' and little_endian) or
  */
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 856, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 856, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_Raise(__pyx_t_3, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -10500,7 +11216,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  *             # One could encode it in the format string and have Cython
  *             # complain instead, BUT: < and > in format strings also imply
  */
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 860, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 860, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_Raise(__pyx_t_3, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -10609,7 +11325,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  * 
  *             # Until ticket #99 is fixed, use integers to avoid warnings
  */
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 880, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 880, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_Raise(__pyx_t_4, 0, 0, 0);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -11237,7 +11953,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
  * 
  * cdef inline int import_umath() except -1:
  */
-      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(2, 1038, __pyx_L5_except_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__15, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(2, 1038, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_Raise(__pyx_t_8, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -11366,7 +12082,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
  * 
  * cdef inline int import_ufunc() except -1:
  */
-      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(2, 1044, __pyx_L5_except_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(2, 1044, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_Raise(__pyx_t_8, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -11492,7 +12208,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
  *     except Exception:
  *         raise ImportError("numpy.core.umath failed to import")             # <<<<<<<<<<<<<<
  */
-      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(2, 1050, __pyx_L5_except_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(2, 1050, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_Raise(__pyx_t_8, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -11560,6 +12276,8 @@ static PyObject *__pyx_tp_new_17_voxel_montecarlo_BaseVoxelMonteCarlo(PyTypeObje
   p->add = ((PyArrayObject *)Py_None); Py_INCREF(Py_None);
   p->voxel_model = ((PyArrayObject *)Py_None); Py_INCREF(Py_None);
   p->xy_size = ((PyArrayObject *)Py_None); Py_INCREF(Py_None);
+  p->logger_int = ((PyArrayObject *)Py_None); Py_INCREF(Py_None);
+  p->logger_float = ((PyArrayObject *)Py_None); Py_INCREF(Py_None);
   p->fluence = ((struct __pyx_obj_17_voxel_montecarlo_Fluence *)Py_None); Py_INCREF(Py_None);
   if (unlikely(__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_1__cinit__(o, a, k) < 0)) goto bad;
   return o;
@@ -11585,6 +12303,8 @@ static void __pyx_tp_dealloc_17_voxel_montecarlo_BaseVoxelMonteCarlo(PyObject *o
   Py_CLEAR(p->add);
   Py_CLEAR(p->voxel_model);
   Py_CLEAR(p->xy_size);
+  Py_CLEAR(p->logger_int);
+  Py_CLEAR(p->logger_float);
   Py_CLEAR(p->fluence);
   (*Py_TYPE(o)->tp_free)(o);
 }
@@ -11618,6 +12338,12 @@ static int __pyx_tp_traverse_17_voxel_montecarlo_BaseVoxelMonteCarlo(PyObject *o
   }
   if (p->xy_size) {
     e = (*v)(((PyObject *)p->xy_size), a); if (e) return e;
+  }
+  if (p->logger_int) {
+    e = (*v)(((PyObject *)p->logger_int), a); if (e) return e;
+  }
+  if (p->logger_float) {
+    e = (*v)(((PyObject *)p->logger_float), a); if (e) return e;
   }
   if (p->fluence) {
     e = (*v)(((PyObject *)p->fluence), a); if (e) return e;
@@ -11655,6 +12381,12 @@ static int __pyx_tp_clear_17_voxel_montecarlo_BaseVoxelMonteCarlo(PyObject *o) {
   tmp = ((PyObject*)p->xy_size);
   p->xy_size = ((PyArrayObject *)Py_None); Py_INCREF(Py_None);
   Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->logger_int);
+  p->logger_int = ((PyArrayObject *)Py_None); Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->logger_float);
+  p->logger_float = ((PyArrayObject *)Py_None); Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
   tmp = ((PyObject*)p->fluence);
   p->fluence = ((struct __pyx_obj_17_voxel_montecarlo_Fluence *)Py_None); Py_INCREF(Py_None);
   Py_XDECREF(tmp);
@@ -11662,15 +12394,17 @@ static int __pyx_tp_clear_17_voxel_montecarlo_BaseVoxelMonteCarlo(PyObject *o) {
 }
 
 static PyMethodDef __pyx_methods_17_voxel_montecarlo_BaseVoxelMonteCarlo[] = {
-  {"setInitialCoordinate", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_3setInitialCoordinate, METH_VARARGS|METH_KEYWORDS, 0},
-  {"setModel", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_5setModel, METH_VARARGS|METH_KEYWORDS, 0},
-  {"setFluence", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_7setFluence, METH_O, 0},
-  {"getFluenceResult", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_9getFluenceResult, METH_NOARGS, 0},
-  {"setParams", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_11setParams, METH_NOARGS, 0},
-  {"getResult", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_13getResult, METH_NOARGS, 0},
-  {"start", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_15start, METH_NOARGS, 0},
-  {"__reduce_cython__", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_17__reduce_cython__, METH_NOARGS, 0},
-  {"__setstate_cython__", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_19__setstate_cython__, METH_O, 0},
+  {"set_nofphoton", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_3set_nofphoton, METH_O, 0},
+  {"get_logger", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_5get_logger, METH_NOARGS, 0},
+  {"setInitialCoordinate", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_7setInitialCoordinate, METH_VARARGS|METH_KEYWORDS, 0},
+  {"setModel", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_9setModel, METH_VARARGS|METH_KEYWORDS, 0},
+  {"setFluence", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_11setFluence, METH_O, 0},
+  {"getFluenceResult", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_13getFluenceResult, METH_NOARGS, 0},
+  {"setParams", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_15setParams, METH_NOARGS, 0},
+  {"getResult", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_17getResult, METH_NOARGS, 0},
+  {"start", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_19start, METH_NOARGS, 0},
+  {"__reduce_cython__", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_21__reduce_cython__, METH_NOARGS, 0},
+  {"__setstate_cython__", (PyCFunction)__pyx_pw_17_voxel_montecarlo_19BaseVoxelMonteCarlo_23__setstate_cython__, METH_O, 0},
   {0, 0, 0, 0}
 };
 
@@ -11813,8 +12547,9 @@ static int __pyx_tp_clear_17_voxel_montecarlo_VoxelPlateMonteCarlo(PyObject *o) 
 
 static PyMethodDef __pyx_methods_17_voxel_montecarlo_VoxelPlateMonteCarlo[] = {
   {"setParams", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_1setParams, METH_VARARGS|METH_KEYWORDS, 0},
-  {"__reduce_cython__", (PyCFunction)__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_3__reduce_cython__, METH_NOARGS, 0},
-  {"__setstate_cython__", (PyCFunction)__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_5__setstate_cython__, METH_O, 0},
+  {"getParams", (PyCFunction)__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_3getParams, METH_NOARGS, 0},
+  {"__reduce_cython__", (PyCFunction)__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_5__reduce_cython__, METH_NOARGS, 0},
+  {"__setstate_cython__", (PyCFunction)__pyx_pw_17_voxel_montecarlo_20VoxelPlateMonteCarlo_7__setstate_cython__, METH_O, 0},
   {0, 0, 0, 0}
 };
 
@@ -12076,7 +12811,6 @@ static struct PyModuleDef __pyx_moduledef = {
 #endif
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
-  {&__pyx_kp_s_, __pyx_k_, sizeof(__pyx_k_), 0, 0, 1, 0},
   {&__pyx_n_s_BaseVoxelMonteCarlo, __pyx_k_BaseVoxelMonteCarlo, sizeof(__pyx_k_BaseVoxelMonteCarlo), 0, 0, 1, 1},
   {&__pyx_kp_s_Finish, __pyx_k_Finish, sizeof(__pyx_k_Finish), 0, 0, 1, 0},
   {&__pyx_n_s_Fluence, __pyx_k_Fluence, sizeof(__pyx_k_Fluence), 0, 0, 1, 1},
@@ -12084,12 +12818,12 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_u_Format_string_allocated_too_shor_2, __pyx_k_Format_string_allocated_too_shor_2, sizeof(__pyx_k_Format_string_allocated_too_shor_2), 0, 1, 0, 0},
   {&__pyx_n_s_ImportError, __pyx_k_ImportError, sizeof(__pyx_k_ImportError), 0, 0, 1, 1},
   {&__pyx_kp_u_Non_native_byte_order_not_suppor, __pyx_k_Non_native_byte_order_not_suppor, sizeof(__pyx_k_Non_native_byte_order_not_suppor), 0, 1, 0, 0},
-  {&__pyx_kp_s_Progress_s, __pyx_k_Progress_s, sizeof(__pyx_k_Progress_s), 0, 0, 1, 0},
   {&__pyx_n_s_RuntimeError, __pyx_k_RuntimeError, sizeof(__pyx_k_RuntimeError), 0, 0, 1, 1},
   {&__pyx_kp_s_Start, __pyx_k_Start, sizeof(__pyx_k_Start), 0, 0, 1, 0},
   {&__pyx_n_s_TypeError, __pyx_k_TypeError, sizeof(__pyx_k_TypeError), 0, 0, 1, 1},
   {&__pyx_n_s_ValueError, __pyx_k_ValueError, sizeof(__pyx_k_ValueError), 0, 0, 1, 1},
   {&__pyx_n_s_VoxelPlateMonteCarlo, __pyx_k_VoxelPlateMonteCarlo, sizeof(__pyx_k_VoxelPlateMonteCarlo), 0, 0, 1, 1},
+  {&__pyx_kp_s__3, __pyx_k__3, sizeof(__pyx_k__3), 0, 0, 1, 0},
   {&__pyx_n_s_add, __pyx_k_add, sizeof(__pyx_k_add), 0, 0, 1, 1},
   {&__pyx_n_s_array, __pyx_k_array, sizeof(__pyx_k_array), 0, 0, 1, 1},
   {&__pyx_n_s_astype, __pyx_k_astype, sizeof(__pyx_k_astype), 0, 0, 1, 1},
@@ -12105,6 +12839,11 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_getArz, __pyx_k_getArz, sizeof(__pyx_k_getArz), 0, 0, 1, 1},
   {&__pyx_n_s_getstate, __pyx_k_getstate, sizeof(__pyx_k_getstate), 0, 0, 1, 1},
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
+  {&__pyx_n_s_int8, __pyx_k_int8, sizeof(__pyx_k_int8), 0, 0, 1, 1},
+  {&__pyx_n_s_logger1, __pyx_k_logger1, sizeof(__pyx_k_logger1), 0, 0, 1, 1},
+  {&__pyx_n_s_logger2, __pyx_k_logger2, sizeof(__pyx_k_logger2), 0, 0, 1, 1},
+  {&__pyx_n_s_logger_float, __pyx_k_logger_float, sizeof(__pyx_k_logger_float), 0, 0, 1, 1},
+  {&__pyx_n_s_logger_int, __pyx_k_logger_int, sizeof(__pyx_k_logger_int), 0, 0, 1, 1},
   {&__pyx_n_s_ma, __pyx_k_ma, sizeof(__pyx_k_ma), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_ms, __pyx_k_ms, sizeof(__pyx_k_ms), 0, 0, 1, 1},
@@ -12124,6 +12863,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_p, __pyx_k_p, sizeof(__pyx_k_p), 0, 0, 1, 1},
   {&__pyx_n_s_print, __pyx_k_print, sizeof(__pyx_k_print), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_vtable, __pyx_k_pyx_vtable, sizeof(__pyx_k_pyx_vtable), 0, 0, 1, 1},
+  {&__pyx_n_s_rand, __pyx_k_rand, sizeof(__pyx_k_rand), 0, 0, 1, 1},
+  {&__pyx_n_s_random, __pyx_k_random, sizeof(__pyx_k_random), 0, 0, 1, 1},
   {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
   {&__pyx_n_s_reduce, __pyx_k_reduce, sizeof(__pyx_k_reduce), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_cython, __pyx_k_reduce_cython, sizeof(__pyx_k_reduce_cython), 0, 0, 1, 1},
@@ -12135,7 +12876,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_test_2, __pyx_k_test_2, sizeof(__pyx_k_test_2), 0, 0, 1, 1},
   {&__pyx_kp_u_unknown_dtype_code_in_numpy_pxd, __pyx_k_unknown_dtype_code_in_numpy_pxd, sizeof(__pyx_k_unknown_dtype_code_in_numpy_pxd), 0, 1, 0, 0},
   {&__pyx_n_s_v, __pyx_k_v, sizeof(__pyx_k_v), 0, 0, 1, 1},
-  {&__pyx_n_s_voxcel_space, __pyx_k_voxcel_space, sizeof(__pyx_k_voxcel_space), 0, 0, 1, 1},
   {&__pyx_n_s_voxel_model, __pyx_k_voxel_model, sizeof(__pyx_k_voxel_model), 0, 0, 1, 1},
   {&__pyx_n_s_voxel_space, __pyx_k_voxel_space, sizeof(__pyx_k_voxel_space), 0, 0, 1, 1},
   {&__pyx_n_s_w, __pyx_k_w, sizeof(__pyx_k_w), 0, 0, 1, 1},
@@ -12146,7 +12886,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 97, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 140, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(2, 272, __pyx_L1_error)
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) __PYX_ERR(2, 856, __pyx_L1_error)
@@ -12160,24 +12900,19 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "(tree fragment)":2
- * def __reduce_cython__(self):
- *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
- * def __setstate_cython__(self, __pyx_state):
- *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
+  /* "_voxel_montecarlo.pyx":74
+ *         self.w_result = np.zeros(nPh,dtype = "float32")
+ * 
+ *         self.voxel_model = np.zeros((10,10,10),dtype = "int8")             # <<<<<<<<<<<<<<
+ * 
+ * 
  */
-  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(3, __pyx_int_10, __pyx_int_10, __pyx_int_10); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple_);
+  __Pyx_GIVEREF(__pyx_tuple_);
+  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_tuple_); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 74, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
-
-  /* "(tree fragment)":4
- *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
- * def __setstate_cython__(self, __pyx_state):
- *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
- */
-  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(1, 4, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__3);
-  __Pyx_GIVEREF(__pyx_tuple__3);
 
   /* "(tree fragment)":2
  * def __reduce_cython__(self):
@@ -12217,6 +12952,25 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
 
+  /* "(tree fragment)":2
+ * def __reduce_cython__(self):
+ *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
+ * def __setstate_cython__(self, __pyx_state):
+ *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
+ */
+  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__8);
+  __Pyx_GIVEREF(__pyx_tuple__8);
+
+  /* "(tree fragment)":4
+ *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
+ * def __setstate_cython__(self, __pyx_state):
+ *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
+ */
+  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__9);
+  __Pyx_GIVEREF(__pyx_tuple__9);
+
   /* "../../../../../opt/anaconda3/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":272
  *             if ((flags & pybuf.PyBUF_C_CONTIGUOUS == pybuf.PyBUF_C_CONTIGUOUS)
  *                 and not PyArray_CHKFLAGS(self, NPY_ARRAY_C_CONTIGUOUS)):
@@ -12224,9 +12978,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)
  */
-  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_u_ndarray_is_not_C_contiguous); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(2, 272, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__8);
-  __Pyx_GIVEREF(__pyx_tuple__8);
+  __pyx_tuple__10 = PyTuple_Pack(1, __pyx_kp_u_ndarray_is_not_C_contiguous); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(2, 272, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__10);
+  __Pyx_GIVEREF(__pyx_tuple__10);
 
   /* "../../../../../opt/anaconda3/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":276
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)
@@ -12235,9 +12989,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *             info.buf = PyArray_DATA(self)
  */
-  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_kp_u_ndarray_is_not_Fortran_contiguou); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(2, 276, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__9);
-  __Pyx_GIVEREF(__pyx_tuple__9);
+  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_kp_u_ndarray_is_not_Fortran_contiguou); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(2, 276, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__11);
+  __Pyx_GIVEREF(__pyx_tuple__11);
 
   /* "../../../../../opt/anaconda3/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":306
  *                 if ((descr.byteorder == c'>' and little_endian) or
@@ -12246,9 +13000,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *                 if   t == NPY_BYTE:        f = "b"
  *                 elif t == NPY_UBYTE:       f = "B"
  */
-  __pyx_tuple__10 = PyTuple_Pack(1, __pyx_kp_u_Non_native_byte_order_not_suppor); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(2, 306, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__10);
-  __Pyx_GIVEREF(__pyx_tuple__10);
+  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_u_Non_native_byte_order_not_suppor); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(2, 306, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__12);
+  __Pyx_GIVEREF(__pyx_tuple__12);
 
   /* "../../../../../opt/anaconda3/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":856
  * 
@@ -12257,9 +13011,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *         if ((child.byteorder == c'>' and little_endian) or
  */
-  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_kp_u_Format_string_allocated_too_shor); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(2, 856, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__11);
-  __Pyx_GIVEREF(__pyx_tuple__11);
+  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_u_Format_string_allocated_too_shor); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(2, 856, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__13);
+  __Pyx_GIVEREF(__pyx_tuple__13);
 
   /* "../../../../../opt/anaconda3/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":880
  *             t = child.type_num
@@ -12268,9 +13022,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *             # Until ticket #99 is fixed, use integers to avoid warnings
  */
-  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_u_Format_string_allocated_too_shor_2); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(2, 880, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__12);
-  __Pyx_GIVEREF(__pyx_tuple__12);
+  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_u_Format_string_allocated_too_shor_2); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(2, 880, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__14);
+  __Pyx_GIVEREF(__pyx_tuple__14);
 
   /* "../../../../../opt/anaconda3/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1038
  *         _import_array()
@@ -12279,9 +13033,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * cdef inline int import_umath() except -1:
  */
-  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_s_numpy_core_multiarray_failed_to); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(2, 1038, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__13);
-  __Pyx_GIVEREF(__pyx_tuple__13);
+  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_kp_s_numpy_core_multiarray_failed_to); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(2, 1038, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__15);
+  __Pyx_GIVEREF(__pyx_tuple__15);
 
   /* "../../../../../opt/anaconda3/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1044
  *         _import_umath()
@@ -12290,9 +13044,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * cdef inline int import_ufunc() except -1:
  */
-  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_s_numpy_core_umath_failed_to_impor); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(2, 1044, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__14);
-  __Pyx_GIVEREF(__pyx_tuple__14);
+  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_kp_s_numpy_core_umath_failed_to_impor); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(2, 1044, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__16);
+  __Pyx_GIVEREF(__pyx_tuple__16);
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -12302,11 +13056,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
 
 static CYTHON_SMALL_CODE int __Pyx_InitGlobals(void) {
   if (__Pyx_InitStrings(__pyx_string_tab) < 0) __PYX_ERR(0, 2, __pyx_L1_error);
-  __pyx_int_0 = PyInt_FromLong(0); if (unlikely(!__pyx_int_0)) __PYX_ERR(0, 2, __pyx_L1_error)
   __pyx_int_1 = PyInt_FromLong(1); if (unlikely(!__pyx_int_1)) __PYX_ERR(0, 2, __pyx_L1_error)
   __pyx_int_2 = PyInt_FromLong(2); if (unlikely(!__pyx_int_2)) __PYX_ERR(0, 2, __pyx_L1_error)
   __pyx_int_3 = PyInt_FromLong(3); if (unlikely(!__pyx_int_3)) __PYX_ERR(0, 2, __pyx_L1_error)
-  __pyx_int_100 = PyInt_FromLong(100); if (unlikely(!__pyx_int_100)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __pyx_int_10 = PyInt_FromLong(10); if (unlikely(!__pyx_int_10)) __PYX_ERR(0, 2, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -12356,27 +13109,30 @@ static int __Pyx_modinit_type_init_code(void) {
   __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._save_vanish_photon = (PyObject *(*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__save_vanish_photon;
   __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._wUpdate = (float (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, float, float, float, float, float, float, int, int, int))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__wUpdate;
   __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._russianRoulette = (float (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, float))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__russianRoulette;
-  __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._encooder = (float (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, float, float, float, int, int, int))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__encooder;
+  __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._encooder = (PyObject *(*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, float, float, float, int, int, int))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__encooder;
   __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._get_index_val = (float (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, float, float, float))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_index_val;
-  __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._get_next_add = (int (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int, int, float, float, float))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_next_add;
-  __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._create01val = (int (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__create01val;
-  __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo.random_uniform = (float (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_random_uniform;
-  __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo.vectorUpdate = (float (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, float, float, float, float))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_vectorUpdate;
+  __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._get_next_add = (PyObject *(*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int, int, float, float, float))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__get_next_add;
+  __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._create01val = (PyObject *(*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, float, float))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__create01val;
+  __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo.random_uniform = (__pyx_t_5numpy_float32_t (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_random_uniform;
+  __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo.vectorUpdate = (PyObject *(*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, float, float, float, float))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_vectorUpdate;
+  __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._distance_to_boundary = (float (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, float, float, float))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__distance_to_boundary;
   __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._a_photon_movement = (void (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__a_photon_movement;
+  __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo.transmit_v = (PyObject *(*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, float, float, float, float, float))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo_transmit_v;
+  __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._p_movement_to_bouder = (PyObject *(*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, float, float, float, float, float, float, float, float))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__p_movement_to_bouder;
   __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._getAbsorptionCoeff = (float (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__getAbsorptionCoeff;
   __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._getScatteringCoeff = (float (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__getScatteringCoeff;
   __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._getAnisotropyCoeff = (float (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__getAnisotropyCoeff;
   __pyx_vtable_17_voxel_montecarlo_BaseVoxelMonteCarlo._getReflectiveIndex = (float (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int))__pyx_f_17_voxel_montecarlo_19BaseVoxelMonteCarlo__getReflectiveIndex;
-  if (PyType_Ready(&__pyx_type_17_voxel_montecarlo_BaseVoxelMonteCarlo) < 0) __PYX_ERR(0, 23, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_17_voxel_montecarlo_BaseVoxelMonteCarlo) < 0) __PYX_ERR(0, 41, __pyx_L1_error)
   #if PY_VERSION_HEX < 0x030800B1
   __pyx_type_17_voxel_montecarlo_BaseVoxelMonteCarlo.tp_print = 0;
   #endif
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_17_voxel_montecarlo_BaseVoxelMonteCarlo.tp_dictoffset && __pyx_type_17_voxel_montecarlo_BaseVoxelMonteCarlo.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_17_voxel_montecarlo_BaseVoxelMonteCarlo.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (__Pyx_SetVtable(__pyx_type_17_voxel_montecarlo_BaseVoxelMonteCarlo.tp_dict, __pyx_vtabptr_17_voxel_montecarlo_BaseVoxelMonteCarlo) < 0) __PYX_ERR(0, 23, __pyx_L1_error)
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_BaseVoxelMonteCarlo, (PyObject *)&__pyx_type_17_voxel_montecarlo_BaseVoxelMonteCarlo) < 0) __PYX_ERR(0, 23, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_17_voxel_montecarlo_BaseVoxelMonteCarlo) < 0) __PYX_ERR(0, 23, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_type_17_voxel_montecarlo_BaseVoxelMonteCarlo.tp_dict, __pyx_vtabptr_17_voxel_montecarlo_BaseVoxelMonteCarlo) < 0) __PYX_ERR(0, 41, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_BaseVoxelMonteCarlo, (PyObject *)&__pyx_type_17_voxel_montecarlo_BaseVoxelMonteCarlo) < 0) __PYX_ERR(0, 41, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_17_voxel_montecarlo_BaseVoxelMonteCarlo) < 0) __PYX_ERR(0, 41, __pyx_L1_error)
   __pyx_ptype_17_voxel_montecarlo_BaseVoxelMonteCarlo = &__pyx_type_17_voxel_montecarlo_BaseVoxelMonteCarlo;
   __pyx_vtabptr_17_voxel_montecarlo_VoxelPlateMonteCarlo = &__pyx_vtable_17_voxel_montecarlo_VoxelPlateMonteCarlo;
   __pyx_vtable_17_voxel_montecarlo_VoxelPlateMonteCarlo.__pyx_base = *__pyx_vtabptr_17_voxel_montecarlo_BaseVoxelMonteCarlo;
@@ -12385,31 +13141,31 @@ static int __Pyx_modinit_type_init_code(void) {
   __pyx_vtable_17_voxel_montecarlo_VoxelPlateMonteCarlo.__pyx_base._getAnisotropyCoeff = (float (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int))__pyx_f_17_voxel_montecarlo_20VoxelPlateMonteCarlo__getAnisotropyCoeff;
   __pyx_vtable_17_voxel_montecarlo_VoxelPlateMonteCarlo.__pyx_base._getReflectiveIndex = (float (*)(struct __pyx_obj_17_voxel_montecarlo_BaseVoxelMonteCarlo *, int, int, int))__pyx_f_17_voxel_montecarlo_20VoxelPlateMonteCarlo__getReflectiveIndex;
   __pyx_type_17_voxel_montecarlo_VoxelPlateMonteCarlo.tp_base = __pyx_ptype_17_voxel_montecarlo_BaseVoxelMonteCarlo;
-  if (PyType_Ready(&__pyx_type_17_voxel_montecarlo_VoxelPlateMonteCarlo) < 0) __PYX_ERR(0, 384, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_17_voxel_montecarlo_VoxelPlateMonteCarlo) < 0) __PYX_ERR(0, 461, __pyx_L1_error)
   #if PY_VERSION_HEX < 0x030800B1
   __pyx_type_17_voxel_montecarlo_VoxelPlateMonteCarlo.tp_print = 0;
   #endif
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_17_voxel_montecarlo_VoxelPlateMonteCarlo.tp_dictoffset && __pyx_type_17_voxel_montecarlo_VoxelPlateMonteCarlo.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_17_voxel_montecarlo_VoxelPlateMonteCarlo.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (__Pyx_SetVtable(__pyx_type_17_voxel_montecarlo_VoxelPlateMonteCarlo.tp_dict, __pyx_vtabptr_17_voxel_montecarlo_VoxelPlateMonteCarlo) < 0) __PYX_ERR(0, 384, __pyx_L1_error)
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_VoxelPlateMonteCarlo, (PyObject *)&__pyx_type_17_voxel_montecarlo_VoxelPlateMonteCarlo) < 0) __PYX_ERR(0, 384, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_17_voxel_montecarlo_VoxelPlateMonteCarlo) < 0) __PYX_ERR(0, 384, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_type_17_voxel_montecarlo_VoxelPlateMonteCarlo.tp_dict, __pyx_vtabptr_17_voxel_montecarlo_VoxelPlateMonteCarlo) < 0) __PYX_ERR(0, 461, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_VoxelPlateMonteCarlo, (PyObject *)&__pyx_type_17_voxel_montecarlo_VoxelPlateMonteCarlo) < 0) __PYX_ERR(0, 461, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_17_voxel_montecarlo_VoxelPlateMonteCarlo) < 0) __PYX_ERR(0, 461, __pyx_L1_error)
   __pyx_ptype_17_voxel_montecarlo_VoxelPlateMonteCarlo = &__pyx_type_17_voxel_montecarlo_VoxelPlateMonteCarlo;
   __pyx_vtabptr_17_voxel_montecarlo_Fluence = &__pyx_vtable_17_voxel_montecarlo_Fluence;
   __pyx_vtable_17_voxel_montecarlo_Fluence.getArz = (PyObject *(*)(struct __pyx_obj_17_voxel_montecarlo_Fluence *, int __pyx_skip_dispatch))__pyx_f_17_voxel_montecarlo_7Fluence_getArz;
   __pyx_vtable_17_voxel_montecarlo_Fluence.test = (PyObject *(*)(struct __pyx_obj_17_voxel_montecarlo_Fluence *, float, float, float, float, int __pyx_skip_dispatch))__pyx_f_17_voxel_montecarlo_7Fluence_test;
   __pyx_vtable_17_voxel_montecarlo_Fluence.saveFluence = (PyObject *(*)(struct __pyx_obj_17_voxel_montecarlo_Fluence *, float, float, float, float))__pyx_f_17_voxel_montecarlo_7Fluence_saveFluence;
-  if (PyType_Ready(&__pyx_type_17_voxel_montecarlo_Fluence) < 0) __PYX_ERR(0, 419, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_17_voxel_montecarlo_Fluence) < 0) __PYX_ERR(0, 504, __pyx_L1_error)
   #if PY_VERSION_HEX < 0x030800B1
   __pyx_type_17_voxel_montecarlo_Fluence.tp_print = 0;
   #endif
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_17_voxel_montecarlo_Fluence.tp_dictoffset && __pyx_type_17_voxel_montecarlo_Fluence.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_17_voxel_montecarlo_Fluence.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (__Pyx_SetVtable(__pyx_type_17_voxel_montecarlo_Fluence.tp_dict, __pyx_vtabptr_17_voxel_montecarlo_Fluence) < 0) __PYX_ERR(0, 419, __pyx_L1_error)
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_Fluence, (PyObject *)&__pyx_type_17_voxel_montecarlo_Fluence) < 0) __PYX_ERR(0, 419, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_17_voxel_montecarlo_Fluence) < 0) __PYX_ERR(0, 419, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_type_17_voxel_montecarlo_Fluence.tp_dict, __pyx_vtabptr_17_voxel_montecarlo_Fluence) < 0) __PYX_ERR(0, 504, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_Fluence, (PyObject *)&__pyx_type_17_voxel_montecarlo_Fluence) < 0) __PYX_ERR(0, 504, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_17_voxel_montecarlo_Fluence) < 0) __PYX_ERR(0, 504, __pyx_L1_error)
   __pyx_ptype_17_voxel_montecarlo_Fluence = &__pyx_type_17_voxel_montecarlo_Fluence;
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -13901,115 +14657,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func) {
     return q;
 }
 
-/* PyIntCompare */
-  static CYTHON_INLINE PyObject* __Pyx_PyInt_EqObjC(PyObject *op1, PyObject *op2, CYTHON_UNUSED long intval, CYTHON_UNUSED long inplace) {
-    if (op1 == op2) {
-        Py_RETURN_TRUE;
-    }
-    #if PY_MAJOR_VERSION < 3
-    if (likely(PyInt_CheckExact(op1))) {
-        const long b = intval;
-        long a = PyInt_AS_LONG(op1);
-        if (a == b) Py_RETURN_TRUE; else Py_RETURN_FALSE;
-    }
-    #endif
-    #if CYTHON_USE_PYLONG_INTERNALS
-    if (likely(PyLong_CheckExact(op1))) {
-        int unequal;
-        unsigned long uintval;
-        Py_ssize_t size = Py_SIZE(op1);
-        const digit* digits = ((PyLongObject*)op1)->ob_digit;
-        if (intval == 0) {
-            if (size == 0) Py_RETURN_TRUE; else Py_RETURN_FALSE;
-        } else if (intval < 0) {
-            if (size >= 0)
-                Py_RETURN_FALSE;
-            intval = -intval;
-            size = -size;
-        } else {
-            if (size <= 0)
-                Py_RETURN_FALSE;
-        }
-        uintval = (unsigned long) intval;
-#if PyLong_SHIFT * 4 < SIZEOF_LONG*8
-        if (uintval >> (PyLong_SHIFT * 4)) {
-            unequal = (size != 5) || (digits[0] != (uintval & (unsigned long) PyLong_MASK))
-                 | (digits[1] != ((uintval >> (1 * PyLong_SHIFT)) & (unsigned long) PyLong_MASK)) | (digits[2] != ((uintval >> (2 * PyLong_SHIFT)) & (unsigned long) PyLong_MASK)) | (digits[3] != ((uintval >> (3 * PyLong_SHIFT)) & (unsigned long) PyLong_MASK)) | (digits[4] != ((uintval >> (4 * PyLong_SHIFT)) & (unsigned long) PyLong_MASK));
-        } else
-#endif
-#if PyLong_SHIFT * 3 < SIZEOF_LONG*8
-        if (uintval >> (PyLong_SHIFT * 3)) {
-            unequal = (size != 4) || (digits[0] != (uintval & (unsigned long) PyLong_MASK))
-                 | (digits[1] != ((uintval >> (1 * PyLong_SHIFT)) & (unsigned long) PyLong_MASK)) | (digits[2] != ((uintval >> (2 * PyLong_SHIFT)) & (unsigned long) PyLong_MASK)) | (digits[3] != ((uintval >> (3 * PyLong_SHIFT)) & (unsigned long) PyLong_MASK));
-        } else
-#endif
-#if PyLong_SHIFT * 2 < SIZEOF_LONG*8
-        if (uintval >> (PyLong_SHIFT * 2)) {
-            unequal = (size != 3) || (digits[0] != (uintval & (unsigned long) PyLong_MASK))
-                 | (digits[1] != ((uintval >> (1 * PyLong_SHIFT)) & (unsigned long) PyLong_MASK)) | (digits[2] != ((uintval >> (2 * PyLong_SHIFT)) & (unsigned long) PyLong_MASK));
-        } else
-#endif
-#if PyLong_SHIFT * 1 < SIZEOF_LONG*8
-        if (uintval >> (PyLong_SHIFT * 1)) {
-            unequal = (size != 2) || (digits[0] != (uintval & (unsigned long) PyLong_MASK))
-                 | (digits[1] != ((uintval >> (1 * PyLong_SHIFT)) & (unsigned long) PyLong_MASK));
-        } else
-#endif
-            unequal = (size != 1) || (((unsigned long) digits[0]) != (uintval & (unsigned long) PyLong_MASK));
-        if (unequal == 0) Py_RETURN_TRUE; else Py_RETURN_FALSE;
-    }
-    #endif
-    if (PyFloat_CheckExact(op1)) {
-        const long b = intval;
-        double a = PyFloat_AS_DOUBLE(op1);
-        if ((double)a == (double)b) Py_RETURN_TRUE; else Py_RETURN_FALSE;
-    }
-    return (
-        PyObject_RichCompare(op1, op2, Py_EQ));
-}
-
-/* WriteUnraisableException */
-  static void __Pyx_WriteUnraisable(const char *name, CYTHON_UNUSED int clineno,
-                                  CYTHON_UNUSED int lineno, CYTHON_UNUSED const char *filename,
-                                  int full_traceback, CYTHON_UNUSED int nogil) {
-    PyObject *old_exc, *old_val, *old_tb;
-    PyObject *ctx;
-    __Pyx_PyThreadState_declare
-#ifdef WITH_THREAD
-    PyGILState_STATE state;
-    if (nogil)
-        state = PyGILState_Ensure();
-#ifdef _MSC_VER
-    else state = (PyGILState_STATE)-1;
-#endif
-#endif
-    __Pyx_PyThreadState_assign
-    __Pyx_ErrFetch(&old_exc, &old_val, &old_tb);
-    if (full_traceback) {
-        Py_XINCREF(old_exc);
-        Py_XINCREF(old_val);
-        Py_XINCREF(old_tb);
-        __Pyx_ErrRestore(old_exc, old_val, old_tb);
-        PyErr_PrintEx(1);
-    }
-    #if PY_MAJOR_VERSION < 3
-    ctx = PyString_FromString(name);
-    #else
-    ctx = PyUnicode_FromString(name);
-    #endif
-    __Pyx_ErrRestore(old_exc, old_val, old_tb);
-    if (!ctx) {
-        PyErr_WriteUnraisable(Py_None);
-    } else {
-        PyErr_WriteUnraisable(ctx);
-        Py_DECREF(ctx);
-    }
-#ifdef WITH_THREAD
-    if (nogil)
-        PyGILState_Release(state);
-#endif
-}
-
 /* GetItemInt */
   static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) {
     PyObject *r;
@@ -14095,6 +14742,48 @@ static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, 
     }
 #endif
     return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+}
+
+/* WriteUnraisableException */
+  static void __Pyx_WriteUnraisable(const char *name, CYTHON_UNUSED int clineno,
+                                  CYTHON_UNUSED int lineno, CYTHON_UNUSED const char *filename,
+                                  int full_traceback, CYTHON_UNUSED int nogil) {
+    PyObject *old_exc, *old_val, *old_tb;
+    PyObject *ctx;
+    __Pyx_PyThreadState_declare
+#ifdef WITH_THREAD
+    PyGILState_STATE state;
+    if (nogil)
+        state = PyGILState_Ensure();
+#ifdef _MSC_VER
+    else state = (PyGILState_STATE)-1;
+#endif
+#endif
+    __Pyx_PyThreadState_assign
+    __Pyx_ErrFetch(&old_exc, &old_val, &old_tb);
+    if (full_traceback) {
+        Py_XINCREF(old_exc);
+        Py_XINCREF(old_val);
+        Py_XINCREF(old_tb);
+        __Pyx_ErrRestore(old_exc, old_val, old_tb);
+        PyErr_PrintEx(1);
+    }
+    #if PY_MAJOR_VERSION < 3
+    ctx = PyString_FromString(name);
+    #else
+    ctx = PyUnicode_FromString(name);
+    #endif
+    __Pyx_ErrRestore(old_exc, old_val, old_tb);
+    if (!ctx) {
+        PyErr_WriteUnraisable(Py_None);
+    } else {
+        PyErr_WriteUnraisable(ctx);
+        Py_DECREF(ctx);
+    }
+#ifdef WITH_THREAD
+    if (nogil)
+        PyGILState_Release(state);
+#endif
 }
 
 /* RaiseTooManyValuesToUnpack */
@@ -14327,16 +15016,6 @@ static PyObject* __Pyx_PyInt_AddObjC(PyObject *op1, PyObject *op2, CYTHON_UNUSED
             return PyFloat_FromDouble(result);
     }
     return (inplace ? PyNumber_InPlaceAdd : PyNumber_Add)(op1, op2);
-}
-#endif
-
-/* PyIntFromDouble */
-  #if PY_MAJOR_VERSION < 3
-static CYTHON_INLINE PyObject* __Pyx_PyInt_FromDouble(double value) {
-    if (value >= (double)LONG_MIN && value <= (double)LONG_MAX) {
-        return PyInt_FromLong((long)value);
-    }
-    return PyLong_FromDouble(value);
 }
 #endif
 
