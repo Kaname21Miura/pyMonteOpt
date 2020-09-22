@@ -8,12 +8,12 @@ Created on Thu Sep 10 17:12:05 2020
 
 
 import numpy as np
-from ..montecalro import MonteCalro
+from ..utils.montecalro import MonteCalro
 from abc import ABCMeta, abstractmethod
 from ..utils.validation import _deprecate_positional_args
 from ..fluence import IntarnalFluence
 import gc
-__all__ = ['VoxelPlateModel']
+__all__ = ['VoxelPlateModel','PlateModel']
 
 # =============================================================================
 # Base solid model
@@ -83,8 +83,8 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         return w-Rsp
     
     @_deprecate_positional_args   
-    def built(self,**kwargs):
-        self.model.built(**kwargs)
+    def build(self,**kwargs):
+        self.model.build(**kwargs)
         self.generateInisalCoodinate(self.nPh)
     
     def photonVanishing(self,p,v,w,add):
@@ -116,14 +116,14 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         l = self.model.voxel_space
         A = self.create01Array(np.argmin(db,axis=0),m=3)
         B = ~A
-        ni = self.model.getReflectiveIndex(add)
+        
         sigAv = A*np.sign(v).astype("int16")
         ds = np.min(db,axis=0)
         s -= ds
-        
         p = l/2*A*np.sign(v)+B*(p+v*ds)
         
-        nt = self.model.getReflectiveIndex((add+sigAv))
+        ni = self.model.getReflectiveIndex(add)
+        nt = self.model.getReflectiveIndex(add+sigAv)
         pb_index = np.where(ni!=nt)[0]
         
         if list(pb_index) != []:
@@ -176,7 +176,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
             ma = self.model.getAbsorptionCoeff(add_)
             ms = self.model.getScatteringCoeff(add_)
             mt = ma+ms
-            s_ = s_/mt
+            s_ /= mt
             pb_index = np.where(s_-db.min(0)>=0)[0]
             pn_index = np.delete(np.arange(s_.size),pb_index)
             if list(pb_index) != []:
@@ -186,12 +186,13 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
                 
                 add[:,index[pn_index]] = add_[:,pn_index]
                 index = index[pb_index]
-                v_,p_,add_,s_ = self.borderAct(v_[:,pb_index],
-                                               p_[:,pb_index],
-                                               add_[:,pb_index],
-                                               s_[pb_index],
-                                               db[:,pb_index])
-                s_ = s_*mt[pb_index]
+                
+                v_,p_,add_,s_ = self.borderAct(
+                    v_[:,pb_index],p_[:,pb_index],
+                    add_[:,pb_index],s_[pb_index],
+                    db[:,pb_index])
+                
+                s_ *= mt[pb_index]
                 out_index_ = np.where(box_model[add_[0],add_[1],add_[2]] < 0)[0]
                 if list(out_index_) != []:
                     v[:,index[out_index_]] = v_[:,out_index_]
@@ -230,7 +231,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
 # =============================================================================
         
 class VoxelModel:
-    def built(self):
+    def build(self):
         pass
     def getAbsorptionCoeff(self,add):
         x,y,z = add
@@ -282,7 +283,7 @@ class PlateModel(VoxelModel):
         self.voxel_model[:,:,0] = -1; self.voxel_model[:,:,-1] = -1
         
     @_deprecate_positional_args
-    def built(self,*,thickness,xy_size,voxel_space,ma,ms,g,n,n_air,f = 'float32'):
+    def build(self,*,thickness,xy_size,voxel_space,ma,ms,g,n,n_air,f = 'float32'):
         del self.voxel_model
         gc.collect()
         #-1はモデルの外側

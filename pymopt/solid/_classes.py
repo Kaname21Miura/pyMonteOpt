@@ -10,7 +10,7 @@ import numpy as np
 import itertools
 from abc import ABCMeta, abstractmethod
 
-from ..montecalro import MonteCalro
+from ..utile.montecalro import MonteCalro
 from ..fluence import IntarnalFluence
 from ..utils import _deprecate_positional_args
 
@@ -40,7 +40,7 @@ class BaseSolidModel(MonteCalro,metaclass = ABCMeta):
         self.ma = np.array([1])
         self.g = np.array([1])
         
-        self.built(*initial_data, **kwargs)
+        self.build(*initial_data, **kwargs)
         self.generateInisalCoodinate()
         if self.fluence :
             self.fluence = IntarnalFluence(nr=self.nr,nz=self.nz,dr=self.dr,dz=self.dz)
@@ -57,7 +57,7 @@ class BaseSolidModel(MonteCalro,metaclass = ABCMeta):
             self.checkNumpyArray(val,key)
             setattr(self,key,np.array(val).astype(self.f_bit))
         
-    def built(self,*initial_data, **kwargs):
+    def build(self,*initial_data, **kwargs):
                 
         for dictionary in initial_data:
             for key in dictionary:

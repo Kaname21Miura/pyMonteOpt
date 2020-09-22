@@ -218,10 +218,10 @@ class MonteCalro:
         elapsed_time = end - start
         q, mod = divmod(elapsed_time, 60)
         if q < 60:
-            print('Calculation time: %d minutes %d seconds.' % (q, mod))
+            print('Calculation time: %d minutes %0.3f seconds.' % (q, mod))
         else:
             q2, mod2 = divmod(q, 60)
-            print('Calculation time: %d h %d minutes.' % (q2, mod2))
+            print('Calculation time: %d h %0.3f minutes.' % (q2, mod2))
             
     def getRdTtRate(self):
         Tt_index = np.where(self.v_result[2]>0)[0]

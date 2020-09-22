@@ -10,31 +10,13 @@ cimport numpy as np
 np.import_array()
 
 from libc.stdlib cimport rand, RAND_MAX
+
 from libc.math cimport sin, cos, tan, acos, asin, copysign, sqrt,log,fabs
 
 #from libcpp cimport bool
 cdef float NAN = np.nan
 ctypedef np.float32_t DTYPE_t
 
-"""# distutils: language = c++
-# distutils: extra_compile_args = -std=c++11
-
-cdef extern from "<random>" namespace "std":
-    cdef cppclass mt19937:
-        mt19937() # we need to define this constructor to stack allocate classes in Cython
-        mt19937(unsigned int seed) # not worrying about matching the exact int type for seed
-
-    cdef cppclass uniform_real_distribution[T]:
-        uniform_real_distribution()
-        uniform_real_distribution(T a, T b)
-        T operator()(mt19937 gen) # ignore the possibility of using other classes for "gen"
-
-def test():
-    cdef:
-        mt19937 gen = mt19937(5)
-        uniform_real_distribution[double] dist = uniform_real_distribution[double](0.0,1.0)
-    return dist(gen)
-"""
 # =============================================================================
 # BaseVoxelMonteCarlo
 # =============================================================================    
@@ -123,15 +105,8 @@ cdef class BaseVoxelMonteCarlo:
             }
     
 
-    cpdef start(self):
-        print("")
-        print("###### Start ######")
-        print("")
-        
+    cpdef start(self):        
         self._monteCycle()
-        
-        print("")
-        print("###### Finish ######")
             
     cdef void _monteCycle(self):
         cdef int n_Photon = self.nPh
@@ -203,7 +178,9 @@ cdef class BaseVoxelMonteCarlo:
         return ex, ey, ez
         
     
-    cdef float _get_index_val(self,int index ,float x, float y, float z):
+    cdef float _get_index_val(
+        self,int index ,float x, float y, float z
+        ):
         cdef float val = 0.
         if index == 0:
             val = x
@@ -213,21 +190,21 @@ cdef class BaseVoxelMonteCarlo:
             val = z
         return val
                    
-    cdef _get_next_add(self,int index, int x, int y, int z, 
-                           float vx, float vy, float vz):
-        cdef int val = 0
+    cdef (int,int,int) _get_next_add(
+        self,int index,int x, int y, int z, 
+        float vx, float vy, float vz
+        ):
         if index == 0:
-            val = int(copysign(1,vx))
-            x = x + val
+            x += int(copysign(1,vx))
         elif index == 1:
-            val = int(copysign(1,vy))
-            y = y + val
+            y += int(copysign(1,vy))
         elif index == 2:
-            val = int(copysign(1,vz))
-            z = z + val
+            z += int(copysign(1,vz))
         return x,y,z
     
-    cdef _create01val(self,int index, float index_val,float base_val):
+    cdef (float,float,float) _create01val(
+        self,int index, float index_val,float base_val
+        ):
         cdef float x_,y_,z_
         x_ = base_val; y_ = base_val; z_ = base_val
         if index == 0:
@@ -236,41 +213,41 @@ cdef class BaseVoxelMonteCarlo:
             y_ = index_val
         elif index == 2:
             z_ = index_val
-        
         return x_, y_, z_
     
     
-    """cdef float random_uniform(self):
+    cdef float random_uniform(self):
         cdef float random = float(rand())
         cdef float randmax = float(RAND_MAX)
-        return random/randmax"""
+        return random/randmax
         
-    cdef np.float32_t random_uniform(self):
+    """cdef np.float32_t random_uniform(self):
         cdef np.float32_t r = np.random.rand()
-        return r
+        return r"""
     
-    cdef vectorUpdate(self,float vx,float vy,float vz,float g):
+    cdef (float,float,float) vectorUpdate(
+        self,float vx,float vy,float vz,float g
+        ):
         cdef:
             float randnum1, randnum2
-            float cosTh,sinTh, cosFi, sinFi,val_f
+            float cosTh,sinTh, cosFi, sinFi,val_f,Fi
             float th = 0.99999
             float distance
             
         randnum1 = self.random_uniform()
         randnum2 = self.random_uniform()
-
-        if g == 0:
+        if g == 0.:
             cosTh = 2*randnum1-1
         else:
             cosTh = (1+g**2-((1-g**2)/(1-g+2*g*randnum1))**2)/(2*g)
         
         sinTh = sqrt(1-cosTh**2)
         
-        cdef float Fi = 2*3.141592*randnum2
+        Fi = 2*3.141592*randnum2
         cosFi = cos(Fi)
         sinFi = sin(Fi)
     
-        if abs(vz) <= th:
+        if fabs(vz) <= th:
             val_f = sqrt(1.-vz**2)
 
             vx = sinTh*(vx*vz*cosFi-vy*sinFi)/val_f + vx*cosTh
@@ -282,11 +259,10 @@ cdef class BaseVoxelMonteCarlo:
             vy = sinTh*sinFi
             vz = cosTh*copysign(1,vz) 
         
-        distance = sqrt(vx**2 + vy**2 + vz**2)
-        vx = vx/distance
-        vy = vy/distance
-        vz = vz/distance
+        #distance = (vx**2 + vy**2 + vz**2)**0.5
+        #vx /= distance;vy /= distance;vz /= distance
         return vx,vy,vz
+            
     
     cdef float _distance_to_boundary(self,float x, float v, float l):
         cdef float db
@@ -320,8 +296,7 @@ cdef class BaseVoxelMonteCarlo:
         
         flag_1 = 1
         while flag_1:
-            s = self.random_uniform()
-            s = -log(s)
+            s = -log(self.random_uniform())
             flag_2 = 1
             while flag_2:
                 ma = self._getAbsorptionCoeff(adx,ady,adz)
@@ -344,17 +319,16 @@ cdef class BaseVoxelMonteCarlo:
                 val_f = s-db_min
                 
                 if val_f >= 0:
-
-                    px,py,pz = self._p_movement_to_bouder(index,px,py,pz,vx,vy,vz,db_min,l)
-                    
-                    ni = self._getReflectiveIndex(adx,ady,adz)
-                    val_xi, val_yi, val_zi = self._get_next_add(index,adx,ady,adz,vx,vy,vz)
-                        
-                    nt = self._getReflectiveIndex(val_xi,val_yi,val_zi)
+                    px,py,pz = self._p_movement_to_bouder(
+                        index,px,py,pz,vx,vy,vz,db_min,l)
                     s -= db_min
                     
+                    ni = self._getReflectiveIndex(adx,ady,adz)
+                    val_xi, val_yi, val_zi = self._get_next_add(
+                        index,adx,ady,adz,vx,vy,vz)
+                    nt = self._getReflectiveIndex(val_xi,val_yi,val_zi)
+                    
                     if ni != nt:
-                        
                         ai = fabs(self._get_index_val(index,vx,vy,vz))
                         ai = acos(ai)
                         val_f = asin(nt/ni)
@@ -362,15 +336,14 @@ cdef class BaseVoxelMonteCarlo:
                             val_f = self.random_uniform()
                             self.logger_float[p_id] = val_f
                             at = asin(sin(ai)*(ni/nt))
-                            Ra = val_f - 0.5*((sin(ai-at)/sin(ai+at))**2+(tan(ai-at)/tan(ai+at))**2)
+                            Ra = val_f - 0.5*((sin(ai-at)/sin(ai+at))**2\
+                                              +(tan(ai-at)/tan(ai+at))**2)
                         else:
                             Ra = -1
                             
                         if Ra <= 0: #Internally reflect
                             val_xf,val_yf,val_zf = self._create01val(index,-1.,1.)
-                            vx *= val_xf
-                            vy *= val_yf
-                            vz *= val_zf
+                            vx *= val_xf; vy *= val_yf; vz *= val_zf
                             
                         else: #Transmit
                             adx = val_xi; ady = val_yi; adz = val_zi
@@ -379,44 +352,39 @@ cdef class BaseVoxelMonteCarlo:
                             vx,vy,vz = self.transmit_v(index,vx,vy,vz,ni/nt,val_f)
                             
                             val_xf,val_yf,val_zf = self._create01val(index,-1.,1.)
-                            px *= val_xf
-                            py *= val_yf
-                            pz *= val_zf
+                            px *= val_xf; py *= val_yf; pz *= val_zf
                             
                     else:
                         adx = val_xi; ady = val_yi; adz = val_zi
                         
                         val_xf,val_yf,val_zf= self._create01val(index,-1.,1.)
-                        px *= val_xf
-                        py *= val_yf
-                        pz *= val_zf
+                        px *= val_xf; py *= val_yf; pz *= val_zf
                         
                     s *= mt
-                    #val_i = self._get_model_val_atAdd(adx,ady,adz)
                     val_i = self.voxel_model[adx][ady][adz]
                     if val_i < 0:
                         self._save_photon(p_id,px,py,pz,adx,ady,adz,vx,vy,vz,w)
                         flag_1 = 0
                         break
-                    
                 else:
-                    px += vx*s
-                    py += vy*s
-                    pz += vz*s
-                    g = self._getAnisotropyCoeff(adx,ady,adz)
-                    
-                    vx,vy,vz = self.vectorUpdate( vx, vy, vz, g)
-                    w = self._wUpdate(w,ma,mt,px,py,pz,adx,ady,adz)
-                    if w <= 0.0001:
-                        w = self._russianRoulette(w)
-                        if w == 0.:
-                            self._save_vanish_photon(p_id)
-                            flag_1 = 0
-                            break
+                    px += vx*s; py += vy*s; pz += vz*s
                     flag_2 = 0
+                    break
+                
+            g = self._getAnisotropyCoeff(adx,ady,adz)
+            vx,vy,vz = self.vectorUpdate( vx, vy, vz, g)
+            w = self._wUpdate(w,ma,mt,px,py,pz,adx,ady,adz)
+            if w <= 0.0001:
+                w = self._russianRoulette(w)
+                if w == 0.:
+                    self._save_vanish_photon(p_id)
+                    flag_1 = 0
+                    break
                     
-    cdef transmit_v(self,int index, float vx,float vy, float vz,
-                    float ni_by_nt,float cos_ai):
+    cdef (float,float,float) transmit_v(
+        self,int index, float vx,float vy, float vz,
+        float ni_by_nt,float cos_ai
+        ):
         if index == 0:
             vx = cos_ai*copysign(1,vx)
             vy *= ni_by_nt; vz *= ni_by_nt
@@ -428,8 +396,10 @@ cdef class BaseVoxelMonteCarlo:
             vx *= ni_by_nt; vy *= ni_by_nt
         return vx,vy,vz
     
-    cdef _p_movement_to_bouder(self,int index, float px, float py, float pz,
-                              float vx, float vy, float vz, float db_min, float l):        
+    cdef (float,float,float) _p_movement_to_bouder(
+        self,int index, float px, float py, float pz,
+        float vx, float vy, float vz, float db_min, float l
+        ):   
         if index == 0:
             px = l*copysign(1,vx)/2.
             py += vy*db_min; pz += vz*db_min
