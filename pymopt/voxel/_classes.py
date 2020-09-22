@@ -9,6 +9,7 @@ Created on Thu Sep 10 17:12:05 2020
 
 import numpy as np
 from ..utils.montecalro import MonteCalro
+from ..utils import readDICOM as dcm
 from abc import ABCMeta, abstractmethod
 from ..utils.validation import _deprecate_positional_args
 from ..fluence import IntarnalFluence
@@ -250,6 +251,82 @@ class VoxelModel:
         index = self.voxel_model[x,y,z]+1
         return self.n[index]
     
+class DicomModel(VoxelModel):
+    
+    @_deprecate_positional_args
+    def build(self,*,thickness,xy_size,voxel_space,ma,ms,g,n,n_air,f = 'float32'):
+        del self.voxel_model
+        gc.collect()
+        #-1はモデルの外側
+        self.voxel_space = voxel_space
+        self.xy_size = xy_size
+        self.borderposit = self._make_borderposit(thickness,f)
+        self._make_voxel_model()
+
+        self.n =np.array([n_air]+n).astype(f)
+        self.ms = np.array(ms).astype(f)
+        self.ma = np.array(ma).astype(f)
+        self.g = np.array(g).astype(f)
+        self.getModelSize()
+        
+    def import_dicom(self,path,dtype = 'int8'):
+        self.path = path
+        self.dtype = dtype
+        array_dicom,resol,ConstPixelDims,ConstPixelSpacing = dcm.readDicom(
+            path,dtype)
+        self.voxel_model = array_dicom
+        self.ConstPixelSpacing = list(ConstPixelSpacing)
+        self.ConstPixelDims = ConstPixelDims
+        self.resol = resol
+        
+    def trim(self,*,right,left,upper,lower,save = False):
+        image = self.voxel_model
+        
+        right = int(right/self.ConstPixelSpacing[0])*-1
+        left = int(left/self.ConstPixelSpacing[0])
+        upper = int(upper/self.ConstPixelSpacing[0])*-1
+        lower = int(lower/self.ConstPixelSpacing[0])
+        image[:lower,:,:] = -10
+        image[upper:,:,:] = -10
+        image[:,right:,:] = -10
+        image[:,:left,:] = -10
+        img_shape = image.shape
+        
+        image = image.ravel()
+        index = np.where(image==-10)[0]
+        image = np.delete(image,index)
+        L0 = self.ConstPixelDims[0]-lower+upper
+        L1 = self.ConstPixelDims[1]-left+right
+        L2 = self.ConstPixelDims[2]
+        image = image.reshape([L0,L1,L2])
+        
+        resol0 = [self.ConstPixelSpacing[0]*i for i in range(image.shape[0]+1)]
+        resol1 = [self.ConstPixelSpacing[0]*i for i in range(image.shape[1]+1)]
+        
+        image[0,:,:] = -1
+        image[-1,:,:] = -1
+        image[:,0,:] = -1
+        image[:,-1,:] = -1
+        
+        dcm.displayGraph(image,resol1,resol0)
+        print('Image shape was changed from (%d,%d,%d)' %img_shape)
+        print('            >>>>>>>     to   (%d,%d,%d)' %image.shape)
+        
+        
+    def rot90deg(self):
+        pass
+    def model_set(self):
+        pass
+    
+    def reset_stting(self):
+        array_dicom,resol,ConstPixelDims,ConstPixelSpacing = dcm.readDicom(
+            self.path,self.dtype)
+    
+    def reConstArray(self,threshold=9500):
+        self.voxel_model = dcm.reConstArray_8(self.voxel_model,threshold)
+        
+        
+        
 class PlateModel(VoxelModel):
     @_deprecate_positional_args
     def __init__(
@@ -305,7 +382,7 @@ class PlateModel(VoxelModel):
                 'g':self.g}
         
     def getModelSize(self):
-        print("Memory area size for voxel storage: %d Mbyte" % (self.voxel_model.nbytes*1e-6))
+        print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
         
 # =============================================================================
 # Public montecalro model
@@ -324,3 +401,12 @@ class VoxelPlateModel(BaseVoxelMonteCarlo):
                 }
     def getParams(self):
         return self.model.getParams()
+    
+    
+class VoxelDicomModel(BaseVoxelMonteCarlo):
+    def __init__(self,*,nPh,fluence=False,
+                 nr=50,nz=20,dr=0.1,dz=0.1):
+        super().__init__(nPh = nPh,fluence =fluence, model = PlateModel())
+        if self.fluence:
+            self.fluence = IntarnalFluence(nr=nr,nz=nz,dr=dr,dz=dz)
+        
