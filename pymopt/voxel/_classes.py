@@ -8,13 +8,17 @@ Created on Thu Sep 10 17:12:05 2020
 
 
 import numpy as np
+import pandas as pa
+import matplotlib.pyplot as plt
 from ..utils.montecalro import MonteCalro
-from ..utils import readDICOM as dcm
+from ..utils import readDicom,reConstArray_8,reConstArray
+
 from abc import ABCMeta, abstractmethod
 from ..utils.validation import _deprecate_positional_args
 from ..fluence import IntarnalFluence
 import gc
-__all__ = ['VoxelPlateModel','PlateModel']
+
+__all__ = ['VoxelPlateModel','PlateModel','VoxelDicomModel']
 
 # =============================================================================
 # Base solid model
@@ -23,13 +27,16 @@ __all__ = ['VoxelPlateModel','PlateModel']
 class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
     #@_deprecate_positional_args
     @abstractmethod
-    def __init__(self,*,nPh,model,fluence = False,f_bit='float32'):
+    def __init__(self,*,nPh,model,fluence = False,f_bit='float32',
+                 nr=50,nz=20,dr=0.1,dz=0.1):
         super().__init__()
         self.f_bit = f_bit
         self.nPh = nPh
         self.model = model
         self.fluence = fluence
         self.generateInisalCoodinate(self.nPh)
+        if self.fluence:
+            self.fluence = IntarnalFluence(nr=nr,nz=nz,dr=dr,dz=dz)
         
     def getVoxelModel(self):
         return self.model.voxel_model
@@ -52,7 +59,15 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
             'v':self.v_result,
             'w':self.w_result,
         }
-        
+    
+    def getFluence(self):
+        return {'Arz':self.fluence.getArz(),
+                'r':self.fluence.getArrayR(),
+                'z':self.fluence.getArrayZ(),
+                }
+    def getParams(self):
+        return self.model.getParams()
+    
     def encooder(self,p,add):
         space = self.model.voxel_space
         center_add_xy = int(self.model.voxel_model.shape[0]/2)
@@ -250,82 +265,120 @@ class VoxelModel:
         x,y,z = add
         index = self.voxel_model[x,y,z]+1
         return self.n[index]
+
+class DicomLinearModel(VoxelModel):
+    def __init__(self):
+        pass
+        
+    def build(self):
+        pass
+    def getAbsorptionCoeff(self,add):
+        x,y,z = add
+        index = self.voxel_model[x,y,z]
+        return self.ma[index]
+    def getScatteringCoeff(self,add):
+        x,y,z = add
+        index = self.voxel_model[x,y,z]
+        return self.ms[index]
+    def getAnisotropyCoeff(self,add):
+        x,y,z = add
+        index = self.voxel_model[x,y,z]
+        return self.g[index]
+    def getReflectiveIndex(self,add):
+        x,y,z = add
+        index = self.voxel_model[x,y,z]+1
+        return self.n[index]
+
+class DicomBinaryModel(VoxelModel):
+    def __init__(self):
+        self.dtype = 'int8'
+        self.dtype_f = 'float32'
+        self.params = {
+            'n_sp':1.,'n_tr':1.37,'n_ct':1.37,'n_skin':1.37,'n_air':1.,
+            'ma_sp':0.001,'ma_tr':40.,'ma_ct':40.,'ma_skin':70.,
+            'ms_sp':0.001,'ms_tr':180.,'ms_ct':180.,'ms_skin':120.,
+            'g_sp':1.,'g_tr':0.93,'g_ct':0.93,'g_skin':1.,
+            }
+        
+        self._set_params()
+        self.voxcel_model = np.zeros(3,3,3,dtype = self.dtype)
+        self.model_shape = (3,3,3)
     
-class DicomModel(VoxelModel):
-    
-    @_deprecate_positional_args
-    def build(self,*,thickness,xy_size,voxel_space,ma,ms,g,n,n_air,f = 'float32'):
+    def build(self,model,skin_th,ct_th,voxel_space,params,dtype_f):
         del self.voxel_model
         gc.collect()
-        #-1はモデルの外側
+        self.dtype_f = dtype_f
+        self.skin_th = skin_th
+        self.ct_th = ct_th
+        self.params = params
+        self.dtype = model.dtype
+        self.model_shape = model.shape
         self.voxel_space = voxel_space
-        self.xy_size = xy_size
-        self.borderposit = self._make_borderposit(thickness,f)
-        self._make_voxel_model()
-
-        self.n =np.array([n_air]+n).astype(f)
-        self.ms = np.array(ms).astype(f)
-        self.ma = np.array(ma).astype(f)
-        self.g = np.array(g).astype(f)
-        self.getModelSize()
+        self._make_voxel_model(model)
+        self._set_params()
         
-    def import_dicom(self,path,dtype = 'int8'):
-        self.path = path
-        self.dtype = dtype
-        array_dicom,resol,ConstPixelDims,ConstPixelSpacing = dcm.readDicom(
-            path,dtype)
-        self.voxel_model = array_dicom
-        self.ConstPixelSpacing = list(ConstPixelSpacing)
-        self.ConstPixelDims = ConstPixelDims
-        self.resol = resol
+    def _set_params(self):
+        # パラメーターは、[骨梁間隙, 海綿骨, 緻密骨, 皮膚, 外気]のように設定されています。
+        name_list = ['_sp','_tr','_ct','_skin']
+        _n = [];_ma = [],_ms = [],_g = []
+        for i in name_list:
+            _n.append(self.params['n'+i])
+            _ma.append(self.params['ma'+i])
+            _ms.append(self.params['ms'+i])
+            _g.append(self.params['g'+i])
+        self.n = np.array(_n.append(self.params['n_air'])).astype(self.dtype_f)
+        self.ma = np.array(_ma).astype(self.dtype_f)
+        self.ms = np.array(_ms).astype(self.dtype_f)
+        self.g = np.array(_g).astype(self.dtype_f)
         
-    def trim(self,*,right,left,upper,lower,save = False):
-        image = self.voxel_model
+    def _make_voxel_model(self,model):
+        # バイナリーモデルでは、骨梁間隙を0,海綿骨を1、緻密骨を2、皮膚を３、領域外を-1に設定する
+        index = np.where(model.flatten()!=0)
+        self.voxcel_model = np.zeros_like(model.size,dtype = model.dtype)
+        self.voxcel_model[index] = 1
+        self.voxcel_model = self.voxcel_model.reshape(
+            self.model_shape[0],self.model_shape[1],self.model_shape[2])
         
-        right = int(right/self.ConstPixelSpacing[0])*-1
-        left = int(left/self.ConstPixelSpacing[0])
-        upper = int(upper/self.ConstPixelSpacing[0])*-1
-        lower = int(lower/self.ConstPixelSpacing[0])
-        image[:lower,:,:] = -10
-        image[upper:,:,:] = -10
-        image[:,right:,:] = -10
-        image[:,:left,:] = -10
-        img_shape = image.shape
+        if not self.ct_th is False:
+            ct = np.ones(self.model_shape[0],
+                         self.model_shape[1],
+                         int(self.skin_th/self.voxel_space),dtype = self.dtype)*2
+            self.voxel_model = np.concatenate(ct.T,self.voxel_model.T).T
         
-        image = image.ravel()
-        index = np.where(image==-10)[0]
-        image = np.delete(image,index)
-        L0 = self.ConstPixelDims[0]-lower+upper
-        L1 = self.ConstPixelDims[1]-left+right
-        L2 = self.ConstPixelDims[2]
-        image = image.reshape([L0,L1,L2])
+        if not self.skin_th is False:
+            skin = np.ones(self.model_shape[0],
+                           self.model_shape[1],
+                           int(self.skin_th/self.voxel_space)+1,dtype = self.dtype)*3
+            self.voxel_model = np.concatenate(skin.T,self.voxel_model.T).T
+            
+        self.voxel_model[0,:,:] = -1
+        self.voxel_model[-1,:,:] = -1
+        self.voxel_model[:,0,:] = -1
+        self.voxel_model[:,-1,:] = -1
+        self.voxel_model[:,:,0] = -1
+        self.voxel_model[:,:,-1] = -1
+            
         
-        resol0 = [self.ConstPixelSpacing[0]*i for i in range(image.shape[0]+1)]
-        resol1 = [self.ConstPixelSpacing[0]*i for i in range(image.shape[1]+1)]
-        
-        image[0,:,:] = -1
-        image[-1,:,:] = -1
-        image[:,0,:] = -1
-        image[:,-1,:] = -1
-        
-        dcm.displayGraph(image,resol1,resol0)
-        print('Image shape was changed from (%d,%d,%d)' %img_shape)
-        print('            >>>>>>>     to   (%d,%d,%d)' %image.shape)
-        
-        
-    def rot90deg(self):
-        pass
-    def model_set(self):
-        pass
+    def getAbsorptionCoeff(self,add):
+        index = self.voxel_model[add[0],add[1],add[2]]
+        return self.ma[index]
     
-    def reset_stting(self):
-        array_dicom,resol,ConstPixelDims,ConstPixelSpacing = dcm.readDicom(
-            self.path,self.dtype)
     
-    def reConstArray(self,threshold=9500):
-        self.voxel_model = dcm.reConstArray_8(self.voxel_model,threshold)
+    def getScatteringCoeff(self,add):
+        index = self.voxel_model[add[0],add[1],add[2]]
+        return self.ms[index]
+    
+    
+    def getAnisotropyCoeff(self,add):
+        index = self.voxel_model[add[0],add[1],add[2]]
+        return self.g[index]
+    
+    
+    def getReflectiveIndex(self,add):
+        index = self.voxel_model[add[0],add[1],add[2]]
+        return self.n[index]
         
-        
+    
         
 class PlateModel(VoxelModel):
     @_deprecate_positional_args
@@ -360,7 +413,7 @@ class PlateModel(VoxelModel):
         self.voxel_model[:,:,0] = -1; self.voxel_model[:,:,-1] = -1
         
     @_deprecate_positional_args
-    def build(self,*,thickness,xy_size,voxel_space,ma,ms,g,n,n_air,f = 'float32'):
+    def build(self,thickness,xy_size,voxel_space,ma,ms,g,n,n_air,f = 'float32'):
         del self.voxel_model
         gc.collect()
         #-1はモデルの外側
@@ -389,24 +442,270 @@ class PlateModel(VoxelModel):
 # =============================================================================
 class VoxelPlateModel(BaseVoxelMonteCarlo):
     def __init__(self,*,nPh,fluence=False,
-                 nr=50,nz=20,dr=0.1,dz=0.1):
-        super().__init__(nPh = nPh,fluence =fluence, model = PlateModel())
-        if self.fluence:
-            self.fluence = IntarnalFluence(nr=nr,nz=nz,dr=dr,dz=dz)
-            
-    def getFluence(self):
-        return {'Arz':self.fluence.getArz(),
-                'r':self.fluence.getArrayR(),
-                'z':self.fluence.getArrayZ(),
-                }
-    def getParams(self):
-        return self.model.getParams()
+                 nr=50,nz=20,dr=0.1,dz=0.1,):
+
+        super().__init__(nPh = nPh,fluence =fluence, model = PlateModel(),
+                         nr=nr,nz=nz,dr=dr,dz=dz)
+
     
     
 class VoxelDicomModel(BaseVoxelMonteCarlo):
+
     def __init__(self,*,nPh,fluence=False,
-                 nr=50,nz=20,dr=0.1,dz=0.1):
-        super().__init__(nPh = nPh,fluence =fluence, model = PlateModel())
-        if self.fluence:
-            self.fluence = IntarnalFluence(nr=nr,nz=nz,dr=dr,dz=dz)
+                 nr=50,nz=20,dr=0.1,dz=0.1,model_type = 'binary'):
         
+        self.model_type = model_type
+        if model_type == 'binary':
+            model = DicomBinaryModel()
+        elif model_type == 'liner':
+            model = DicomLinearModel()
+            
+        super().__init__(nPh = nPh,fluence =fluence, model = model,
+                         nr=nr,nz=nz,dr=dr,dz=dz)
+            
+        self._right = 0
+        self._left = 0
+        self._upper = 0
+        self._lower = 0
+        self._bottom = 0
+        self._top = 0
+        self.threshold = 9500
+            
+    @_deprecate_positional_args   
+    def build(self,*,skin_th = 3.,ct_th = 0.03,
+            n_sp = 1.,n_tr=1.37,n_ct = 1.37,n_skin = 1.37,n_air = 1.,
+            ma_sp = 0.001,ma_tr = 40.,ma_ct = 40.,ma_skin = 70.,
+            ms_sp = 0.001,ms_tr = 180.,ms_ct = 180.,ms_skin = 120.,
+            g_sp = 1.,g_tr = 0.93,g_ct = 0.93,g_skin = 1.,f = 'float32'):
+        
+        params = {
+            'n_sp':n_sp,'n_tr':n_tr,'n_ct':n_tr,'n_skin':n_skin,'n_air':n_air,
+            'ma_sp':ma_sp,'ma_tr':ma_tr,'ma_ct':ma_ct,'ma_skin':ma_skin,
+            'ms_sp':ms_sp,'ms_tr':ms_tr,'ms_ct':ms_ct,'ms_skin':ms_skin,
+            'g_sp':g_sp,'g_tr':g_tr,'g_ct':g_ct,'g_skin':g_skin,
+            }
+        
+        self.model.build(self.array_dicom,skin_th,ct_th,self.ConstPixelSpacing[0],
+                         params,f)
+        self.generateInisalCoodinate(self.nPh)
+        del self.array_dicom
+        gc.collect()
+        
+    def import_dicom(self,path,dtype = 'int8'):
+        self.path = path
+        self.dtype = dtype
+        array_dicom,ConstPixelDims,ConstPixelSpacing = readDicom(path)
+        self.model.array_dicom = array_dicom
+        self.ConstPixelSpacing = list(ConstPixelSpacing)
+        self.ConstPixelDims = ConstPixelDims
+        
+        
+    def display_cross_section(self,*,xx = 0,yy = 0,zz = 0,
+                              int_pix = True, section_line = True,
+                              graph_type = 'ALL', cmap = 'gray',
+                              image = False,):
+        if image is False:
+            image = self.array_dicom
+        
+        if int_pix:
+            x_size = xx*self.ConstPixelSpacing[0] 
+            y_size = yy*self.ConstPixelSpacing[1]
+            z_size = zz*self.ConstPixelSpacing[2]
+        else:
+            x_size = int(xx)
+            y_size = int(yy)
+            z_size = int(zz)
+            xx = int(x_size/self.ConstPixelSpacing[0])
+            yy = int(y_size/self.ConstPixelSpacing[1])
+            zz = int(z_size/self.ConstPixelSpacing[2])
+            
+        resol0 = [self.ConstPixelSpacing[0]*i for i in range(image.shape[0]+1)]
+        resol1 = [self.ConstPixelSpacing[1]*i for i in range(image.shape[1]+1)]
+        resol2 = [self.ConstPixelSpacing[2]*i for i in range(image.shape[2]+1)]
+        if graph_type == 'XY':
+            plt.figure(figsize=(6,6),dpi=100)
+            plt.set_cmap(plt.get_cmap(cmap))
+            plt.title('X-Y pic in Z = %0.3f mm' %(z_size))
+            plt.pcolormesh(resol1,resol0,image[:,:,zz])
+            plt.xlabel('X mm')
+            plt.ylabel("Y mm")
+            plt.show()
+        if graph_type == 'XY-YZ':
+            fig,ax = plt.subplots(1,2,figsize=[12,6],dpi=90)
+            plt.set_cmap(plt.get_cmap(cmap))
+            ax[0].set_title('X-Y pic in Z = %0.3f mm' %(z_size))
+            ax[0].pcolormesh(resol1,resol0,image[:,:,zz])
+            ax[0].set_xlabel("X mm")
+            ax[0].set_ylabel("Y mm")
+            if section_line:
+                ax[0].plot([x_size,x_size],[0,resol0[-1]],'-',c = 'r')
+                
+            ax[1].set_title('Y-Z pic in X = %0.3f mm' %(x_size))
+            ax[1].pcolormesh(resol2,resol0,image[:,xx,:])
+            ax[1].set_xlabel("Z mm")
+            ax[1].set_ylabel("Y mm")
+            if section_line:
+                ax[1].plot([z_size,z_size],[0,resol0[-1]],'-',c = 'r')
+            plt.show()
+        if graph_type == 'ALL' or graph_type == 'NO_HIST':
+            fig,ax = plt.subplots(2,2,figsize=[12,12],dpi=90)
+            plt.set_cmap(plt.get_cmap(cmap))
+            ax[0,0].set_title('X-Y pic in Z = %0.3f mm' %(z_size))
+            ax[0,0].pcolormesh(resol1,resol0,image[:,:,zz])
+            ax[0,0].set_xlabel("X mm")
+            ax[0,0].set_ylabel("Y mm")
+            if section_line:
+                ax[0,0].plot([x_size,x_size],[0,resol0[-1]],'-',c = 'r')
+                ax[0,0].plot([0,resol1[-1]],[y_size,y_size],'-',c = 'r')
+                
+            ax[0,1].set_title('Y-Z pic in X = %0.3f mm' %(x_size))
+            ax[0,1].pcolormesh(resol2,resol0,image[:,xx,:])
+            ax[0,1].set_xlabel("Z mm")
+            ax[0,1].set_ylabel("Y mm")
+            if section_line:
+                ax[0,1].plot([z_size,z_size],[0,resol0[-1]],'-',c = 'r')
+                
+            ax[1,0].set_title('X-Z pic in Y = %0.3f mm' %(y_size))
+            ax[1,0].pcolormesh(resol1,resol2,image[yy,:,:].T)
+            ax[1,0].set_ylim(resol2[-1],resol2[0])
+            ax[1,0].set_xlabel("X mm")
+            ax[1,0].set_ylabel("Z mm")
+            if section_line:
+                ax[1,0].plot([0,resol1[-1]],[z_size,z_size],'-',c = 'r')
+                
+            if graph_type == 'ALL':
+                ax[1,1].set_title('Histogram of X-Y pic pixel values')
+                ax[1,1].hist(image[:,:,zz].flatten(),bins=50, color='c')
+                ax[1,1].set_yscale('log')
+                ax[1,1].set_xlabel("Voxel values")
+                ax[1,1].set_ylabel("Frequency")
+        plt.show()
+        
+    def rot180_y(self):
+        self.v = np.flip(self.array_dicom)
+        self.array_dicom = np.flipud(self.array_dicom)
+        
+    def rot90_z(self,k=1):
+        self.array_dicom = np.rot90(self.array_dicom,k=k)
+
+        
+    def trim_area(self,*, right = 0, left = 0,
+                  upper ,lower =0,
+                  top = 0,bottom = 0,
+                  int_pix = True,cmap = 'gray'):
+        img = self.array_dicom.copy()
+        
+        if int_pix:
+            right = right*-1
+            upper = upper*-1
+        else:
+            right = int(right/self.ConstPixelSpacing[0])*-1
+            left = int(left/self.ConstPixelSpacing[0])
+            upper = int(upper/self.ConstPixelSpacing[1])*-1
+            lower = int(lower/self.ConstPixelSpacing[1])
+            bottom = int(bottom/self.ConstPixelSpacing[2])*-1
+            top = int(top/self.ConstPixelSpacing[2])
+            
+        d_rate = 2
+        for i,po in enumerate([upper,right,bottom]):
+            if i == 0:
+                if po != 0:
+                    img[po:,:,:] = img[po:,:,:]/d_rate
+            elif i == 1:
+                if po != 0:
+                    img[:,po:,:] = img[:,po:,:]/d_rate
+            elif i == 2:
+                if po != 0:
+                    img[:,:,po:] = img[:,:,po:]/d_rate
+        img[:lower,:,:] = img[:lower,:,:]/d_rate
+        img[:,:left,:] = img[:,:left,:]/d_rate
+        img[:,:,:top] = img[:,:,:top]/d_rate
+        
+        df = pa.DataFrame(columns = ['right','left','upper','lower','top','bottom'])
+        df_array = np.array([right,left,upper,lower,top,bottom])
+        df.loc['Pixel number'] = df_array
+        df.loc['Position [mm]'] = np.round(df_array*self.ConstPixelSpacing[0],3)
+        print('Trimming parameters')
+        print(abs(df))
+        
+        self.display_cross_section(image = img,zz = top,
+                              xx = int(img.shape[0]/2),
+                              yy = int(img.shape[1]/2),
+                              cmap = cmap)
+        self._right = right
+        self._left = left
+        self._upper = upper
+        self._lower = lower
+        self._bottom = bottom
+        self._top = top
+        
+    def set_trim(self,threshold=False,cmap = 'gray'):
+        if not threshold is False:
+            if self.dtype == 'int8':
+                self.threshold = int(threshold*2**8)
+            elif self.dtype == 'int16':
+                self.threshold = int(threshold*2**8)
+        self.array_dicom = reConstArray_8(self.array_dicom,self.threshold)
+        
+        d_num = -10
+        d_size = self.array_dicom.nbytes*1e-6
+        
+        for i,po in enumerate([self._upper,self._right,self._bottom]):
+            if i == 0:
+                if po != 0:
+                    self.array_dicom[po:,:,:] = d_num
+            elif i == 1:
+                if po != 0:
+                    self.array_dicom[:,po:,:] = d_num
+            elif i == 2:
+                if po != 0:
+                    self.array_dicom[:,:,po:] = d_num
+        self.array_dicom[:self._lower,:,:] = d_num
+        self.array_dicom[:,:self._left,:] = d_num
+        self.array_dicom[:,:,:self._top] = d_num
+        
+        img_shape = self.array_dicom.shape
+        
+        self.array_dicom = self.array_dicom.ravel()
+        index = np.where(self.array_dicom==d_num)[0]
+        self.array_dicom = np.delete(self.array_dicom,index)
+        L0 = self.ConstPixelDims[0]-abs(self._lower)-abs(self._upper )
+        L1 = self.ConstPixelDims[1]-abs(self._left )-abs(self._right)
+        L2 = self.ConstPixelDims[2]-abs(self._top)-abs(self._bottom)
+        self.array_dicom = self.array_dicom.reshape([L0,L1,L2])
+        
+        self.display_cross_section(zz = 0,
+                              xx = int(self.array_dicom.shape[0]/2),
+                              yy = int(self.array_dicom.shape[1]/2),
+                              cmap = cmap)
+        
+        print("#########  Size  #########")
+        print('Image shape was changed')
+        print('from (%d,%d,%d)' %img_shape)
+        print(' to  (%d,%d,%d)' %self.array_dicom.shape)
+        print()
+        print('Memory area size for voxel storage changed')
+        print('from %0.3f Mbyte' %d_size)
+        print(' to  %0.3f Mbyte' %(self.array_dicom.nbytes*1e-6))
+        
+        
+    def model_set(self):
+        pass
+    
+    def reset_setting(self):
+        del self.array_dicom
+        gc.collect()
+        array_dicom,ConstPixelDims,ConstPixelSpacing = readDicom(
+            self.path,self.dtype)
+        self.array_dicom = array_dicom
+        self.ConstPixelSpacing = list(ConstPixelSpacing)
+        self.ConstPixelDims = ConstPixelDims
+    
+    def reConstArray(self,threshold=37,cmap = 'gray',graph_type = 'XY'):
+        image = reConstArray(self.array_dicom,threshold)
+            
+        self.display_cross_section(image = image,zz = 0,
+                              xx = int(image.shape[0]/2),
+                              yy = int(image.shape[1]/2),
+                              cmap = cmap,graph_type = graph_type)
+        self.threshold = int(threshold*2**8)

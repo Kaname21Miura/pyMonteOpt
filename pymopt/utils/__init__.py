@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 from .validation import _deprecate_positional_args
 from .montecalro import MonteCalro
-import readDICOM
+from .readDICOM import readDicom,reConstArray_8,reConstArray
 __all__ = [
     '_deprecate_positional_args',
     'MonteCalro',
-    'readDICOM',
+    'readDicom',
+    'readDicom',
+    'reConstArray_8',
+    'reConstArray',
     ]

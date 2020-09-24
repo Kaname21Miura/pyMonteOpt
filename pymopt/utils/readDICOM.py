@@ -4,6 +4,7 @@ Created on Tue Jul 30 14:08:54 2019
 
 @author: Kaname Miura
 """
+#
 
 import numpy as np
 import pydicom as dicom
@@ -13,23 +14,22 @@ import matplotlib.pyplot as plt
 workspace = os.getcwd()
 os.chdir(workspace)
 
-def readDicom(*,path,size_down=True,ext_name = '.dcm'):
+def readDicom(path,*,size_down=True,ext_name = '.dcm'):
     os.chdir(workspace)
     lstFilesDCM = []  # create an empty list
     for dirName, subdirList, fileList in os.walk(path):
         for filename in fileList:
             if ext_name in filename.lower(): # 拡張子が.dcmか.magかで書き換える
                 lstFilesDCM.append(os.path.join(dirName,filename))
-    
+    lstFilesDCM.sort()
     RefDs = dicom.read_file(lstFilesDCM[0],force=True) # DICOMの先頭ファイルはヘッダとなる
     RefDs.file_meta.TransferSyntaxUID = dicom.uid.ImplicitVRLittleEndian
     
     ConstPixelDims = (int(RefDs.Rows), int(RefDs.Columns), len(lstFilesDCM))
 
-    ConstPixelSpacing = (float(RefDs.PixelSpacing[0]), float(RefDs.PixelSpacing[1]), float(RefDs.PixelSpacing[1]))
-    x = np.arange(0.0, (ConstPixelDims[0]+1)*ConstPixelSpacing[0], ConstPixelSpacing[0])
-    y = np.arange(0.0, (ConstPixelDims[1]+1)*ConstPixelSpacing[1], ConstPixelSpacing[1])
-    z = np.arange(0.0, (ConstPixelDims[2]+1)*ConstPixelSpacing[2], ConstPixelSpacing[2])
+    ConstPixelSpacing = (float(RefDs.PixelSpacing[0]),
+                         float(RefDs.PixelSpacing[1]),
+                         float(RefDs.PixelSpacing[1]))
     
     ArrayDicom = np.zeros(ConstPixelDims, dtype=RefDs.pixel_array.dtype)
     
@@ -39,16 +39,16 @@ def readDicom(*,path,size_down=True,ext_name = '.dcm'):
         ds.file_meta.TransferSyntaxUID = dicom.uid.ImplicitVRLittleEndian
         ArrayDicom[:, :, lstFilesDCM.index(filenameDCM)] = ds.pixel_array
     if size_down:
-        ArrayDicom = changeResolution(ArrayDicom,ConstPixelDims)
+        ArrayDicom = _changeResolution(ArrayDicom,ConstPixelDims)
         
     print("ConstPixelDims: %s"%str(ConstPixelDims))
     print("ConstPixelSpacing: %s"%str(ConstPixelSpacing))
     print("Data infomation")
     print(RefDs)
     os.chdir(workspace)
-    return ArrayDicom,[x,y,z],ConstPixelDims,ConstPixelSpacing
+    return ArrayDicom,ConstPixelDims,ConstPixelSpacing
     
-def changeResolution(x,ConstPixelDims):
+def _changeResolution(x,ConstPixelDims):
     #解像度を16bitから8bitに変更します。
     a = x.shape
     x = x.reshape(-1,ConstPixelDims[2])
@@ -57,6 +57,10 @@ def changeResolution(x,ConstPixelDims):
 
 def reConstArray_8(ArrayDicom, threshold=9500):
     threshold = round(threshold/(2**8))
+    return np.where(ArrayDicom < threshold, 0, ArrayDicom)
+
+def reConstArray(ArrayDicom, threshold=37):
+    threshold = round(threshold)
     return np.where(ArrayDicom < threshold, 0, ArrayDicom)
 
 def displayGraph(ArrayDicom,resolution):

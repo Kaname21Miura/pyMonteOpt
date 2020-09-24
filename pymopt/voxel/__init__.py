@@ -1,1 +1,1 @@
-from ._classes import VoxelPlateModelfrom ._classes_cy import VoxelPlateModelCy__all__ = [    'VoxelPlateModel',    'VoxelPlateModelCy',    ]
+from ._classes import VoxelPlateModel,DicomModelfrom ._classes_cy import VoxelPlateModelCy__all__ = [    'VoxelPlateModel',    'VoxelPlateModelCy',    'DicomModel'    ]
