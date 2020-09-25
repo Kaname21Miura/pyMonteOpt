@@ -11,11 +11,11 @@ import pydicom as dicom
 import os
 import matplotlib.pyplot as plt
 
-workspace = os.getcwd()
-os.chdir(workspace)
+#workspace = os.getcwd()
+#os.chdir(workspace)
 
 def readDicom(path,*,size_down=True,ext_name = '.dcm'):
-    os.chdir(workspace)
+    #os.chdir(workspace)
     lstFilesDCM = []  # create an empty list
     for dirName, subdirList, fileList in os.walk(path):
         for filename in fileList:
@@ -24,15 +24,15 @@ def readDicom(path,*,size_down=True,ext_name = '.dcm'):
     lstFilesDCM.sort()
     RefDs = dicom.read_file(lstFilesDCM[0],force=True) # DICOMの先頭ファイルはヘッダとなる
     RefDs.file_meta.TransferSyntaxUID = dicom.uid.ImplicitVRLittleEndian
-    
+
     ConstPixelDims = (int(RefDs.Rows), int(RefDs.Columns), len(lstFilesDCM))
 
     ConstPixelSpacing = (float(RefDs.PixelSpacing[0]),
                          float(RefDs.PixelSpacing[1]),
                          float(RefDs.PixelSpacing[1]))
-    
+
     ArrayDicom = np.zeros(ConstPixelDims, dtype=RefDs.pixel_array.dtype)
-    
+
     # すべてのDICOMファイルに対して読み込む
     for filenameDCM in lstFilesDCM:
         ds = dicom.read_file(filenameDCM,force=True)
@@ -40,14 +40,14 @@ def readDicom(path,*,size_down=True,ext_name = '.dcm'):
         ArrayDicom[:, :, lstFilesDCM.index(filenameDCM)] = ds.pixel_array
     if size_down:
         ArrayDicom = _changeResolution(ArrayDicom,ConstPixelDims)
-        
+
     print("ConstPixelDims: %s"%str(ConstPixelDims))
     print("ConstPixelSpacing: %s"%str(ConstPixelSpacing))
     print("Data infomation")
     print(RefDs)
-    os.chdir(workspace)
+    #os.chdir(workspace)
     return ArrayDicom,ConstPixelDims,ConstPixelSpacing
-    
+
 def _changeResolution(x,ConstPixelDims):
     #解像度を16bitから8bitに変更します。
     a = x.shape
@@ -72,11 +72,9 @@ def displayGraph(ArrayDicom,resolution):
     plt.ylabel("mm")
     plt.xlim(0,resolution[1].max())
     plt.show()
-    
+
 # 表示
 
-#pathdcom = "DICOMfile9" 
+#pathdcom = "DICOMfile9"
 #ArrayDicom,resolution,ConstPixelDims = readDicom(pathdcom)
 #ArrayDicom = reConstArray(ArrayDicom)
-
-             

@@ -10,20 +10,23 @@ Created on Thu Sep 10 17:12:05 2020
 import numpy as np
 import pandas as pa
 import matplotlib.pyplot as plt
+from matplotlib import colors
+
 from ..utils.montecalro import MonteCalro
 from ..utils import readDicom,reConstArray_8,reConstArray
-
 from abc import ABCMeta, abstractmethod
 from ..utils.validation import _deprecate_positional_args
 from ..fluence import IntarnalFluence
-import gc
 
+import gc
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 __all__ = ['VoxelPlateModel','PlateModel','VoxelDicomModel']
 
 # =============================================================================
 # Base solid model
 # =============================================================================
-        
+
 class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
     #@_deprecate_positional_args
     @abstractmethod
@@ -34,13 +37,15 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self.nPh = nPh
         self.model = model
         self.fluence = fluence
-        self.generateInisalCoodinate(self.nPh)
         if self.fluence:
             self.fluence = IntarnalFluence(nr=nr,nz=nz,dr=dr,dz=dz)
-        
+    def start(self):
+        self.generateInisalCoodinate(self.nPh)
+        super().start()
+
     def getVoxelModel(self):
         return self.model.voxel_model
-        
+
     def generateInisalCoodinate(self,nPh,f = 'float32'):
         center_add_xy = int(self.model.voxel_model.shape[0]/2)
         self.add =  np.full((3, nPh),center_add_xy).astype("int16")
@@ -51,7 +56,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self.v[2] = 1
         self.w = np.ones(nPh).astype(f)
         self.w = self.initialWeight(self.w)
-        
+
     def getResult(self):
         encoded_position = self.encooder(self.p_result,self.add_result)
         return{
@@ -59,15 +64,16 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
             'v':self.v_result,
             'w':self.w_result,
         }
-    
+
     def getFluence(self):
         return {'Arz':self.fluence.getArz(),
                 'r':self.fluence.getArrayR(),
                 'z':self.fluence.getArrayZ(),
                 }
+
     def getParams(self):
         return self.model.getParams()
-    
+
     def encooder(self,p,add):
         space = self.model.voxel_space
         center_add_xy = int(self.model.voxel_model.shape[0]/2)
@@ -76,33 +82,40 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         encoded_position[1] = space*(add[1]-center_add_xy)+p[1]
         encoded_position[2] = np.round(space*(add[2]-1)+p[2]+space/2,6)
         return encoded_position
-        
+
     def wUpdate(self,w,ma,mt,p,add):
         dw = w*ma/mt
         if self.fluence != False:
             encoded_position = self.encooder(p,add)
             self.fluence.saveFluesnce(encoded_position,dw)
         return w-dw
-    
+
     def endProcess(self):
         self.v_result = self.v_result[:,1:]
         self.p_result = self.p_result[:,1:]
         self.add_result = self.add_result[:,1:]
         self.w_result = self.w_result[1:]
-    
+
     def initialWeight(self,w):
         Rsp = 0
-        n1 = self.model.n[0]
-        n2 = self.model.n[1]
+        n1 = self.model.n[-1]
+        n2 = self.model.n[0]
         if n1 != n2:
             Rsp = ((n1-n2)/(n1+n2))**2
         return w-Rsp
-    
-    @_deprecate_positional_args   
+
+    def set_monte_params(self,*,nPh,fluence = False,
+                        f_bit='float32',nr=50,nz=20,dr=0.1,dz=0.1):
+        self.f_bit = f_bit
+        self.nPh = nPh
+        self.fluence = fluence
+        if self.fluence:
+            self.fluence = IntarnalFluence(nr=nr,nz=nz,dr=dr,dz=dz)
+
+    @_deprecate_positional_args
     def build(self,**kwargs):
         self.model.build(**kwargs)
-        self.generateInisalCoodinate(self.nPh)
-    
+
     def photonVanishing(self,p,v,w,add):
         #photn waight が0.0001以下
         del_index = np.where(w<=0.0001)[0]
@@ -114,7 +127,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
             w = np.delete(w, del_index)
             add = np.delete(add,del_index, axis = 1)
         return p,v,w,add
-    
+
     def borderOut(self,p,v,w,add,index):
         self.v_result = np.concatenate([self.v_result, v[:,index]],axis = 1)
         self.p_result = np.concatenate([self.p_result, p[:,index]],axis = 1)
@@ -124,53 +137,58 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         p = np.delete(p,index, axis = 1)
         v = np.delete(v,index, axis = 1)
         add = np.delete(add,index, axis = 1)
-        
+
         w = np.delete(w,index)
         return p,v,w,add
-    
+
     def borderAct(self,v,p,add,s,db):
         l = self.model.voxel_space
         A = self.create01Array(np.argmin(db,axis=0),m=3)
         B = ~A
-        
+
         sigAv = A*np.sign(v).astype("int16")
         ds = np.min(db,axis=0)
         s -= ds
         p = l/2*A*np.sign(v)+B*(p+v*ds)
-        
+
         ni = self.model.getReflectiveIndex(add)
         nt = self.model.getReflectiveIndex(add+sigAv)
         pb_index = np.where(ni!=nt)[0]
-        
+
         if list(pb_index) != []:
             #透過判別
             #入射角の計算
             ai = np.abs(A[:,pb_index]*v[:,pb_index])
-            ai = np.arccos(ai[ai!=0])#Aから算出される0を排除して1次元配列にする
+            ai = np.arccos(ai[ai!=0])#Aから算出される0を排除して1次元配列にする\
+            Ra = np.zeros_like(ai)
+
             #全反射するときのインデックスを取得
-            sub_index = np.where(ai>=np.arcsin(nt[pb_index]/ni[pb_index]))[0]
+            sub_index = np.where(nt[pb_index]-ni[pb_index]<0)[0]
+            subsub_index = np.where(ai[sub_index]>=np.arcsin(nt[pb_index][sub_index]/ni[pb_index][sub_index]))[0]
             #屈折角の計算
             ##(ai,at)=(0,0)の時は透過させ方向ベクトルは変化させない
+            ###今の状態だと、subsub_indexもarcsinで計算しているため、しょうがないけどRuntimeWarningが出ます
             at = np.arcsin((ni[pb_index]/nt[pb_index])*np.sin(ai))
             Ra = np.random.rand(ai.size)-0.5*(np.add((np.sin(ai-at)/np.sin(ai+at))**2,
                                                      (np.tan(ai-at)/np.tan(ai+at))**2))
+
             #全反射はRaを強制的に0以下にし反射させる
-            Ra[sub_index] = -1
-            
+            Ra[sub_index[subsub_index]] = -1
+
             #透過と反射のindexを取得
             vl_index = pb_index[np.where(Ra<=0)[0].tolist()].tolist()#反射
             sub_index = np.where(Ra>0)[0]#Raに対する透過のindex
             vt_index = pb_index[sub_index]#全体ベクトルvに対する透過のindex
-            
+
             #反射するときのベクトルを更新　
             v[:,vl_index] = v[:,vl_index]*(B[:,vl_index]*1-A[:,vl_index]*1)
-            
+
             #透過するときのベクトルを更新
             if vt_index !=[]:
                 v[:,vt_index] = (ni[vt_index]/nt[vt_index])\
                     *((v[:,vt_index]*B[:,vt_index])\
                       +(A[:,vt_index]*np.sign(v[:,vt_index])*np.cos(at[sub_index])))
-                
+
             #境界を超えた時の位置更新,番地の更新
             pt_index = np.delete(np.arange(ni.size),vl_index)
             p[:,pt_index] = p[:,pt_index]*(B[:,pt_index]*1-A[:,pt_index]*1)
@@ -178,8 +196,9 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         else:
             p = p*(B*1-A*1)
             add += sigAv
+
         return v,p,add,s
-    
+
     def RTInterface(self,v,p,add):
         box_model = self.model.voxel_model
         l = self.model.voxel_space
@@ -188,6 +207,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         index = np.arange(s.size)
         out_index = []
         while True:
+            ###今の状態だと、ｖは最初Ｚ軸方向以外0なので、dbはしょうがないけどRuntimeWarningが出ます
             db = (l/2-p_*np.sign(v_))/np.abs(v_)
             ma = self.model.getAbsorptionCoeff(add_)
             ms = self.model.getScatteringCoeff(add_)
@@ -199,15 +219,15 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
                 v[:,index[pn_index]] = v_[:,pn_index]
                 p[:,index[pn_index]] = p_[:,pn_index]\
                 +s_[pn_index]*v_[:,pn_index]
-                
+
                 add[:,index[pn_index]] = add_[:,pn_index]
                 index = index[pb_index]
-                
+
                 v_,p_,add_,s_ = self.borderAct(
                     v_[:,pb_index],p_[:,pb_index],
                     add_[:,pb_index],s_[pb_index],
                     db[:,pb_index])
-                
+                v_ = v_/np.linalg.norm(v_,axis=0)
                 s_ *= mt[pb_index]
                 out_index_ = np.where(box_model[add_[0],add_[1],add_[2]] < 0)[0]
                 if list(out_index_) != []:
@@ -225,7 +245,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
                 p[:,index] = p_+s_*v_
                 break
         return v,p,add,out_index
-    
+
     def stepMovement(self):
         self.v,self.p,self.add,index = self.RTInterface(self.v,self.p,self.add)
 
@@ -240,53 +260,44 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self.p,self.v,self.w,self.add = self.photonVanishing(self.p,self.v,self.w,self.add)
 
         return self.w.size
-    
-    
+
+
 # =============================================================================
 # Modeling class
 # =============================================================================
-        
+
 class VoxelModel:
     def build(self):
         pass
     def getAbsorptionCoeff(self,add):
-        x,y,z = add
-        index = self.voxel_model[x,y,z]
+        index = self.voxel_model[add[0],add[1],add[2]]
         return self.ma[index]
     def getScatteringCoeff(self,add):
-        x,y,z = add
-        index = self.voxel_model[x,y,z]
+        index = self.voxel_model[add[0],add[1],add[2]]
         return self.ms[index]
     def getAnisotropyCoeff(self,add):
-        x,y,z = add
-        index = self.voxel_model[x,y,z]
+        index = self.voxel_model[add[0],add[1],add[2]]
         return self.g[index]
     def getReflectiveIndex(self,add):
-        x,y,z = add
-        index = self.voxel_model[x,y,z]+1
+        index = self.voxel_model[add[0],add[1],add[2]]
         return self.n[index]
 
 class DicomLinearModel(VoxelModel):
     def __init__(self):
         pass
-        
     def build(self):
         pass
     def getAbsorptionCoeff(self,add):
-        x,y,z = add
-        index = self.voxel_model[x,y,z]
+        index = self.voxel_model[add[0],add[1],add[2]]
         return self.ma[index]
     def getScatteringCoeff(self,add):
-        x,y,z = add
-        index = self.voxel_model[x,y,z]
+        index = self.voxel_model[add[0],add[1],add[2]]
         return self.ms[index]
     def getAnisotropyCoeff(self,add):
-        x,y,z = add
-        index = self.voxel_model[x,y,z]
+        index = self.voxel_model[add[0],add[1],add[2]]
         return self.g[index]
     def getReflectiveIndex(self,add):
-        x,y,z = add
-        index = self.voxel_model[x,y,z]+1
+        index = self.voxel_model[add[0],add[1],add[2]]
         return self.n[index]
 
 class DicomBinaryModel(VoxelModel):
@@ -297,95 +308,106 @@ class DicomBinaryModel(VoxelModel):
             'n_sp':1.,'n_tr':1.37,'n_ct':1.37,'n_skin':1.37,'n_air':1.,
             'ma_sp':0.001,'ma_tr':40.,'ma_ct':40.,'ma_skin':70.,
             'ms_sp':0.001,'ms_tr':180.,'ms_ct':180.,'ms_skin':120.,
-            'g_sp':1.,'g_tr':0.93,'g_ct':0.93,'g_skin':1.,
+            'g_sp':.99,'g_tr':0.93,'g_ct':0.93,'g_skin':.93,
+            'th_skin':2.,'th_ct':0.03,
             }
-        
-        self._set_params()
-        self.voxcel_model = np.zeros(3,3,3,dtype = self.dtype)
+        self.keys = list(self.params.keys())
+
+        self.set_params()
+        self.voxel_space = 0.01
+        self.voxel_model = np.zeros((3,3,3),dtype = self.dtype)
         self.model_shape = (3,3,3)
-    
-    def build(self,model,skin_th,ct_th,voxel_space,params,dtype_f):
+
+    def build(self,model,voxel_space):
         del self.voxel_model
         gc.collect()
-        self.dtype_f = dtype_f
-        self.skin_th = skin_th
-        self.ct_th = ct_th
-        self.params = params
+
         self.dtype = model.dtype
         self.model_shape = model.shape
+        self.model_size = model.size
         self.voxel_space = voxel_space
         self._make_voxel_model(model)
-        self._set_params()
-        
-    def _set_params(self):
+
+
+    def get_params(self):
+        _head = {'n':0,'ma':1,'ms':2,'g':3,'th':4}
+        _part = {'sp':0,'tr':1,'ct':2,'skin':3,'air':4}
+        df_ = np.zeros((len(_head),len(_part)))
+        for i in self.params:
+            val = i.split('_')
+            df_[_head[val[0]],_part[val[1]]] = self.params[i]
+        df_ = pa.DataFrame(df_)
+        df_.columns = _part.keys()
+        df_.index = _head.keys()
+        return df_
+
+    def set_params(self,*initial_data, **kwargs):
+        for dictionary in initial_data:
+            for key in dictionary:
+                if not key in self.keys:
+                    raise KeyError(key)
+                self.params[key] = dictionary[key]
+
+        for key in kwargs:
+            if not key in self.keys:
+                raise KeyError(key)
+            self.params[key] = kwargs[key]
+
+        self._make_model_params()
+
+    def _make_model_params(self):
         # パラメーターは、[骨梁間隙, 海綿骨, 緻密骨, 皮膚, 外気]のように設定されています。
         name_list = ['_sp','_tr','_ct','_skin']
-        _n = [];_ma = [],_ms = [],_g = []
+        _n = [];_ma = [];_ms = [];_g = []
         for i in name_list:
             _n.append(self.params['n'+i])
             _ma.append(self.params['ma'+i])
             _ms.append(self.params['ms'+i])
             _g.append(self.params['g'+i])
-        self.n = np.array(_n.append(self.params['n_air'])).astype(self.dtype_f)
+        _n.append(self.params['n_air'])
+        self.n = np.array(_n).astype(self.dtype_f)
         self.ma = np.array(_ma).astype(self.dtype_f)
         self.ms = np.array(_ms).astype(self.dtype_f)
         self.g = np.array(_g).astype(self.dtype_f)
-        
+
     def _make_voxel_model(self,model):
         # バイナリーモデルでは、骨梁間隙を0,海綿骨を1、緻密骨を2、皮膚を３、領域外を-1に設定する
-        index = np.where(model.flatten()!=0)
-        self.voxcel_model = np.zeros_like(model.size,dtype = model.dtype)
-        self.voxcel_model[index] = 1
-        self.voxcel_model = self.voxcel_model.reshape(
+        self.voxel_model = model.flatten()
+        del model
+        gc.collect
+        index = np.where(self.voxel_model!=0)[0]
+        self.voxel_model[index] = 1
+        self.voxel_model = self.voxel_model.reshape(
             self.model_shape[0],self.model_shape[1],self.model_shape[2])
-        
-        if not self.ct_th is False:
-            ct = np.ones(self.model_shape[0],
+
+        if not self.params['th_ct'] !=0:
+            ct = np.ones((self.model_shape[0],
                          self.model_shape[1],
-                         int(self.skin_th/self.voxel_space),dtype = self.dtype)*2
-            self.voxel_model = np.concatenate(ct.T,self.voxel_model.T).T
-        
-        if not self.skin_th is False:
-            skin = np.ones(self.model_shape[0],
+                         int(self.params['th_ct']/self.voxel_space)),
+                         dtype = self.dtype)*2
+            self.voxel_model = np.concatenate((ct.T,self.voxel_model.T)).T
+
+        if self.params['th_skin'] != 0:
+            skin = np.ones((self.model_shape[0],
                            self.model_shape[1],
-                           int(self.skin_th/self.voxel_space)+1,dtype = self.dtype)*3
-            self.voxel_model = np.concatenate(skin.T,self.voxel_model.T).T
-            
+                           int(self.params['th_skin']/self.voxel_space)+1),
+                           dtype = self.dtype)*3
+            self.voxel_model = np.concatenate((skin.T,self.voxel_model.T)).T
+
         self.voxel_model[0,:,:] = -1
         self.voxel_model[-1,:,:] = -1
         self.voxel_model[:,0,:] = -1
         self.voxel_model[:,-1,:] = -1
         self.voxel_model[:,:,0] = -1
         self.voxel_model[:,:,-1] = -1
-            
-        
-    def getAbsorptionCoeff(self,add):
-        index = self.voxel_model[add[0],add[1],add[2]]
-        return self.ma[index]
-    
-    
-    def getScatteringCoeff(self,add):
-        index = self.voxel_model[add[0],add[1],add[2]]
-        return self.ms[index]
-    
-    
-    def getAnisotropyCoeff(self,add):
-        index = self.voxel_model[add[0],add[1],add[2]]
-        return self.g[index]
-    
-    
-    def getReflectiveIndex(self,add):
-        index = self.voxel_model[add[0],add[1],add[2]]
-        return self.n[index]
-        
-    
-        
+
+
 class PlateModel(VoxelModel):
     @_deprecate_positional_args
     def __init__(
         self,*,thickness=[0.2,] ,xy_size=0.1 ,voxel_space = 0.1,
         ma=[1,],ms=[100,],g=[0.9,],n=[1.37,],n_air=1,f = 'float32'):
-        self.n =np.array([n_air]+n).astype(f)
+        self.n =np.array(n+[n_air]).astype(f)
         self.ms = np.array(ms).astype(f)
         self.ma = np.array(ma).astype(f)
         self.g = np.array(g).astype(f)
@@ -393,7 +415,7 @@ class PlateModel(VoxelModel):
         self.xy_size = xy_size
         self.borderposit = self._make_borderposit(thickness,f)
         self._make_voxel_model()
-        
+
     def _make_borderposit(self,thickness,f):
         thickness = [0]+thickness
         b = 0; b_list = []
@@ -401,7 +423,7 @@ class PlateModel(VoxelModel):
             b += i
             b_list.append(b)
         return np.array(b_list).astype(f)
-    
+
     def _make_voxel_model(self):
         nxy_box = np.round(self.xy_size/self.voxel_space).astype(int)
         nz_box = np.round(self.borderposit/self.voxel_space).astype(int)
@@ -411,7 +433,7 @@ class PlateModel(VoxelModel):
         self.voxel_model[0] = -1;self.voxel_model[-1] = -1
         self.voxel_model[:,0] = -1; self.voxel_model[:,-1] = -1
         self.voxel_model[:,:,0] = -1; self.voxel_model[:,:,-1] = -1
-        
+
     @_deprecate_positional_args
     def build(self,thickness,xy_size,voxel_space,ma,ms,g,n,n_air,f = 'float32'):
         del self.voxel_model
@@ -427,42 +449,40 @@ class PlateModel(VoxelModel):
         self.ma = np.array(ma).astype(f)
         self.g = np.array(g).astype(f)
         self.getModelSize()
-        
+
     def getParams(self):
         return {'ms':self.ms,
                 'ma':self.ma,
                 'n':self.n,
                 'g':self.g}
-        
+
     def getModelSize(self):
         print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
-        
+
 # =============================================================================
 # Public montecalro model
 # =============================================================================
 class VoxelPlateModel(BaseVoxelMonteCarlo):
-    def __init__(self,*,nPh,fluence=False,
+    def __init__(self,*,nPh=1000,fluence=False,
                  nr=50,nz=20,dr=0.1,dz=0.1,):
 
         super().__init__(nPh = nPh,fluence =fluence, model = PlateModel(),
                          nr=nr,nz=nz,dr=dr,dz=dz)
 
-    
-    
 class VoxelDicomModel(BaseVoxelMonteCarlo):
 
     def __init__(self,*,nPh,fluence=False,
                  nr=50,nz=20,dr=0.1,dz=0.1,model_type = 'binary'):
-        
+
         self.model_type = model_type
         if model_type == 'binary':
             model = DicomBinaryModel()
         elif model_type == 'liner':
             model = DicomLinearModel()
-            
+
         super().__init__(nPh = nPh,fluence =fluence, model = model,
                          nr=nr,nz=nz,dr=dr,dz=dz)
-            
+
         self._right = 0
         self._left = 0
         self._upper = 0
@@ -470,45 +490,55 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         self._bottom = 0
         self._top = 0
         self.threshold = 9500
-            
-    @_deprecate_positional_args   
-    def build(self,*,skin_th = 3.,ct_th = 0.03,
-            n_sp = 1.,n_tr=1.37,n_ct = 1.37,n_skin = 1.37,n_air = 1.,
-            ma_sp = 0.001,ma_tr = 40.,ma_ct = 40.,ma_skin = 70.,
-            ms_sp = 0.001,ms_tr = 180.,ms_ct = 180.,ms_skin = 120.,
-            g_sp = 1.,g_tr = 0.93,g_ct = 0.93,g_skin = 1.,f = 'float32'):
-        
-        params = {
-            'n_sp':n_sp,'n_tr':n_tr,'n_ct':n_tr,'n_skin':n_skin,'n_air':n_air,
-            'ma_sp':ma_sp,'ma_tr':ma_tr,'ma_ct':ma_ct,'ma_skin':ma_skin,
-            'ms_sp':ms_sp,'ms_tr':ms_tr,'ms_ct':ms_ct,'ms_skin':ms_skin,
-            'g_sp':g_sp,'g_tr':g_tr,'g_ct':g_ct,'g_skin':g_skin,
-            }
-        
-        self.model.build(self.array_dicom,skin_th,ct_th,self.ConstPixelSpacing[0],
-                         params,f)
-        self.generateInisalCoodinate(self.nPh)
+        self.array_dicom = np.zeros((3,3,3),dtype='int8')
+
+    def build(self,*initial_data, **kwargs):
+        self.model.set_params(*initial_data, **kwargs)
+        try:
+            self.model.build(self.array_dicom,self.ConstPixelSpacing[0])
+            del self.array_dicom
+            gc.collect()
+        except:
+            warnings.warn('New voxel_model was not built')
+
+    def set_params(self,*initial_data, **kwargs):
+        self.model.set_params(*initial_data, **kwargs)
+
+    def display_histmap(self):
+        fig = plt.figure(figsize=(10,6),dpi=200)
+        ax = fig.add_subplot(111)
+        ax.set_aspect('equal')
+        _index = self.getRdTtIndex()
+        res = self.getResult()
+        y = res['p'][1,_index['Rd']]
+        x = res['p'][0,_index['Rd']]
+        H = ax.hist2d(x,y, bins=2**10,cmap="plasma",norm=colors.LogNorm())
+        ax.set_title('Hist map at XY sureface on Z = 0 mm')
+        ax.set_xlabel('X [mm]')
+        ax.set_ylabel('Y [mm]')
+        fig.colorbar(H[3],ax=ax)
+        plt.show()
+
+    def import_dicom(self,path,dtype = 'int8'):
         del self.array_dicom
         gc.collect()
-        
-    def import_dicom(self,path,dtype = 'int8'):
         self.path = path
         self.dtype = dtype
         array_dicom,ConstPixelDims,ConstPixelSpacing = readDicom(path)
-        self.model.array_dicom = array_dicom
+        self.array_dicom = array_dicom
         self.ConstPixelSpacing = list(ConstPixelSpacing)
         self.ConstPixelDims = ConstPixelDims
-        
-        
+        print("Memory area size for voxel storage: %0.3f Mbyte" % (self.array_dicom.nbytes*1e-6))
+
     def display_cross_section(self,*,xx = 0,yy = 0,zz = 0,
                               int_pix = True, section_line = True,
-                              graph_type = 'ALL', cmap = 'gray',
+                              graph_type = 'ALL', hist_type = 'XY',cmap = 'gray',
                               image = False,):
         if image is False:
             image = self.array_dicom
-        
+
         if int_pix:
-            x_size = xx*self.ConstPixelSpacing[0] 
+            x_size = xx*self.ConstPixelSpacing[0]
             y_size = yy*self.ConstPixelSpacing[1]
             z_size = zz*self.ConstPixelSpacing[2]
         else:
@@ -518,7 +548,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
             xx = int(x_size/self.ConstPixelSpacing[0])
             yy = int(y_size/self.ConstPixelSpacing[1])
             zz = int(z_size/self.ConstPixelSpacing[2])
-            
+
         resol0 = [self.ConstPixelSpacing[0]*i for i in range(image.shape[0]+1)]
         resol1 = [self.ConstPixelSpacing[1]*i for i in range(image.shape[1]+1)]
         resol2 = [self.ConstPixelSpacing[2]*i for i in range(image.shape[2]+1)]
@@ -539,7 +569,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
             ax[0].set_ylabel("Y mm")
             if section_line:
                 ax[0].plot([x_size,x_size],[0,resol0[-1]],'-',c = 'r')
-                
+
             ax[1].set_title('Y-Z pic in X = %0.3f mm' %(x_size))
             ax[1].pcolormesh(resol2,resol0,image[:,xx,:])
             ax[1].set_xlabel("Z mm")
@@ -557,14 +587,14 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
             if section_line:
                 ax[0,0].plot([x_size,x_size],[0,resol0[-1]],'-',c = 'r')
                 ax[0,0].plot([0,resol1[-1]],[y_size,y_size],'-',c = 'r')
-                
+
             ax[0,1].set_title('Y-Z pic in X = %0.3f mm' %(x_size))
             ax[0,1].pcolormesh(resol2,resol0,image[:,xx,:])
             ax[0,1].set_xlabel("Z mm")
             ax[0,1].set_ylabel("Y mm")
             if section_line:
                 ax[0,1].plot([z_size,z_size],[0,resol0[-1]],'-',c = 'r')
-                
+
             ax[1,0].set_title('X-Z pic in Y = %0.3f mm' %(y_size))
             ax[1,0].pcolormesh(resol1,resol2,image[yy,:,:].T)
             ax[1,0].set_ylim(resol2[-1],resol2[0])
@@ -572,29 +602,39 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
             ax[1,0].set_ylabel("Z mm")
             if section_line:
                 ax[1,0].plot([0,resol1[-1]],[z_size,z_size],'-',c = 'r')
-                
+
             if graph_type == 'ALL':
-                ax[1,1].set_title('Histogram of X-Y pic pixel values')
-                ax[1,1].hist(image[:,:,zz].flatten(),bins=50, color='c')
+                if hist_type == 'XY':
+                    ax[1,1].set_title('Histogram of X-Y pic pixel values')
+                    ax[1,1].hist(image[:,:,zz].flatten(),bins=50, color='c')
+                elif hist_type == 'YZ':
+                    ax[1,1].set_title('Histogram of Y-Z pic pixel values')
+                    ax[1,1].hist(image[:,xx,].flatten(),bins=50, color='c')
+                elif hist_type == 'XZ':
+                    ax[1,1].set_title('Histogram of X-Z pic pixel values')
+                    ax[1,1].hist(image[yy,:,].flatten(),bins=50, color='c')
+                elif hist_type =='ALL':
+                    ax[1,1].set_title('Histogram of X-Z pic pixel values')
+                    ax[1,1].hist(image.flatten(),bins=50, color='c')
                 ax[1,1].set_yscale('log')
                 ax[1,1].set_xlabel("Voxel values")
                 ax[1,1].set_ylabel("Frequency")
         plt.show()
-        
+
     def rot180_y(self):
-        self.v = np.flip(self.array_dicom)
+        self.array_dicom = np.flip(self.array_dicom)
         self.array_dicom = np.flipud(self.array_dicom)
-        
+
     def rot90_z(self,k=1):
         self.array_dicom = np.rot90(self.array_dicom,k=k)
 
-        
+
     def trim_area(self,*, right = 0, left = 0,
                   upper ,lower =0,
                   top = 0,bottom = 0,
                   int_pix = True,cmap = 'gray'):
         img = self.array_dicom.copy()
-        
+
         if int_pix:
             right = right*-1
             upper = upper*-1
@@ -605,7 +645,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
             lower = int(lower/self.ConstPixelSpacing[1])
             bottom = int(bottom/self.ConstPixelSpacing[2])*-1
             top = int(top/self.ConstPixelSpacing[2])
-            
+
         d_rate = 2
         for i,po in enumerate([upper,right,bottom]):
             if i == 0:
@@ -620,25 +660,29 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         img[:lower,:,:] = img[:lower,:,:]/d_rate
         img[:,:left,:] = img[:,:left,:]/d_rate
         img[:,:,:top] = img[:,:,:top]/d_rate
-        
+
         df = pa.DataFrame(columns = ['right','left','upper','lower','top','bottom'])
         df_array = np.array([right,left,upper,lower,top,bottom])
         df.loc['Pixel number'] = df_array
         df.loc['Position [mm]'] = np.round(df_array*self.ConstPixelSpacing[0],3)
         print('Trimming parameters')
         print(abs(df))
-        
+
         self.display_cross_section(image = img,zz = top,
                               xx = int(img.shape[0]/2),
                               yy = int(img.shape[1]/2),
                               cmap = cmap)
+        del img
+        gc.collect()
+
         self._right = right
         self._left = left
         self._upper = upper
         self._lower = lower
         self._bottom = bottom
         self._top = top
-        
+
+
     def set_trim(self,threshold=False,cmap = 'gray'):
         if not threshold is False:
             if self.dtype == 'int8':
@@ -646,10 +690,10 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
             elif self.dtype == 'int16':
                 self.threshold = int(threshold*2**8)
         self.array_dicom = reConstArray_8(self.array_dicom,self.threshold)
-        
+
         d_num = -10
         d_size = self.array_dicom.nbytes*1e-6
-        
+
         for i,po in enumerate([self._upper,self._right,self._bottom]):
             if i == 0:
                 if po != 0:
@@ -663,9 +707,9 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         self.array_dicom[:self._lower,:,:] = d_num
         self.array_dicom[:,:self._left,:] = d_num
         self.array_dicom[:,:,:self._top] = d_num
-        
+
         img_shape = self.array_dicom.shape
-        
+
         self.array_dicom = self.array_dicom.ravel()
         index = np.where(self.array_dicom==d_num)[0]
         self.array_dicom = np.delete(self.array_dicom,index)
@@ -673,25 +717,26 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         L1 = self.ConstPixelDims[1]-abs(self._left )-abs(self._right)
         L2 = self.ConstPixelDims[2]-abs(self._top)-abs(self._bottom)
         self.array_dicom = self.array_dicom.reshape([L0,L1,L2])
-        
+
         self.display_cross_section(zz = 0,
                               xx = int(self.array_dicom.shape[0]/2),
                               yy = int(self.array_dicom.shape[1]/2),
                               cmap = cmap)
-        
+
         print("#########  Size  #########")
-        print('Image shape was changed')
-        print('from (%d,%d,%d)' %img_shape)
-        print(' to  (%d,%d,%d)' %self.array_dicom.shape)
+        print('* Image shape was changed')
+        print('  from (%d,%d,%d)' %img_shape)
+        print('  to   (%d,%d,%d)' %self.array_dicom.shape)
         print()
-        print('Memory area size for voxel storage changed')
-        print('from %0.3f Mbyte' %d_size)
-        print(' to  %0.3f Mbyte' %(self.array_dicom.nbytes*1e-6))
-        
-        
+        print('* Memory area size for')
+        print('  voxel storage was changed')
+        print('  from %0.3f Mbyte' %d_size)
+        print('  to   %0.3f Mbyte' %(self.array_dicom.nbytes*1e-6))
+
+
     def model_set(self):
         pass
-    
+
     def reset_setting(self):
         del self.array_dicom
         gc.collect()
@@ -700,12 +745,36 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         self.array_dicom = array_dicom
         self.ConstPixelSpacing = list(ConstPixelSpacing)
         self.ConstPixelDims = ConstPixelDims
-    
-    def reConstArray(self,threshold=37,cmap = 'gray',graph_type = 'XY'):
+
+    def check_threshold(self,threshold=37,cmap = 'gray',graph_type = 'XY'):
         image = reConstArray(self.array_dicom,threshold)
-            
         self.display_cross_section(image = image,zz = 0,
                               xx = int(image.shape[0]/2),
                               yy = int(image.shape[1]/2),
                               cmap = cmap,graph_type = graph_type)
         self.threshold = int(threshold*2**8)
+
+    def set_threshold(self,threshold=37,cmap = 'gray',graph_type = 'XY'):
+        self.array_dicom = reConstArray(self.array_dicom,threshold)
+        self.display_cross_section(zz = 0,
+                              xx = int(self.array_dicom.shape[0]/2),
+                              yy = int(self.array_dicom.shape[1]/2),
+                              cmap = cmap,graph_type = graph_type)
+        self.threshold = int(threshold*2**8)
+
+    def initialWeight(self,w):
+        Rsp = 0
+        n2 = -1
+        n1 = self.model.n[-1]
+        if self.model.params['th_skin'] != 0:
+            n2 = self.model.n[3]
+        elif self.model.params['th_ct'] != 0:
+            n2 = self.model.n[2]
+
+        if n1 != n2 and n2 > 0:
+            Rsp = ((n1-n2)/(n1+n2))**2
+        elif n2 < 0:
+            n1 = np.ones(self.w.size)
+            n2 = self.model.getReflectiveIndex(self.add)
+            Rsp = ((n1-n2)/(n1+n2))**2
+        return w-Rsp

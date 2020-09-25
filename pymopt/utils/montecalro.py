@@ -16,23 +16,23 @@ class MonteCalro:
         self.nPh = 1000
         self.f_bit = 'float32'
         self.vectorTh = 0.99999
-        
+
         self.v_result = np.empty((3,1)).astype(self.f_bit)
         self.p_result = np.empty((3,1)).astype(self.f_bit)
         self.add_result = np.empty((3,1)).astype('int16')
         self.w_result = np.empty(1).astype(self.f_bit)
-        
+
         self.p = np.empty((3,1)).astype(self.f_bit)
         self.v = np.empty((3,1)).astype(self.f_bit)
         self.w = np.empty(1).astype(self.f_bit)
-    
+
     def start(self):
         print("")
         print("###### Start ######")
         print("")
-        
+
         start_ = time.time()
-        
+
         count = self.monteCycle(start_)
         self.endProcess()
 
@@ -43,7 +43,7 @@ class MonteCalro:
         self.getRdTtRate()
         self.calTime(time.time(), start_)
         return self
-        
+
     def monteCycle(self,start_):
         count = 0
         counter = 2
@@ -58,11 +58,11 @@ class MonteCalro:
                 self.calTime(time.time(), start_)
                 print()
         return count
-        
-    
+
+
     def endProcess(self):
         pass
-    
+
     def vectorUpdate(self,v,G):
         index = np.where(G==0.0)[0]
         cosTh = np.empty_like(G)
@@ -120,7 +120,7 @@ class MonteCalro:
         if self.fluence != False:
             self.fluence.saveFluesnce(p,dw)
         return w-dw
-            
+
     def russianRoulette(self,w):
         ## 確率的に光子を生き返らせます。
         m = 10
@@ -134,14 +134,14 @@ class MonteCalro:
     #光子の移動距離, uniformly distributed over the interval (0,1)
     def stepLength(self,size):
         return -np.log(np.random.rand(size)).astype(self.f_bit)
-    
+
     #任意の位置(indexの行)が１でそれ以外は0の行列を作る
     def create01Array(self,index,m=3):
         n = index.size
         array_0_1 = np.zeros(m*n,dtype = bool)
         array_0_1[index+m*np.arange(n)] = 1
         return array_0_1.reshape(n,m).T
-    
+
     @classmethod
     def _get_param_names(cls):
         """Get parameter names for the estimator"""
@@ -168,7 +168,7 @@ class MonteCalro:
                                    % (cls, init_signature))
         # Extract and sort argument names excluding 'self'
         return sorted([p.name for p in parameters])
-    
+
     def set_params(self,**params):
         if not params:
             # Simple optimization to gain speed (inspect is slow)
@@ -194,9 +194,9 @@ class MonteCalro:
             valid_params[key].set_params(**sub_params)
 
         return self
-    
+
     def get_params(self, deep=True):
-        
+
         out = dict()
         for key in self._get_param_names():
             try:
@@ -213,7 +213,7 @@ class MonteCalro:
                 out.update((key + '__' + k, val) for k, val in deep_items)
             out[key] = value
         return out
-    
+
     def calTime(self, end, start):
         elapsed_time = end - start
         q, mod = divmod(elapsed_time, 60)
@@ -222,22 +222,25 @@ class MonteCalro:
         else:
             q2, mod2 = divmod(q, 60)
             print('Calculation time: %d h %0.3f minutes.' % (q2, mod2))
-            
+
     def getRdTtRate(self):
-        Tt_index = np.where(self.v_result[2]>0)[0]
-        Rd_index = np.where(self.v_result[2]<0)[0]
-        self.Rdw = self.w_result[Rd_index].sum()/self.nPh
-        self.Ttw = self.w_result[Tt_index].sum()/self.nPh
+        self.Tt_index = np.where(self.v_result[2]>0)[0]
+        self.Rd_index = np.where(self.v_result[2]<0)[0]
+        self.Rdw = self.w_result[self.Rd_index].sum()/self.nPh
+        self.Ttw = self.w_result[self.Tt_index].sum()/self.nPh
         print('######')
         print('Mean Rd %0.6f'% self.Rdw)
         print('Mean Tt %0.6f'% self.Ttw)
         print()
-        
+
+    def getRdTtIndex(self):
+        return {
+            'Rd':self.Rd_index,
+            'Tt':self.Tt_index,
+        }
+
     def getRdTtValues(self):
         return {
             'Rd':self.Rdw,
             'Tt':self.Ttw,
         }
-    
-    
-
