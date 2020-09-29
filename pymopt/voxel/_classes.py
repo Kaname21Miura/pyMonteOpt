@@ -49,7 +49,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
     def generateInisalCoodinate(self,nPh,f = 'float32'):
         self.add =  np.zeros((3, nPh),dtype = 'int16')
         self.add[0] = int(self.model.voxel_model.shape[0]/2)
-        self.add[0] = int(self.model.voxel_model.shape[1]/2)
+        self.add[1] = int(self.model.voxel_model.shape[1]/2)
         self.add[2] = 1
         self.p = np.zeros((3,nPh)).astype(f)
         self.p[2] = -self.model.voxel_space/2
