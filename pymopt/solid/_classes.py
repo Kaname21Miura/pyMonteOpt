@@ -30,7 +30,7 @@ class BaseSolidModel(MonteCalro,metaclass = ABCMeta):
                      ]
         self.fluence = False
         self.nr=50;self.nz=20;self.dr=0.1;self.dz=0.1
-        
+
         self.borderposit = np.array([0])
         self.thickness = np.array([0])
         self.n = np.array([1])
@@ -39,26 +39,26 @@ class BaseSolidModel(MonteCalro,metaclass = ABCMeta):
         self.ms = np.array([1])
         self.ma = np.array([1])
         self.g = np.array([1])
-        
+
         self.build(*initial_data, **kwargs)
-        self.generateInisalCoodinate()
+        self._generate_inisal_coodinate()
         if self.fluence :
             self.fluence = IntarnalFluence(nr=self.nr,nz=self.nz,dr=self.dr,dz=self.dz)
-        
+
     def checkNumpyArray(self,val,key):
         if (not type(val) is np.ndarray)and(not type(val) is list):
             e_mess = key + ' must be list or ndarray'
             raise ValueError(e_mess)
-            
+
     def checkPrams(self):
         check_values = np.array([self.g,self.ma,self.ms,self.n,self.thickness])
         check_keys = ['g','ma','ms','n','thickness']
         for val,key in zip(check_values,check_keys):
             self.checkNumpyArray(val,key)
             setattr(self,key,np.array(val).astype(self.f_bit))
-        
+
     def build(self,*initial_data, **kwargs):
-                
+
         for dictionary in initial_data:
             for key in dictionary:
                 if not key in self.keys:
@@ -68,18 +68,18 @@ class BaseSolidModel(MonteCalro,metaclass = ABCMeta):
             if not key in self.keys:
                 raise KeyError(key)
             setattr(self, key, kwargs[key])
-            
+
         self.setBorderPosit()
         self.checkPrams()
         self.setRefIndex()
-        self.generateInisalCoodinate()
+        self._generate_inisal_coodinate()
 
 
     def setRefIndex(self):
         border = np.append(self.n_air,self.n)
         border = np.append(border,self.n_air).astype(self.f_bit)
         setattr(self,'ref_index',border)
-        
+
     def setBorderPosit(self):
         thick = [0]+self.thickness
         b = 0; b_list = []
@@ -87,17 +87,17 @@ class BaseSolidModel(MonteCalro,metaclass = ABCMeta):
             b += i
             b_list.append(b)
         setattr(self,'borderposit',np.array(b_list).astype(self.f_bit))
-        
+
     @abstractmethod
     def stepMovement(self):
         return self.w.size
-    
-    def generateInisalCoodinate(self):
+
+    def _generate_inisal_coodinate(self):
         self.p = np.zeros((3,self.nPh),dtype = self.f_bit)
         self.v = np.zeros((3,self.nPh),dtype = self.f_bit)
         self.v[2] = 1
         self.w = self._initialWeight(np.full(self.nPh,1).astype(self.f_bit))
-        
+
     def _initialWeight(self,w):
         Rsp = 0
         n1 = self.ref_index[0]
@@ -110,19 +110,19 @@ class BaseSolidModel(MonteCalro,metaclass = ABCMeta):
             self.p_result = np.concatenate([self.p_result, result[0]],axis = 1)
             self.v_result = np.concatenate([self.v_result, result[1]],axis = 1)
             self.w_result = np.concatenate([self.w_result, result[2]])
-            
+
     def endProcess(self):
         self.v_result = self.v_result[:,1:]
         self.p_result = self.p_result[:,1:]
         self.w_result = self.w_result[1:]
-        
+
     def getResult(self):
         return {
             'p':self.p_result,
             'v':self.v_result,
             'w':self.w_result,
         }
-    
+
     def getFluence(self):
         return {'Arz':self.fluence.getArz(),
                 'r':self.fluence.getArrayR(),
@@ -132,16 +132,16 @@ class BaseSolidModel(MonteCalro,metaclass = ABCMeta):
 # =============================================================================
 # Public montecalro model
 # =============================================================================
-        
+
 class SolidPlateModel(BaseSolidModel):
     @_deprecate_positional_args
     def __init__(self,*initial_data, **kwargs):
         super().__init__(*initial_data, **kwargs)
-        
+
     # 境界への入射角を定義
     def getIncidentAngle(self,v):
         return np.arccos(abs(v[2]))
-    
+
     # 境界上のベクトル更新
     def boundaryVectorUpdate(self,v,at,snell_rato,vl_index,vt_index):
         #反射するとき
@@ -153,7 +153,7 @@ class SolidPlateModel(BaseSolidModel):
             v[1,vt_index] = snell_rato[vt_index]*v[1,vt_index]
             v[2,vt_index] = np.sign(v[2,vt_index])*np.cos(at)
         return v
-    
+
     # 境界判別と光子移動距離の更新
     def boundaryJudgment(self,p,v,s):
         ma,ms,g = self.getOpticalProperties(p,v)
@@ -165,7 +165,7 @@ class SolidPlateModel(BaseSolidModel):
         s[pb_index] = db[pb_index]
         return pb_index,s,dl,ma,ms,g
 
-    
+
     def getBorderIndex(self,p,v):
         border = self.borderposit
         margin = 1e-8
@@ -181,7 +181,7 @@ class SolidPlateModel(BaseSolidModel):
             delta[ind[0,ind_shallow],0] = -1
             delta[ind[0,ind_deep],border.size-1] = 1
         return np.where(delta[:,:-1] != delta[:,1:])[1]
-    
+
     def getOpticalProperties(self,p,v):
         index = self.getBorderIndex(p,v)
         p_size = p[2].size
@@ -190,7 +190,7 @@ class SolidPlateModel(BaseSolidModel):
         ms_out = (np.tile(self.ms,(p_size,1))*A).max(1)
         g_out = (np.tile(self.g,(p_size,1))*A).max(1)
         return ma_out,ms_out,g_out
-    
+
     def getNextMt(self,p,v):
         index = self.getBorderIndex(p,v)
         index = np.sign(v[2])+index
@@ -200,7 +200,7 @@ class SolidPlateModel(BaseSolidModel):
         data[0,index_index] = (np.tile(self.ma,(index_index.size,1))*A).max(1)
         data[1,index_index] = (np.tile(self.ms,(index_index.size,1))*A).max(1)
         return data[0],data[1]
-    
+
     def getDistanceBoundary(self,p,v):
         index_positive = np.where(v[2]>0)[0]
         index_negative = np.where(v[2]<0)[0]
@@ -215,7 +215,7 @@ class SolidPlateModel(BaseSolidModel):
         S[index_positive] = (deep[index_positive] - p[2,index_positive])/v[2,index_positive]
         S[index_zero]=1000
         return abs(S)
-    
+
     #屈折率ni,ntの取得
     def getNiNt(self,p,v):
         ind_negative = np.where(v[2]<0)[0]
@@ -224,24 +224,24 @@ class SolidPlateModel(BaseSolidModel):
         n = self.ref_index
         border = self.borderposit
         index = self.getBorderIndex(p,v)+1
-        
+
         n_array = np.tile(n,(index.size,1)).T
         ni = (n_array*self.create01Array(index,m=border.size+1)).max(0)
-        
+
         nt = np.empty_like(pz)
         shallow = (n_array*self.create01Array(index-1,m=border.size+1)).max(0)
         deep = (n_array*self.create01Array(index+1,m=border.size+1)).max(0)
         nt[ind_positive] = deep[ind_positive]
         nt[ind_negative] = shallow[ind_negative]
         return ni,nt
-    
+
     def limBorder(self,p): #境界面上のZ方向計算誤差をなくします。
         border = self.borderposit
         index = np.argmin(abs(np.tile(border,(p[2].size,1)).T-p[2]),axis=0)
         A = self.create01Array(index,m=border.size).T
         p[2] = (np.tile(border,(p[2].size,1))*A).max(1)
         return p
-    
+
     def borderOut(self,p,v,w):
         margin = 1e-10
         border = self.borderposit
@@ -255,7 +255,7 @@ class SolidPlateModel(BaseSolidModel):
         p = np.delete(p, del_index, axis = 1)
         w = np.delete(w, del_index)
         return p,v,w,result
-    
+
     def photonVanishing(self,w,p,v):
         #photn waight が0.0001以下
         del_index = np.where(w<=0.0001)[0]
@@ -266,14 +266,14 @@ class SolidPlateModel(BaseSolidModel):
             p = np.delete(p, del_index, axis = 1)
             w = np.delete(w, del_index)
         return p,v,w
-    
+
     def updateOnBoundary(self,v,p,f="float32"):
         ## ここでは、透過判別や反射、屈折の計算を行います。
-        #境界を超える前後の屈折率を取得  
+        #境界を超える前後の屈折率を取得
         ni,nt = self.getNiNt(p,v)
         #境界前後で屈折率が変化する場合のindex
         pb_index = np.where(ni!=nt)[0]
-        
+
         if list(pb_index) != []:
             #透過判別
             #入射角の計算
@@ -309,11 +309,11 @@ class SolidPlateModel(BaseSolidModel):
             ind = np.where(n_ma == 0)[0]
             p[:,index[ind]] = pp[:,ind]
             v[:,index[ind]] = vv[:,ind]
-            
+
             pp = np.delete(pp,ind,axis=1)
             vv = np.delete(vv,ind,axis=1)
             index = np.delete(index,ind)
-            
+
             ind = np.where(n_ma != 0)[0]
             mt = mt[ind]
             pb_index,l,dl,ma,ms,g = self.boundaryJudgment(pp,vv,dl[ind]*mt)
@@ -327,7 +327,7 @@ class SolidPlateModel(BaseSolidModel):
             ms_list.append(ms[pn_index])
             g_list.append(g[pn_index])
             mt = ma[pb_index]+ma[pb_index]
-            
+
             pp = np.delete(pp,pn_index,axis=1)
             vv = np.delete(vv,pn_index,axis=1)
             index = np.delete(index,pn_index)
@@ -337,8 +337,8 @@ class SolidPlateModel(BaseSolidModel):
         if list(index)!=[]:
             ma = np.array(list(itertools.chain.from_iterable(ma_list)))
             ms = np.array(list(itertools.chain.from_iterable(ms_list)))
-            g = np.array(list(itertools.chain.from_iterable(g_list)))        
-            mt = ma+ms        
+            g = np.array(list(itertools.chain.from_iterable(g_list)))
+            mt = ma+ms
             v[:,index] = self.vectorUpdate(v[:,index],g)
             w[index] = self.wUpdate(w[index],ma,mt,1,p[:,index])
         return p, v, w
@@ -357,16 +357,16 @@ class SolidPlateModel(BaseSolidModel):
             #境界上光子のベクトルの更新
             self.p[:,pb_index],self.v[:,pb_index],self.w[pb_index] = self.RTInterface(
                 self.p[:,pb_index],self.v[:,pb_index],self.w[pb_index],dl,mt[pb_index])
-            
+
             #境界を超えない光子の位置,ベクトルを更新
             pn_index = np.delete(np.arange(self.p[2].size),pb_index)
             self.v[:,pn_index] = self.vectorUpdate(self.v[:,pn_index],g[pn_index])
             self.w[pn_index] = self.wUpdate(self.w[pn_index],ma[pn_index],mt[pn_index],1,self.p[:,pn_index])
-            
+
         else:#全ての光子が境界に乗っていない時
             self.v= self.vectorUpdate(self.v,g)
             self.w = self.wUpdate(self.w,ma,mt,1,self.p)
-            
+
         self.p,self.v,self.w,result=self.borderOut(self.p,self.v,self.w)
         self.p,self.v,self.w = self.photonVanishing(self.w,self.p,self.v)
         self.saveResult(result)

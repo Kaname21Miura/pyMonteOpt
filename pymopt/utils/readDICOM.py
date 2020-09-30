@@ -56,7 +56,7 @@ def _changeResolution(x,ConstPixelDims):
     return np.array(x).reshape(a[0],a[1],a[2])
 
 def reConstArray_8(ArrayDicom, threshold=9500):
-    threshold = round(threshold/(2**8))
+    threshold = round(threshold/(1+2**8))
     return np.where(ArrayDicom < threshold, 0, ArrayDicom)
 
 def reConstArray(ArrayDicom, threshold=37):

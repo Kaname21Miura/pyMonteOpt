@@ -10,6 +10,7 @@ import time
 import warnings
 from collections import defaultdict
 import inspect
+from ..utils.utilities import calTime
 
 class MonteCalro:
     def __init__(self):
@@ -26,6 +27,9 @@ class MonteCalro:
         self.v = np.empty((3,1)).astype(self.f_bit)
         self.w = np.empty(1).astype(self.f_bit)
 
+        self.Rdw = 0
+        self.Ttw = 0
+
     def start(self):
         print("")
         print("###### Start ######")
@@ -41,7 +45,7 @@ class MonteCalro:
         print("###### Finish ######")
         print("Maximum step number: %s"%count)
         self.getRdTtRate()
-        self.calTime(time.time(), start_)
+        calTime(time.time(), start_)
         return self
 
     def monteCycle(self,start_):
@@ -55,7 +59,7 @@ class MonteCalro:
             if count%counter==0:
                 counter*=2
                 print("Progress: %s [％]"%round((1-w_size/self.nPh)*100,3))
-                self.calTime(time.time(), start_)
+                calTime(time.time(), start_)
                 print()
         return count
 
@@ -214,14 +218,6 @@ class MonteCalro:
             out[key] = value
         return out
 
-    def calTime(self, end, start):
-        elapsed_time = end - start
-        q, mod = divmod(elapsed_time, 60)
-        if q < 60:
-            print('Calculation time: %d minutes %0.3f seconds.' % (q, mod))
-        else:
-            q2, mod2 = divmod(q, 60)
-            print('Calculation time: %d h %0.3f minutes.' % (q2, mod2))
 
     def getRdTtRate(self):
         self.Tt_index = np.where(self.v_result[2]>0)[0]
