@@ -8,9 +8,83 @@ Created on Thu Sep 10 10:30:04 2020
 import numpy as np
 from numba import njit
 from ..utils import _deprecate_positional_args
+__all__ = ['Fluence3D','Fluence2D']
+class Fluence3D:
+    @_deprecate_positional_args
+    def __init__(self,*,nr,nz,dr,dz):
+        self.r = np.array([(i)*dr for i in range(nr+1)])
+        self.z = np.array([(i)*dz for i in range(nz+1)])
+        self.Arz = np.zeros((nr,nr,nz),dtype = 'float32')
+        self.nr = nr
+        self.nz = nz
+        self.dr = dr
+        self.dz = dz
+        print("Memory area size for fluence storage: %d Mbyte" % (self.Arz.nbytes*1e-6))
 
+    def getArz(self):
+        return self.Arz
 
-class IntarnalFluence(object):
+    def getArrayZ(self):
+        return np.array([(i+0.5)*self.dz for i in range(self.nz)])
+
+    def getArrayR(self):
+        return np.array([(i+0.5)*self.dr for i in range(self.nr)])
+
+    def saveFluesnce(self,p,w):
+        p = p[:,np.argsort(p[2,:])]
+        self.Arz = self._inputArz(p,w,self.r,self.z,self.Axyz)
+
+    @staticmethod
+    @njit('f4[:,:,:](f4[:,:],f4[:],f8[:],f8[:],f4[:,:,:])')
+    def _inputArz(prz,w,r,z,Arz):
+        count = 0
+        nr,nz = r.size,z.size
+        for wi in w:
+            flag = True
+            num_x = 0
+            num_y = 0
+            num_z = 0
+            val = 0
+            for i in r:
+                if val==nr-1:
+                    flag = False
+                    break
+                if prz[0][count]>=i and prz[0][count]<r[val+1]:
+                    num_x = val
+                    break
+                val+=1
+            else:
+                continue
+            if flag:
+                val = 0
+                for i in r:
+                    if val==nr-1:
+                        flag = False
+                        break
+                    if prz[1][count]>=i and prz[1][count]<r[val+1]:
+                        num_y = val
+                        break
+                    val+=1
+                else:
+                    continue
+                if flag:
+                    val = 0
+                    for i in z:
+                        if val==nz-1:
+                            flag = False
+                            break
+                        if prz[2][count]>=i and prz[2][count]<z[val+1]:
+                            num_z = val
+                            break
+                        val+=1
+                    else:
+                        continue
+                    if flag:
+                        Arz[num_x][num_y][num_z]+=wi
+                        count+=1
+        return Arz
+
+class Fluence2D(object):
     @_deprecate_positional_args
     def __init__(self,*,nr,nz,dr,dz):
         self.r = np.array([(i)*dr for i in range(nr+1)])
@@ -21,13 +95,13 @@ class IntarnalFluence(object):
         self.dr = dr
         self.dz = dz
         print("Memory area size for fluence storage: %d Mbyte" % (self.Arz.nbytes*1e-6))
-        
+
     def getArz(self):
         return self.Arz
-    
+
     def getArrayZ(self):
         return np.array([(i+0.5)*self.dz for i in range(self.nz)])
-    
+
     def getArrayR(self):
         return np.array([(i+0.5)*self.dr for i in range(self.nr)])
 
@@ -37,7 +111,7 @@ class IntarnalFluence(object):
         prz = np.array([rr,zz]).astype('float32')
         prz = prz[:,np.argsort(prz[1,:])]
         self.Arz = self._inputArz(prz,w,self.r,self.z,self.Arz)
-        
+
     @staticmethod
     @njit('f4[:,:](f4[:,:],f4[:],f8[:],f8[:],f4[:,:])')
     def _inputArz(prz,w,r,z,Arz):

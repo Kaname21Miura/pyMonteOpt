@@ -20,7 +20,7 @@ import json,pickle,bz2
 from ..utils.montecalro import MonteCalro
 from ..utils import readDicom,reConstArray_8,reConstArray
 from ..utils.validation import _deprecate_positional_args
-from ..fluence import IntarnalFluence
+from ..fluence import Fluence2D,Fluence3D
 from ..utils.utilities import calTime,set_params
 import gc
 import warnings
@@ -35,16 +35,21 @@ __all__ = ['VoxelPlateModel','PlateModel','VoxelDicomModel']
 class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
     #@_deprecate_positional_args
     @abstractmethod
-    def __init__(self,*,nPh,model,fluence = False,dtype='float32',
+    def __init__(self,*,nPh,model,fluence_mode =False, dtype='float32',
                  nr=50,nz=20,dr=0.1,dz=0.1,d_beam = 0):
         super().__init__()
         self.dtype = dtype
         self.nPh = nPh
         self.d_beam = d_beam
         self.model = model
-        self.fluence = fluence
+        self.fluence = fluence_mode
+        self.fluence_mode = fluence_mode
         if self.fluence:
-            self.fluence = IntarnalFluence(nr=nr,nz=nz,dr=dr,dz=dz)
+            if fluence_mode == '2D':
+                self.fluence = Fluence2D(nr=nr,nz=nz,dr=dr,dz=dz)
+            elif fluence_mode == '3D':
+                self.fluence = Fluence3D(nr=nr,nz=nz,dr=dr,dz=dz)
+
     def start(self):
         self._generate_inisal_coodinate(self.nPh)
         super().start()
@@ -59,7 +64,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self.add[2] = 1
         self.p = np.zeros((3,nPh)).astype(f)
         self.p[2] = -self.model.voxel_space/2
-        self._ser_beam_diameter()
+        self._set_beam_diameter()
         self.v = np.zeros((3,nPh)).astype(f)
         self.v[2] = 1
         self.w = np.ones(nPh).astype(f)
@@ -68,9 +73,10 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
 
     def _set_beam_diameter(self):
         if self.d_beam!= 0:
+            l = self.model.voxel_space
             print("TEM00を入力")
             #ガウシアン分布を生成
-            gb = np.array(self.gaussianBeam(self.w0)).astype(f_bit)
+            gb = np.array(self.gaussianBeam(self.d_beam)).astype(self.dtype)
             #ガウシアン分布を各アドレスに振り分ける
             pp = (gb/l).astype("int16")
             ind = np.where(gb<0)
@@ -163,13 +169,20 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
             Rsp = ((n1-n2)/(n1+n2))**2
         return w-Rsp
 
-    def set_monte_params(self,*,nPh,fluence = False,
-                        dtype='float32',nr=50,nz=20,dr=0.1,dz=0.1):
+    def set_monte_params(self,*,nPh,model,
+        fluence_mode =False, dtype='float32',
+        nr=50,nz=20,dr=0.1,dz=0.1,d_beam = 0):
         self.dtype = dtype
         self.nPh = nPh
-        self.fluence = fluence
+        self.d_beam = d_beam
+        self.model = model
+        self.fluence = fluence_mode
+        self.fluence_mode = fluence_mode
         if self.fluence:
-            self.fluence = IntarnalFluence(nr=nr,nz=nz,dr=dr,dz=dz)
+            if fluence_mode == '2D':
+                self.fluence = Fluence2D(nr=nr,nz=nz,dr=dr,dz=dz)
+            elif fluence_mode == '3D':
+                self.fluence = Fluence3D(nr=nr,nz=nz,dr=dr,dz=dz)
 
     @_deprecate_positional_args
     def build(self,**kwargs):
@@ -360,7 +373,7 @@ class DicomBinaryModel(VoxelModel):
             }
         self.keys = list(self.params.keys())
 
-        self.set_params()
+        self._make_model_params()
         self.voxel_space = 0.01
         self.voxel_model = np.zeros((3,3,3),dtype = self.dtype)
         self.model_shape = (3,3,3)
@@ -374,7 +387,6 @@ class DicomBinaryModel(VoxelModel):
         self.model_size = model.size
         self.voxel_space = voxel_space
         self._make_voxel_model(model)
-
 
     def get_params(self):
         _head = {'n':0,'ma':1,'ms':2,'g':3,'th':4}
@@ -417,7 +429,7 @@ class DicomBinaryModel(VoxelModel):
         self.voxel_model = self.voxel_model.reshape(
             self.model_shape[0],self.model_shape[1],self.model_shape[2])
 
-        if not self.params['th_ct'] !=0:
+        if self.params['th_ct'] !=0:
             ct = np.ones((self.model_shape[0],
                          self.model_shape[1],
                          int(self.params['th_ct']/self.voxel_space)),
@@ -443,10 +455,10 @@ class DicomLinearModel(DicomBinaryModel):
         self.model_name = 'DicomBinaryModel'
         self.dtype = 'int8'
         self.dtype_f = 'float32'
-        self.cort_num=20
-        self.skin_num=30
+        self.cort_num=-20
+        self.skin_num=-30
         self.params = {
-            'th_skin':2,'th_ct':0.03,
+            'th_skin':2,'th_ct':0.3,
             'n_sp':1.,'n_tr':1.37,'n_ct':1.37,'n_skin':1.37,'n_air':1.,
             'ma_sp':0.00001,'ma_tr':0.011,'ma_ct':0.011,'ma_skin':0.037,
             'ms_sp':0.00001,'ms_tr':np.nan,'ms_ct':19.1,'ms_skin':18.8,
@@ -454,46 +466,71 @@ class DicomLinearModel(DicomBinaryModel):
             }
         self.keys = list(self.params.keys())
 
-        self.set_params()
+        self._make_model_params()
         self.voxel_space = 0.01
         self.voxel_model = np.zeros((3,3,3),dtype = self.dtype)
         self.model_shape = (3,3,3)
 
+    def _make_voxel_model(self,model):
+        # バイナリーモデルでは、骨梁間隙を0,海綿骨を1、緻密骨を2、皮膚を３、領域外を-1に設定する
+        self.voxel_model = model
+        del model
+        gc.collect
+        if self.params['th_ct'] !=0:
+            ct = np.ones((self.model_shape[0],
+                         self.model_shape[1],
+                         int(self.params['th_ct']/self.voxel_space)),
+                         dtype = self.dtype)*self.cort_num
+            self.voxel_model = np.concatenate((ct.T,self.voxel_model.T)).T
+
+        if self.params['th_skin'] != 0:
+            skin = np.ones((self.model_shape[0],
+                           self.model_shape[1],
+                           int(self.params['th_skin']/self.voxel_space)+1),
+                           dtype = self.dtype)*self.skin_num
+            self.voxel_model = np.concatenate((skin.T,self.voxel_model.T)).T
+
+        self.voxel_model[0,:,:] = -1
+        self.voxel_model[-1,:,:] = -1
+        self.voxel_model[:,0,:] = -1
+        self.voxel_model[:,-1,:] = -1
+        self.voxel_model[:,:,0] = -1
+        self.voxel_model[:,:,-1] = -1
 
     def getAbsorptionCoeff(self,add):
         # パラメーターは、[骨梁間隙, 海綿骨, 緻密骨, 皮膚, 外気]
-        val = self.voxel_model[add[0],add[1],add[2]]
-        val[val== 0 ]=self.ma[0]
-        val[val > 0 ]=self.ma[1]
-        val[val==-20]=self.ma[2]
-        val[val==-30]=self.ma[3]
-        return self.ma[index]
+        val = self.voxel_model[add[0],add[1],add[2]].astype('float32')
+        val[val>0]=self.ma[1]
+        val[val==0]=self.ma[0]
+        val[val==self.cort_num]=self.ma[2]
+        val[val==self.skin_num]=self.ma[3]
+        return val
 
     def getScatteringCoeff(self,add):
-        val = self.voxel_model[add[0],add[1],add[2]]
+        val = self.voxel_model[add[0],add[1],add[2]].astype('float32')
         #### 確認が必要 #####
-        val[val > 0 ]=(0.016*val[val>0]*256-119.75)/10
-        val[val== 0 ]=self.ms[0]
-        val[val==-20]=self.ms[2]
-        val[val==-30]=self.ms[3]
-        return self.ms[index]
+        val[val>0]=(0.016*val[val>0]*256-119.75)/10
+        val[val==0]=self.ms[0]
+        val[val==self.cort_num]=self.ms[2]
+        val[val==self.skin_num]=self.ms[3]
+        return val
 
     def getAnisotropyCoeff(self,add):
-        val = self.voxel_model[add[0],add[1],add[2]]
-        val[val== 0 ]=self.g[0]
+        val = self.voxel_model[add[0],add[1],add[2]].astype('float32')
         val[val > 0 ]=self.g[1]
-        val[val==-20]=self.g[2]
-        val[val==-30]=self.g[3]
+        val[val== 0 ]=self.g[0]
+        val[val==self.cort_num]=self.g[2]
+        val[val==self.skin_num]=self.g[3]
         return val
 
     def getReflectiveIndex(self,add):
         # パラメーターは、[骨梁間隙, 海綿骨, 緻密骨, 皮膚, 外気]のように設定されています。
-        val = self.voxel_model[add[0],add[1],add[2]]
-        val[val== -1]=self.n[-1]
-        val[val== 0 ]=self.n[0]
+        val = self.voxel_model[add[0],add[1],add[2]].astype('float32')
         val[val > 0 ]=self.n[1]
-        val[val==-20]=self.n[2]
-        val[val==-30]=self.n[3]
+        val[val== 0 ]=self.n[0]
+        val[val== -1]=self.n[4]
+        val[val==self.cort_num]=self.n[2]
+        val[val==self.skin_num]=self.n[3]
         return val
 
 
@@ -559,16 +596,17 @@ class PlateModel(VoxelModel):
 # Public montecalro model
 # =============================================================================
 class VoxelPlateModel(BaseVoxelMonteCarlo):
-    def __init__(self,*,nPh=1000,fluence=False,dtype='float32',
+    def __init__(self,*,nPh=1000,fluence_mode=False,dtype='float32',
                  nr=50,nz=20,dr=0.1,dz=0.1,):
 
-        super().__init__(nPh = nPh,fluence =fluence, model = PlateModel(),
+        super().__init__(nPh = nPh,fluence_mode =fluence_mode, model = PlateModel(),
                          dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz)
 
 class VoxelDicomModel(BaseVoxelMonteCarlo):
 
-    def __init__(self,*,nPh,fluence=False,dtype='float32',
-                 nr=50,nz=20,dr=0.1,dz=0.1,model_type = 'binary'):
+    def __init__(self,*,nPh=1000,dtype='float32',
+                 nr=50,nz=20,dr=0.1,dz=0.1, fluence_mode=False,
+                 model_type = 'binary',d_beam = 0):
 
         self.model_type = model_type
         if model_type == 'binary':
@@ -576,7 +614,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         elif model_type == 'liner':
             model = DicomLinearModel()
 
-        super().__init__(nPh = nPh,fluence =fluence, model = model,
+        super().__init__(nPh = nPh,fluence_mode =fluence_mode,model = model,
                          dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz)
 
         self._right = 0
@@ -592,7 +630,10 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         self.rot90_z_status = 0
 
     def build(self,*initial_data, **kwargs):
-        self.model.set_params(*initial_data, **kwargs)
+        if initial_data == () and kwargs == {}:
+            pass
+        else:
+            self.model.set_params(*initial_data, **kwargs)
         try:
             self.model.build(self.array_dicom,self.ConstPixelSpacing[0])
             del self.array_dicom
@@ -603,6 +644,29 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
     def set_params(self,*initial_data, **kwargs):
         self.model.set_params(*initial_data, **kwargs)
 
+    def set_monte_params(self,*,nPh,dtype='float32',
+                 nr=50,nz=20,dr=0.1,dz=0.1, fluence_mode=False,
+                 model_type = 'binary',d_beam = 0):
+        self.dtype = dtype
+        self.nPh = nPh
+        self.d_beam = d_beam
+        self.fluence = fluence_mode
+        self.fluence_mode = fluence_mode
+        if self.fluence:
+            if fluence_mode == '2D':
+                self.fluence = Fluence2D(nr=nr,nz=nz,dr=dr,dz=dz)
+            elif fluence_mode == '3D':
+                self.fluence = Fluence3D(nr=nr,nz=nz,dr=dr,dz=dz)
+
+        self.model_type = model_type
+        if model_type == 'binary':
+            model = DicomBinaryModel()
+        elif model_type == 'liner':
+            model = DicomLinearModel()
+        params = self.model.params
+        self.model = model
+        self.model.set_params(params)
+
     def _calc_info(self):
         calc_info = {
             'Date':datetime.datetime.now().isoformat(),
@@ -612,10 +676,10 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
                 'model_type':self.model_type,
                 'model_name':self.model.model_name,
                 'model_params':self.model.params,
-                'model_shape':self.model_shape,
-                'model_dtype':self.model.dtype,
+                'model_shape':self.model.model_shape,
+                'model_dtype':self.model.dtype.name,
             },
-            'dicom'{
+            'dicom':{
                 'dicom_path':self.path,
                 'ConstPixelSpacing':self.ConstPixelSpacing,
                 'ConstPixelDims':self.ConstPixelDims,
@@ -631,12 +695,13 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
                     'trim_bottom_pixel':self._bottom,
                     'bone_threshold':self.threshold,
                 },
+                'd_beam':self.d_beam,
                 'fluence_mode':self.fluence_mode,
             }
         }
         return calc_info
 
-    def save_result(fname = "test"):
+    def save_result(self,fname = "test"):
         start_ = time.time()
 
         res = self.get_result()
@@ -673,6 +738,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         self.array_dicom = array_dicom
         self.ConstPixelSpacing = list(ConstPixelSpacing)
         self.ConstPixelDims = ConstPixelDims
+        self.trimd_size =ConstPixelDims
         print("Memory area size for voxel storage: %0.3f Mbyte" % (self.array_dicom.nbytes*1e-6))
 
     def display_cross_section(self,*,xx = 0,yy = 0,zz = 0,
@@ -831,13 +897,22 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         self._bottom = bottom
         self._top = top
 
+    def set_trim_pixel(self,*, right = 0, left = 0,
+                  upper ,lower =0,
+                  top = 0,bottom = 0,):
+        self._right = right
+        self._left = left
+        self._upper = upper
+        self._lower = lower
+        self._bottom = bottom
+        self._top = top
 
     def set_trim(self,threshold=False,cmap = 'gray'):
         if not threshold is False:
             if self.dtype == 'int8':
                 self.threshold = int(threshold*2**8)
             elif self.dtype == 'int16':
-                self.threshold = int(threshold*2**8)
+                self.threshold = int(threshold)
         self.array_dicom = reConstArray_8(self.array_dicom,self.threshold)
 
         d_num = -10

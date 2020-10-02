@@ -6,8 +6,7 @@ Created on Wed Sep 16 16:53:54 2020
 @author: kaname
 """
 
-from .intarnal_fluence import IntarnalFluence
-
+from .intarnal_fluence import Fluence2D,Fluence3D
 __all__ = [
-    'IntarnalFluence',
+    'Fluence2D','Fluence3D',
     ]
