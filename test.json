@@ -1,5 +1,5 @@
 {
-    "Date": "2020-10-02T23:03:15.354178",
+    "Date": "2020-10-05T20:38:58.590106",
     "number_of_photons": 10000,
     "calc_dtype": "float32",
     "model": {
@@ -62,6 +62,6 @@
             "bone_threshold": 9472
         },
         "d_beam": 0.54,
-        "fluence_mode": false
+        "fluence_mode": "3D"
     }
 }

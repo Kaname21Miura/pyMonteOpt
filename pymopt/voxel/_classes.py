@@ -53,6 +53,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
     def start(self):
         self._generate_inisal_coodinate(self.nPh)
         super().start()
+        return self
 
     def get_voxel_model(self):
         return self.model.voxel_model
@@ -152,7 +153,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         dw = w*ma/mt
         if self.fluence != False:
             encoded_position = self._encooder(p,add)
-            self.fluence.saveFluesnce(encoded_position,dw)
+            self.fluence.saveFluesnce(encoded_position,dw/ma)
         return w-dw
 
     def _end_process(self):
@@ -705,12 +706,27 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         start_ = time.time()
 
         res = self.get_result()
-        with bz2.open(fname+".pkl.bz2", 'wb') as fp:
+        save_name = fname+"_LID.pkl.bz2"
+        with bz2.open(save_name, 'wb') as fp:
             fp.write(pickle.dumps(res))
-
+        print("Monte Carlo results saved in ")
+        print("-> %s" %(save_name))
+        print('')
         info = self._calc_info()
-        with open(fname+".json", 'w') as fp:
+        save_name = fname+"_info.json"
+        with open(save_name, 'w') as fp:
             json.dump(info,fp,indent=4)
+        print("Calculation conditions are saved in")
+        print("-> %s" %(save_name))
+        print('')
+        if self.fluence_mode:
+            fe = self.fluence.getArz()
+            save_name = fname+'_fluence'+self.fluence_mode+".pkl.bz2"
+            with bz2.open(save_name, 'wb') as fp:
+                fp.write(pickle.dumps(fe))
+            print("Internal Fluence saved in ")
+            print("-> %s" %(save_name))
+            print('')
 
         calTime(time.time(), start_)
 
@@ -782,7 +798,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
                 ax[0].plot([x_size,x_size],[0,resol0[-1]],'-',c = 'r')
 
             ax[1].set_title('Y-Z pic in X = %0.3f mm' %(x_size))
-            ax[1].pcolormesh(resol2,resol0,image[:,xx,:])
+            ax[1].pcolormesh(resol2,resol0,image[xx,:,:])
             ax[1].set_xlabel("Z mm")
             ax[1].set_ylabel("Y mm")
             if section_line:
@@ -800,14 +816,14 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
                 ax[0,0].plot([0,resol1[-1]],[y_size,y_size],'-',c = 'r')
 
             ax[0,1].set_title('Y-Z pic in X = %0.3f mm' %(x_size))
-            ax[0,1].pcolormesh(resol2,resol0,image[:,xx,:])
+            ax[0,1].pcolormesh(resol2,resol0,image[xx,:,:])
             ax[0,1].set_xlabel("Z mm")
             ax[0,1].set_ylabel("Y mm")
             if section_line:
                 ax[0,1].plot([z_size,z_size],[0,resol0[-1]],'-',c = 'r')
 
             ax[1,0].set_title('X-Z pic in Y = %0.3f mm' %(y_size))
-            ax[1,0].pcolormesh(resol1,resol2,image[yy,:,:].T)
+            ax[1,0].pcolormesh(resol1,resol2,image[:,yy,:].T)
             ax[1,0].set_ylim(resol2[-1],resol2[0])
             ax[1,0].set_xlabel("X mm")
             ax[1,0].set_ylabel("Z mm")

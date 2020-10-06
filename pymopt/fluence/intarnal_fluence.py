@@ -12,9 +12,9 @@ __all__ = ['Fluence3D','Fluence2D']
 class Fluence3D:
     @_deprecate_positional_args
     def __init__(self,*,nr,nz,dr,dz):
-        self.r = np.array([(i)*dr for i in range(nr+1)])
+        self.r = np.array([(i)*dr for i in np.arange(-nr,nr+1)])
         self.z = np.array([(i)*dz for i in range(nz+1)])
-        self.Arz = np.zeros((nr,nr,nz),dtype = 'float32')
+        self.Arz = np.zeros((nr*2,nr*2,nz),dtype = 'float32')
         self.nr = nr
         self.nz = nz
         self.dr = dr
@@ -28,11 +28,11 @@ class Fluence3D:
         return np.array([(i+0.5)*self.dz for i in range(self.nz)])
 
     def getArrayR(self):
-        return np.array([(i+0.5)*self.dr for i in range(self.nr)])
+        return np.array([(i+0.5)*self.dr for i in np.arange(-self.nr,self.nr)])
 
     def saveFluesnce(self,p,w):
         p = p[:,np.argsort(p[2,:])]
-        self.Arz = self._inputArz(p,w,self.r,self.z,self.Axyz)
+        self.Arz = self._inputArz(p,w,self.r,self.z,self.Arz)
 
     @staticmethod
     @njit('f4[:,:,:](f4[:,:],f4[:],f8[:],f8[:],f4[:,:,:])')
