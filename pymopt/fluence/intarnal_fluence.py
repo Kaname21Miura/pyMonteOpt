@@ -19,6 +19,7 @@ class Fluence3D:
         self.nz = nz
         self.dr = dr
         self.dz = dz
+        self.vol = dz*dr**2
         print("Memory area size for fluence storage: %d Mbyte" % (self.Arz.nbytes*1e-6))
 
     def getArz(self):
@@ -32,6 +33,7 @@ class Fluence3D:
 
     def saveFluesnce(self,p,w):
         p = p[:,np.argsort(p[2,:])]
+        w = w/self.vol
         self.Arz = self._inputArz(p,w,self.r,self.z,self.Arz)
 
     @staticmethod

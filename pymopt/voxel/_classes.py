@@ -668,9 +668,10 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         self.model = model
         self.model.set_params(params)
 
-    def _calc_info(self):
+    def _calc_info(self,coment=''):
         calc_info = {
             'Date':datetime.datetime.now().isoformat(),
+            'coment':coment,
             'number_of_photons':self.nPh,
             'calc_dtype':self.dtype,
             'model':{
@@ -702,7 +703,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         }
         return calc_info
 
-    def save_result(self,fname = "test"):
+    def save_result(self,fname,coment=''):
         start_ = time.time()
 
         res = self.get_result()
@@ -712,7 +713,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         print("Monte Carlo results saved in ")
         print("-> %s" %(save_name))
         print('')
-        info = self._calc_info()
+        info = self._calc_info(coment)
         save_name = fname+"_info.json"
         with open(save_name, 'w') as fp:
             json.dump(info,fp,indent=4)

@@ -9,6 +9,8 @@ from tqdm import tqdm
 import gc
 from ..utils.utilities import calTime,set_params
 
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 import bz2,pickle,json
 __all__ = ['OBD']
 # =============================================================================
@@ -242,7 +244,7 @@ class OBD:
         self.params ={
             'start':-10,'end':65,'split':1,
             'outerD_1':50,'efl_1':100,'bfl_1':93.41,
-            'ct_1':10,'et_1':3.553,'r_1':51.68,'n_1'1.517,
+            'ct_1':10,'et_1':3.553,'r_1':51.68,'n_1':1.517,
             'outerD_2' : 50,'efl_2' : 50,'bfl_2' : 43.28,
             'ct_2':12,'et_2':3.01,'r_2':39.24,'n_2':1.758,
             'slit_outerD':50,'slitD':20,'width':2,'thickness':3,
@@ -261,7 +263,7 @@ class OBD:
         self.nPh = self.data['nPh']
 
     def open_pklbz2_file(self,path):
-        with bz2.open(path, 'rb') as fp:
+        with bz2.open(path+"_LID.pkl.bz2", 'rb') as fp:
             data = pickle.loads(fp.read())
         return data
 
@@ -271,24 +273,23 @@ class OBD:
         return json_load
 
     def load_file(self,path):
-        del self.data
-        gc.collect()
         self.data = self.open_pklbz2_file(path)
         self.nPh = self.data['nPh']
 
     def start(self):
-        res = self.opticalAnalysisMeth(self)
+        res = self.opticalAnalysisMeth()
 
         plt.figure(figsize=(8,6),dpi=90)
         plt.plot(res[0],np.log10(res[1]/self.nPh),"-",c = "k")
         plt.xlabel("$Z\ [mm]$")
         plt.ylabel("$log_{10}(I/I_0)$")
         plt.show()
-        self.result = pa.DataFrame(rez,index=["Z","int"]).T
-        self.result["log(int)"] = np.log10(posit[1]/nPh)
+        self.result = pa.DataFrame(res,index=["Z","int"]).T
+        self.result["log(int)"] = np.log10(res[1]/self.nPh)
 
     def save_result(self,path):
-        df_.to_csv(fname_save, index=False)
+        fname_save = path+"_opt.csv"
+        self.result.to_csv(fname_save, index=False)
 
     #光学系を定義
     def opticalUnit(self,Z,p,v,w):
@@ -339,6 +340,6 @@ class OBD:
         w = self.data['w'][rd_index]
         intdist = np.empty_like(step)
         for (i,Z) in enumerate(tqdm(step)):
-            intdist[i] = opticalUnit(Z,p,v,w)
+            intdist[i] = self.opticalUnit(Z,p,v,w)
         calTime(time.time(), start_)
         return step,intdist
