@@ -26,7 +26,7 @@ import gc
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-__all__ = ['VoxelPlateModel','PlateModel','VoxelDicomModel']
+__all__ = ['VoxelPlateModel','PlateModel','VoxelDicomModel','VoxelPlateLedModel']
 
 # =============================================================================
 # Base solid model
@@ -509,8 +509,7 @@ class DicomLinearModel(DicomBinaryModel):
 
     def getScatteringCoeff(self,add):
         val = self.voxel_model[add[0],add[1],add[2]].astype('float32')
-        #### 確認が必要 #####
-        val[val>0]=(0.016*val[val>0]*256-119.75)/10
+        val[val>0]=1.6676*1e3*val[val>0]*2**8-10.932
         val[val==0]=self.ms[0]
         val[val==self.cort_num]=self.ms[2]
         val[val==self.skin_num]=self.ms[3]
@@ -602,6 +601,80 @@ class VoxelPlateModel(BaseVoxelMonteCarlo):
 
         super().__init__(nPh = nPh,fluence_mode =fluence_mode, model = PlateModel(),
                          dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz)
+
+class VoxelPlateLedModel(BaseVoxelMonteCarlo):
+    def __init__(self,*,nPh=1000,fluence_mode=False,dtype='float32',
+                 nr=50,nz=20,dr=0.1,dz=0.1,):
+
+        super().__init__(nPh = nPh,fluence_mode =fluence_mode, model = PlateModel(),
+                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz)
+        self.led_params = {
+            'h':2.5,
+            'nx':5,
+            'ny':5,
+            'dx':1.2,
+            'dy':0.298,
+        }
+        self.led_keys = list(self.led_params.keys())
+
+    def set_led_params(self,*initial_data, **kwargs):
+        set_params(self.led_params,self.led_keys,*initial_data, **kwargs)
+
+    def _generate_inisal_coodinate(self,nPh,f = 'float32'):
+        self.add =  np.zeros((3, nPh),dtype = 'int16')
+        self.add[0] = int(self.model.voxel_model.shape[0]/2)
+        self.add[1] = int(self.model.voxel_model.shape[1]/2)
+        self.add[2] = 1
+        self.p = np.zeros((3,nPh)).astype(f)
+        self.p[2] = -self.model.voxel_space/2
+        self.v = np.zeros((3,nPh)).astype(f)
+        self.v[2] = 1
+        self._set_led()
+        self.w = np.ones(nPh).astype(f)
+        self.w = self._initial_weight(self.w)
+
+    def _set_led(self):
+        l = self.model.voxel_space
+        a= []
+        for i in range(self.led_params['nx']):
+            for j in range(self.led_params['ny']):
+                a.append([i,j,0])
+        a = np.array(a).astype('float32').T
+        a[0]*=self.led_params['dx'];a[1]*=self.led_params['dy']
+        a[0]-=a[0].max()/2;a[1]-=a[1].max()/2
+        b = a.copy()
+        b[2] = self.led_params['h']
+        b = b/np.linalg.norm(b,axis=0)
+        ni = self.model.n[-1]
+        nt = self.model.n[0]
+        b[:2] *= nt/ni
+        b[2] = (1-(1-b[2]**2)*(ni/nt)**2)**0.5
+        n_agrid = int(self.nPh/(self.led_params['nx']*self.led_params['ny']))
+        self.nPh = n_agrid*self.led_params['nx']*self.led_params['ny']
+
+        gp = np.zeros((2,self.nPh))
+        gv = np.zeros((3,self.nPh))
+        for i in range(self.led_params['nx']*self.led_params['ny']):
+            for j in range(3):
+                if j !=2:
+                    gp[j,n_agrid*i:n_agrid*(i+1)] = a[j,i]
+                    gv[j,n_agrid*i:n_agrid*(i+1)] = b[j,i]
+                else:
+                    gv[j,n_agrid*i:n_agrid*(i+1)] = b[j,i]
+
+        #各アドレスに振り分ける
+        pp = (gp/l).astype("int16")
+        ind = np.where(gb<0)
+        pp[ind[0].tolist(),ind[1].tolist()] = \
+            pp[ind[0].tolist(),ind[1].tolist()]-1
+        pa = gp - pp*l -l/2
+        ind = np.where((np.abs(pa)>=l/2))
+        pa[ind[0].tolist(),ind[1].tolist()] = \
+            np.sign(pa[ind[0].tolist(),ind[1].tolist()])*(l/2)
+
+        self.add[:2] = self.add[:2] + pp
+        self.p[:2] = pa.astype(self.dtype)
+        self.v = gv
 
 class VoxelDicomModel(BaseVoxelMonteCarlo):
 
