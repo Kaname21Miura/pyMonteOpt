@@ -247,7 +247,7 @@ class OBD:
             'ct_1':10,'et_1':3.553,'r_1':51.68,'n_1':1.517,
             'outerD_2' : 50,'efl_2' : 50,'bfl_2' : 43.28,
             'ct_2':12,'et_2':3.01,'r_2':39.24,'n_2':1.758,
-            'slit_outerD':50,'slitD':20,'width':2,'thickness':3,
+            'slit_outerD':50,'slit_D':20,'slit_width':2,'slit_thickness':5,
             'd_pd':3,
         }
         self.keys_params  = list(self.params.keys())
@@ -294,9 +294,10 @@ class OBD:
     #光学系を定義
     def opticalUnit(self,Z,p,v,w):
         z_lens1 = -self.params['bfl_1'] + Z
-        z_lens2 = z_lens1 - self.params['ct_1'] -55 - self.params['ct_2']
+        z_lens2 = z_lens1 - self.params['ct_1']\
+        -self.params['slit_thickness']*2-self.params['ct_2']-37
         z_slit1 = z_lens1 - self.params['ct_1']
-        z_slit2 = z_lens2 + self.params['ct_2']
+        z_slit2 = z_lens2 + self.params['ct_2']+ self.params['slit_thickness']
         z_pd = z_lens2 - self.params['bfl_2']
 
         #レンズとスリット、フォトダイオードのオブジェクトをそれぞれ生成
@@ -310,12 +311,12 @@ class OBD:
             self.params['r_2'],self.params['n_2'],z_lens2
             )
         slit_1 = Slit(
-            self.params['slit_outerD'],self.params['slitD'],
-            self.params['width'],self.params['thickness'],z_slit1
+            self.params['slit_outerD'],self.params['slit_D'],
+            self.params['slit_width'],self.params['slit_thickness'],z_slit1
             )
         slit_2 = Slit(
-            self.params['slit_outerD'],self.params['slitD'],
-            self.params['width'],self.params['thickness'],z_slit2
+            self.params['slit_outerD'],self.params['slit_D'],
+            self.params['slit_width'],self.params['slit_thickness'],z_slit2
             )
         pd = Photodiode(self.params['d_pd'],z_pd)
         #解析

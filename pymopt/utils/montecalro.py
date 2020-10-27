@@ -38,7 +38,7 @@ class MonteCalro:
         start_ = time.time()
 
         count = self.monteCycle(start_)
-        self.endProcess()
+        self._end_process()
 
         #結果の表示
         print("")
@@ -64,7 +64,7 @@ class MonteCalro:
         return count
 
 
-    def endProcess(self):
+    def _end_process(self):
         pass
 
     def vectorUpdate(self,v,G):
