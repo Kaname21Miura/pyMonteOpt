@@ -51,6 +51,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
                 self.fluence = Fluence3D(nr=nr,nz=nz,dr=dr,dz=dz)
 
     def start(self):
+        self.nPh = int(self.nPh)
         self._generate_inisal_coodinate(self.nPh)
         super().start()
         return self
@@ -368,9 +369,9 @@ class DicomBinaryModel(VoxelModel):
         self.params = {
             'th_skin':2,'th_ct':0.03,
             'n_sp':1.,'n_tr':1.37,'n_ct':1.37,'n_skin':1.37,'n_air':1.,
-            'ma_sp':0.00001,'ma_tr':0.011,'ma_ct':0.011,'ma_skin':0.037,
-            'ms_sp':0.00001,'ms_tr':19.1,'ms_ct':19.1,'ms_skin':18.8,
-            'g_sp':0.99,'g_tr':0.93,'g_ct':0.93,'g_skin':.93,
+            'ma_sp':1e-8,'ma_tr':0.011,'ma_ct':0.011,'ma_skin':0.037,
+            'ms_sp':1e-8,'ms_tr':19.1,'ms_ct':19.1,'ms_skin':18.8,
+            'g_sp':0.90,'g_tr':0.93,'g_ct':0.93,'g_skin':.93,
             }
         self.keys = list(self.params.keys())
 
@@ -509,7 +510,9 @@ class DicomLinearModel(DicomBinaryModel):
 
     def getScatteringCoeff(self,add):
         val = self.voxel_model[add[0],add[1],add[2]].astype('float32')
-        val[val>0]=1.6676*1e3*val[val>0]*2**8-10.932
+        val[val>0]=1.6676*1e-3*val[val>0]*2**8-10.932
+        #val[val>0]=1.55*1e-3*val[val>0]*2**8-10.6
+
         val[val==0]=self.ms[0]
         val[val==self.cort_num]=self.ms[2]
         val[val==self.skin_num]=self.ms[3]
@@ -1057,17 +1060,17 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         self.ConstPixelSpacing = list(ConstPixelSpacing)
         self.ConstPixelDims = ConstPixelDims
 
-    def check_threshold(self,threshold=37,cmap = 'gray',graph_type = 'XY'):
+    def check_threshold(self,threshold=37,cmap = 'gray',zz = 0,graph_type = 'XY'):
         image = reConstArray(self.array_dicom,threshold)
-        self.display_cross_section(image = image,zz = 0,
+        self.display_cross_section(image = image,zz = zz,
                               xx = int(image.shape[0]/2),
                               yy = int(image.shape[1]/2),
                               cmap = cmap,graph_type = graph_type)
         self.threshold = int(threshold*2**8)
 
-    def set_threshold(self,threshold=37,cmap = 'gray',graph_type = 'XY'):
+    def set_threshold(self,*,threshold=37,cmap = 'gray',zz = 0, graph_type = 'XY'):
         self.array_dicom = reConstArray(self.array_dicom,threshold)
-        self.display_cross_section(zz = 0,
+        self.display_cross_section(zz = zz,
                               xx = int(self.array_dicom.shape[0]/2),
                               yy = int(self.array_dicom.shape[1]/2),
                               cmap = cmap,graph_type = graph_type)
