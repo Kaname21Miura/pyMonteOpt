@@ -540,7 +540,7 @@ class DicomLinearModel(DicomBinaryModel):
 class PlateModel(VoxelModel):
     @_deprecate_positional_args
     def __init__(
-        self,*,thickness=[0.2,] ,xy_size=0.1 ,voxel_space = 0.1,
+        self,*,thickness=[0.2,] ,xy_size=[0.1,0.1],voxel_space = 0.1,
         ma=[1,],ms=[100,],g=[0.9,],n=[1.37,],n_air=1,f = 'float32'):
         self.model_name = 'PlateModel'
         self.n =np.array(n+[n_air]).astype(f)
@@ -561,9 +561,10 @@ class PlateModel(VoxelModel):
         return np.array(b_list).astype(f)
 
     def _make_voxel_model(self):
-        nxy_box = np.round(self.xy_size/self.voxel_space).astype(int)
+        nx_box = np.round(self.xy_size[0]/self.voxel_space).astype(int)
+        ny_box = np.round(self.xy_size[1]/self.voxel_space).astype(int)
         nz_box = np.round(self.borderposit/self.voxel_space).astype(int)
-        self.voxel_model = np.zeros((nxy_box+2,nxy_box+2,nz_box[-1]+2),dtype = 'int8')
+        self.voxel_model = np.zeros((nx_box+2,ny_box+2,nz_box[-1]+2),dtype = 'int8')
         for i in range(nz_box.size-1):
             self.voxel_model[:,:,nz_box[i]+1:nz_box[i+1]+1] = i
         self.voxel_model[0] = -1;self.voxel_model[-1] = -1
