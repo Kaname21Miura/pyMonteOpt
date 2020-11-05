@@ -454,7 +454,7 @@ class DicomBinaryModel(VoxelModel):
 
 class DicomLinearModel(DicomBinaryModel):
     def __init__(self):
-        self.model_name = 'DicomBinaryModel'
+        self.model_name = 'DicomLinearModel'
         self.dtype = 'int8'
         self.dtype_f = 'float32'
         self.cort_num=-20
@@ -689,7 +689,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         self.model_type = model_type
         if model_type == 'binary':
             model = DicomBinaryModel()
-        elif model_type == 'liner':
+        elif model_type == 'linear':
             model = DicomLinearModel()
 
         super().__init__(nPh = nPh,fluence_mode =fluence_mode,model = model,

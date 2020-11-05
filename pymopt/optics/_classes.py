@@ -249,6 +249,7 @@ class OBD:
             'ct_2':12,'et_2':3.01,'r_2':39.24,'n_2':1.758,
             'slit_outerD':50,'slit_D':20,'slit_width':2,'slit_thickness':5,
             'd_pd':3,
+            'distance_2slits':37,'pd_poit_correction':0,
         }
         self.keys_params  = list(self.params.keys())
         self.data = {'p':0,'v':0,'w':0,'nPh':1000}
@@ -276,14 +277,14 @@ class OBD:
         self.data = self.open_pklbz2_file(path)
         self.nPh = self.data['nPh']
 
-    def start(self):
+    def start(self,show_graph = False):
         res = self.opticalAnalysisMeth()
-
-        plt.figure(figsize=(8,6),dpi=90)
-        plt.plot(res[0],np.log10(res[1]/self.nPh),"-",c = "k")
-        plt.xlabel("$Z\ [mm]$")
-        plt.ylabel("$log_{10}(I/I_0)$")
-        plt.show()
+        if show_graph:
+            plt.figure(figsize=(8,6),dpi=90)
+            plt.plot(res[0],np.log10(res[1]/self.nPh),"-",c = "k")
+            plt.xlabel("$Z\ [mm]$")
+            plt.ylabel("$log_{10}(I/I_0)$")
+            plt.show()
         self.result = pa.DataFrame(res,index=["Z","int"]).T
         self.result["log(int)"] = np.log10(res[1]/self.nPh)
 
@@ -295,10 +296,10 @@ class OBD:
     def opticalUnit(self,Z,p,v,w):
         z_lens1 = -self.params['bfl_1'] + Z
         z_lens2 = z_lens1 - self.params['ct_1']\
-        -self.params['slit_thickness']*2-self.params['ct_2']-37
+        -self.params['slit_thickness']*2-self.params['ct_2']-self.params['distance_2slits']
         z_slit1 = z_lens1 - self.params['ct_1']
         z_slit2 = z_lens2 + self.params['ct_2']+ self.params['slit_thickness']
-        z_pd = z_lens2 - self.params['bfl_2']
+        z_pd = z_lens2 - self.params['bfl_2']-self.params['pd_poit_correction']
 
         #レンズとスリット、フォトダイオードのオブジェクトをそれぞれ生成
         #outerD,ct,r,n,position
