@@ -1041,8 +1041,8 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         self.array_dicom = self.array_dicom.reshape([L0,L1,L2])
 
         self.display_cross_section(zz = 0,
-                              xx = int(self.array_dicom.shape[0]/2),
-                              yy = int(self.array_dicom.shape[1]/2),
+                              xx = int(self.array_dicom.shape[1]/2),
+                              yy = int(self.array_dicom.shape[0]/2),
                               cmap = cmap)
 
         print("#########  Size  #########")
