@@ -878,7 +878,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
                 ax[0].plot([x_size,x_size],[0,resol0[-1]],'-',c = 'r')
 
             ax[1].set_title('Y-Z pic in X = %0.3f mm' %(x_size))
-            ax[1].pcolormesh(resol2,resol0,image[xx,:,:])
+            ax[1].pcolormesh(resol2,resol0,image[:,xx,:])
             ax[1].set_xlabel("Z mm")
             ax[1].set_ylabel("Y mm")
             if section_line:
@@ -896,14 +896,14 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
                 ax[0,0].plot([0,resol1[-1]],[y_size,y_size],'-',c = 'r')
 
             ax[0,1].set_title('Y-Z pic in X = %0.3f mm' %(x_size))
-            ax[0,1].pcolormesh(resol2,resol0,image[xx,:,:])
+            ax[0,1].pcolormesh(resol2,resol0,image[:,xx,:])
             ax[0,1].set_xlabel("Z mm")
             ax[0,1].set_ylabel("Y mm")
             if section_line:
                 ax[0,1].plot([z_size,z_size],[0,resol0[-1]],'-',c = 'r')
 
             ax[1,0].set_title('X-Z pic in Y = %0.3f mm' %(y_size))
-            ax[1,0].pcolormesh(resol1,resol2,image[:,yy,:].T)
+            ax[1,0].pcolormesh(resol1,resol2,image[yy,:,:].T)
             ax[1,0].set_ylim(resol2[-1],resol2[0])
             ax[1,0].set_xlabel("X mm")
             ax[1,0].set_ylabel("Z mm")
@@ -916,10 +916,10 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
                     ax[1,1].hist(image[:,:,zz].flatten(),bins=50, color='c')
                 elif hist_type == 'YZ':
                     ax[1,1].set_title('Histogram of Y-Z pic pixel values')
-                    ax[1,1].hist(image[:,xx,].flatten(),bins=50, color='c')
+                    ax[1,1].hist(image[xx,:,].flatten(),bins=50, color='c')
                 elif hist_type == 'XZ':
                     ax[1,1].set_title('Histogram of X-Z pic pixel values')
-                    ax[1,1].hist(image[yy,:,].flatten(),bins=50, color='c')
+                    ax[1,1].hist(image[:,yy,].flatten(),bins=50, color='c')
                 elif hist_type =='ALL':
                     ax[1,1].set_title('Histogram of X-Z pic pixel values')
                     ax[1,1].hist(image.flatten(),bins=50, color='c')
