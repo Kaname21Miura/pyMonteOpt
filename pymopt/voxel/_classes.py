@@ -512,7 +512,7 @@ class DicomLinearModel(DicomBinaryModel):
         val = self.voxel_model[add[0],add[1],add[2]].astype('float32')
         #val[val>0]=1.6676*1e-3*val[val>0]*2**8-10.932 #海綿骨と緻密骨を直線近似
         #val[val>0]=1.55*1e-3*val[val>0]*2**8-10.6 #若森モデル
-        val[val>0]=8.46*1e-4*val[val>0]*2**8+6.25　#緻密のみを直線近似
+        val[val>0]=8.46*1e-4*val[val>0]*2**8+6.25 #緻密のみを直線近似
         #val[val>0]=3.92*1e-8*(val[val>0]*2**8)**2+2.77*1e-3*(val[val>0]*2**8)-17.5#海綿骨と緻密骨を2次近似
 
         val[val==0]=self.ms[0]
