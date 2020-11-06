@@ -689,10 +689,8 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
                  model_type = 'binary',d_beam = 0):
 
         self.model_type = model_type
-        if model_type == 'binary':
-            model = DicomBinaryModel()
-        elif model_type == 'linear':
-            model = DicomLinearModel()
+        model = self._model_select(self.model_type)
+        self.model = model
 
         super().__init__(nPh = nPh,fluence_mode =fluence_mode,model = model,
                          dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz)
@@ -724,6 +722,13 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
     def set_params(self,*initial_data, **kwargs):
         self.model.set_params(*initial_data, **kwargs)
 
+    def _model_select(self,model_type):
+        if model_type == 'binary':
+            model = DicomBinaryModel()
+        elif model_type == 'linear':
+            model = DicomLinearModel()
+        return model
+
     def set_monte_params(self,*,nPh,dtype='float32',
                  nr=50,nz=20,dr=0.1,dz=0.1, fluence_mode=False,
                  model_type = 'binary',d_beam = 0):
@@ -739,12 +744,9 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
                 self.fluence = Fluence3D(nr=nr,nz=nz,dr=dr,dz=dz)
 
         self.model_type = model_type
-        if model_type == 'binary':
-            model = DicomBinaryModel()
-        elif model_type == 'liner':
-            model = DicomLinearModel()
-        params = self.model.params
+        model = self._model_select(self.model_type)
         self.model = model
+        params = self.model.params
         self.model.set_params(params)
 
     def _calc_info(self,coment=''):
