@@ -743,10 +743,10 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
             elif fluence_mode == '3D':
                 self.fluence = Fluence3D(nr=nr,nz=nz,dr=dr,dz=dz)
 
+        params = self.model.params
         self.model_type = model_type
         model = self._model_select(self.model_type)
         self.model = model
-        params = self.model.params
         self.model.set_params(params)
 
     def _calc_info(self,coment=''):
