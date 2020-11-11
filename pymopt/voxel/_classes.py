@@ -143,10 +143,11 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
 
     def _encooder(self,p,add):
         space = self.model.voxel_space
-        center_add_xy = int(self.model.voxel_model.shape[0]/2)
+        center_add_x = int(self.model.voxel_model.shape[0]/2)
+        center_add_y = int(self.model.voxel_model.shape[1]/2)
         encoded_position = p.copy()
-        encoded_position[0] = space*(add[0]-center_add_xy)+p[0]
-        encoded_position[1] = space*(add[1]-center_add_xy)+p[1]
+        encoded_position[0] = space*(add[0]-center_add_x)+p[0]
+        encoded_position[1] = space*(add[1]-center_add_y)+p[1]
         encoded_position[2] = np.round(space*(add[2]-1)+p[2]+space/2,6)
         return encoded_position
 
