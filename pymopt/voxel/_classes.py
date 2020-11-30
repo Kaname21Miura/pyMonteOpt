@@ -44,6 +44,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self.model = model
         self.fluence = fluence_mode
         self.fluence_mode = fluence_mode
+        self.generate_initial = True
         if self.fluence:
             if fluence_mode == '2D':
                 self.fluence = Fluence2D(nr=nr,nz=nz,dr=dr,dz=dz)
@@ -52,25 +53,52 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
 
     def start(self):
         self.nPh = int(self.nPh)
-        self._generate_inisal_coodinate(self.nPh)
+        if self.generate_initial:
+            self._generate_initial_coodinate(self.nPh)
         super().start()
         return self
 
     def get_voxel_model(self):
         return self.model.voxel_model
 
-    def _generate_inisal_coodinate(self,nPh,f = 'float32'):
+    def _generate_initial_coodinate(self,nPh,f = 'float32'):
         self.add =  np.zeros((3, nPh),dtype = 'int16')
         self.add[0] = int(self.model.voxel_model.shape[0]/2)
         self.add[1] = int(self.model.voxel_model.shape[1]/2)
         self.add[2] = 1
-        self.p = np.zeros((3,nPh)).astype(f)
+        self.p = np.zeros((3,nPh)).astype(self.dtype)
         self.p[2] = -self.model.voxel_space/2
         self._set_beam_diameter()
-        self.v = np.zeros((3,nPh)).astype(f)
+        self.v = np.zeros((3,nPh)).astype(self.dtype)
         self.v[2] = 1
         self.w = np.ones(nPh).astype(f)
         self.w = self._initial_weight(self.w)
+
+    def def_initial_coodinate(self,p,v,w,nPh):
+        l = self.model.voxel_space
+        self.add =  np.zeros((3, len(w)),dtype = 'int16')
+        self.p = np.zeros((3,len(w))).astype(self.dtype)
+        self.nPh = nPh
+        self.v = v
+        self.w = w
+        #分布を各アドレスに振り分ける
+        gb = p[:2]
+        pp = (gb/l).astype("int16")
+        ind = np.where(gb<0)
+        pp[ind[0].tolist(),ind[1].tolist()] = \
+            pp[ind[0].tolist(),ind[1].tolist()]-1
+        pa = gb - pp*l -l/2
+        ind = np.where((np.abs(pa)>=l/2))
+        pa[ind[0].tolist(),ind[1].tolist()] = \
+            np.sign(pa[ind[0].tolist(),ind[1].tolist()])*(l/2)
+        pp[0] = pp[0]+int(self.model.voxel_model.shape[0]/2)
+        pp[1] = pp[1]+int(self.model.voxel_model.shape[1]/2)
+
+        self.add[:2] = pp
+        self.add[2] = 0
+        self.p[:2] = pa.astype(self.dtype)
+        self.p[2] = 0
+        self.generate_initial = False
 
 
     def _set_beam_diameter(self):
