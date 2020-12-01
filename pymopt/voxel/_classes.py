@@ -53,10 +53,18 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
 
     def start(self):
         self.nPh = int(self.nPh)
+        self._reset_results()
         if self.generate_initial:
             self._generate_initial_coodinate(self.nPh)
         super().start()
         return self
+
+    def _reset_results(self):
+            self.v_result = np.empty((3,1)).astype(self.f_bit)
+            self.p_result = np.empty((3,1)).astype(self.f_bit)
+            self.add_result = np.empty((3,1)).astype('int16')
+            self.w_result = np.empty(1).astype(self.f_bit)
+            return self
 
     def get_voxel_model(self):
         return self.model.voxel_model
@@ -766,17 +774,18 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         self.d_beam = d_beam
         self.fluence = fluence_mode
         self.fluence_mode = fluence_mode
+
         if self.fluence:
             if fluence_mode == '2D':
                 self.fluence = Fluence2D(nr=nr,nz=nz,dr=dr,dz=dz)
             elif fluence_mode == '3D':
                 self.fluence = Fluence3D(nr=nr,nz=nz,dr=dr,dz=dz)
-
-        params = self.model.params
-        self.model_type = model_type
-        model = self._model_select(self.model_type)
-        self.model = model
-        self.model.set_params(params)
+        if model_type != 'keep':
+            params = self.model.params
+            self.model_type = model_type
+            model = self._model_select(self.model_type)
+            self.model = model
+            self.model.set_params(params)
 
     def _calc_info(self,coment=''):
         calc_info = {
