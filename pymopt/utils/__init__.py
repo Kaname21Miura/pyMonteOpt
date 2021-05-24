@@ -2,7 +2,7 @@
 from .validation import _deprecate_positional_args
 from .montecalro import MonteCalro
 from .readDICOM import readDicom,reConstArray_8,reConstArray
-from .utilities import calTime,set_params
+from .utilities import calTime,set_params,ToJsonEncoder
 
 __all__ = [
     '_deprecate_positional_args',
@@ -11,5 +11,6 @@ __all__ = [
     'readDicom',
     'reConstArray_8',
     'reConstArray',
-    'calTime','set_params'
+    'calTime','set_params',
+    'ToJsonEncoder'
     ]

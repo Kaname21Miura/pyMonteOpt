@@ -1,8 +1,11 @@
-from ._classes import VoxelPlateModel,VoxelDicomModel,VoxelPlateLedModel
-#from ._classes_cy import VoxelPlateModelCy
-__all__ = [
-'VoxelPlateModel',
-#'VoxelPlateModelCy',
-'VoxelDicomModel',
-'VoxelPlateLedModel'
+
+from ._classes import VoxelPlateModel,VoxelDicomModel
+from ._classes import VoxelPlateLedModel,VoxelSeparatedPlateModel
+#from ._classes_cy import VoxelPlateModelCy
+__all__ = [
+'VoxelPlateModel',
+#'VoxelPlateModelCy',
+'VoxelDicomModel',
+'VoxelSeparatedPlateModel',
+'VoxelPlateLedModel',
 ]

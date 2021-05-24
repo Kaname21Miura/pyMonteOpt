@@ -1,4 +1,6 @@
 
+import json
+import numpy as np
 
 def calTime(end, start):
     elapsed_time = end - start
@@ -21,3 +23,14 @@ def set_params(data,keys,*initial_data, **kwargs):
         if not key in keys:
             raise KeyError(key)
         data[key] = kwargs[key]
+
+class ToJsonEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(MyEncoder, self).default(obj)

@@ -6,7 +6,6 @@ Created on Thu Sep 10 17:12:05 2020
 @author: kaname
 """
 ## *** All parameters should be defined in millimeters ***
-
 import numpy as np
 from scipy import stats
 import pandas as pd
@@ -21,12 +20,17 @@ from ..utils.montecalro import MonteCalro
 from ..utils import readDicom,reConstArray_8,reConstArray
 from ..utils.validation import _deprecate_positional_args
 from ..fluence import Fluence2D,Fluence3D
-from ..utils.utilities import calTime,set_params
+from ..utils.utilities import calTime,set_params,ToJsonEncoder
 import gc
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-__all__ = ['VoxelPlateModel','PlateModel','VoxelDicomModel','VoxelPlateLedModel']
+__all__ = [
+'VoxelPlateModel',
+'PlateModel',
+'VoxelDicomModel',
+'VoxelSeparatedPlateModel',
+'VoxelPlateLedModel']
 
 # =============================================================================
 # Base solid model
@@ -340,7 +344,11 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
                     db[:,pb_index])
                 v_ = v_/np.linalg.norm(v_,axis=0)
                 s_ *= mt[pb_index]
-                out_index_ = np.where(box_model[add_[0],add_[1],add_[2]] == -1)[0]
+                #外側に出る？
+                out_index_ = np.where(
+                    (box_model[add_[0],add_[1],add_[2]] <= -1)\
+                    &(box_model[add_[0],add_[1],add_[2]] >= -5)
+                )[0]
                 if list(out_index_) != []:
                     v[:,index[out_index_]] = v_[:,out_index_]
                     p[:,index[out_index_]] = p_[:,out_index_]
@@ -620,7 +628,7 @@ class PlateModel(VoxelModel):
         self.borderposit = self._make_borderposit(thickness,f)
         self._make_voxel_model()
 
-        self.n =np.array([n_air]+n).astype(f)
+        self.n =np.array(n+[n_air]).astype(f)
         self.ms = np.array(ms).astype(f)
         self.ma = np.array(ma).astype(f)
         self.g = np.array(g).astype(f)
@@ -635,6 +643,56 @@ class PlateModel(VoxelModel):
     def getModelSize(self):
         print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
 
+
+class SeparatedPlateModel(PlateModel):
+    def __init__(
+        self,*,thickness=[0.2,] ,xy_size=[0.1,0.1],voxel_space = 0.1,
+        ma=[1,],ms=[100,],g=[0.9,],n=[1.37,],n_air=1,n_front=1,n_back=1,f = 'float32'):
+        self.model_name = 'PlateModel'
+        self.n =np.array(n+[n_back,n_front,n_air]).astype(f)
+        self.ms = np.array(ms+[0,0,0]).astype(f)
+        self.ma = np.array(ma+[0,0,0]).astype(f)
+        self.g = np.array(g+[0,0,0]).astype(f)
+        self.voxel_space = voxel_space
+        self.xy_size = xy_size
+        self.borderposit = self._make_borderposit(thickness,f)
+        self._make_voxel_model()
+
+    def _make_voxel_model(self):
+        nx_box = np.round(self.xy_size[0]/self.voxel_space).astype('int')
+        ny_box = np.round(self.xy_size[1]/self.voxel_space).astype('int')
+        nz_box = np.round(self.borderposit/self.voxel_space).astype('int')
+        self.voxel_model = np.zeros((nx_box+2,ny_box+2,nz_box[-1]+2),dtype = 'int8')
+        for i in range(nz_box.size-1):
+            self.voxel_model[:,:,nz_box[i]+1:nz_box[i+1]+1] = i
+        self.voxel_model[0] = -1;self.voxel_model[-1] = -1
+        self.voxel_model[:,0] = -1; self.voxel_model[:,-1] = -1
+        self.voxel_model[:,:,0] = -2; self.voxel_model[:,:,-1] = -3
+
+    @_deprecate_positional_args
+    def build(self,
+        thickness,
+        xy_size,
+        voxel_space,
+        ma,ms,g,
+        n,n_air,n_front,n_back,
+        f = 'float32'):
+
+        del self.voxel_model
+        gc.collect()
+        #-1はモデルの外側
+        self.voxel_space = voxel_space
+        self.xy_size = xy_size
+        self.borderposit = self._make_borderposit(thickness,f)
+        self._make_voxel_model()
+
+        self.n =np.array(n+[n_back,n_front,n_air]).astype(f)
+        self.ms = np.array(ms+[0,0,0]).astype(f)
+        self.ma = np.array(ma+[0,0,0]).astype(f)
+        self.g = np.array(g+[0,0,0]).astype(f)
+        self.getModelSize()
+
+
 # =============================================================================
 # Public montecalro model
 # =============================================================================
@@ -644,6 +702,62 @@ class VoxelPlateModel(BaseVoxelMonteCarlo):
 
         super().__init__(nPh = nPh,fluence_mode =fluence_mode, model = PlateModel(),
                          dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz)
+
+class VoxelSeparatedPlateModel(BaseVoxelMonteCarlo):
+    #時に光入射面と透過面の屈折率を変更したい場合が生じる。
+    #その時は、このモデルを用いる。
+    #SeparatedPlateModelは、光入射面と透過面の屈折率を独立して設定することが可能である。
+    def __init__(self,*,nPh=1000,fluence_mode=False,dtype='float32',
+                 nr=50,nz=20,dr=0.1,dz=0.1,d_beam = 0):
+
+        super().__init__(nPh = nPh,fluence_mode =fluence_mode, model = SeparatedPlateModel(),
+                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,d_beam=d_beam)
+    def save_result(self,fname,coment=''):
+        start_ = time.time()
+
+        res = self.get_result()
+        save_name = fname+"_LID.pkl.bz2"
+        with bz2.open(save_name, 'wb') as fp:
+            fp.write(pickle.dumps(res))
+        print("Monte Carlo results saved in ")
+        print("-> %s" %(save_name))
+        print('')
+        info = self._calc_info(coment)
+        save_name = fname+"_info.json"
+        with open(save_name, 'w') as fp:
+            json.dump(info,fp,indent=4,cls= ToJsonEncoder)
+        print("Calculation conditions are saved in")
+        print("-> %s" %(save_name))
+        print('')
+        if self.fluence_mode:
+            fe = self.fluence.getArz()
+            save_name = fname+'_fluence'+self.fluence_mode+".pkl.bz2"
+            with bz2.open(save_name, 'wb') as fp:
+                fp.write(pickle.dumps(fe))
+            print("Internal Fluence saved in ")
+            print("-> %s" %(save_name))
+            print('')
+
+        calTime(time.time(), start_)
+
+    def _calc_info(self,coment=''):
+        _params = self.model.get_params()
+        calc_info = {
+            'Date':datetime.datetime.now().isoformat(),
+            'coment':coment,
+            'number_of_photons':self.nPh,
+            'calc_dtype':self.dtype,
+            'model':{
+                'model_params':_params,
+                'model_voxel_space':self.model.voxel_space,
+                'model_xy_size':self.model.xy_size,
+            },
+            'd_beam':self.d_beam,
+            'beam_mode':'TEM00',
+            'fluence_mode':self.fluence_mode,
+        }
+        return calc_info
+
 
 class VoxelPlateLedModel(BaseVoxelMonteCarlo):
     def __init__(self,*,nPh=1000,fluence_mode=False,dtype='float32',
