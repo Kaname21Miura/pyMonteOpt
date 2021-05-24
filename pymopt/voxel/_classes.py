@@ -241,6 +241,19 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
             p = np.delete(p, del_index, axis = 1)
             w = np.delete(w, del_index)
             add = np.delete(add,del_index, axis = 1)
+
+        # nanデータを削除
+        # なぜnanになるのかは究明する必要がある。
+        # 現在以下のモデルでp,vがnanになる可能性が確認されている。
+        # VoxelSeparatedPlateModel,
+        if np.isnan(p).any():
+            print('Nan occurs in vector p')
+            del_index = np.where(np.isnan(p)[0])[0]
+            v = np.delete(v, del_index, axis = 1)
+            p = np.delete(p, del_index, axis = 1)
+            w = np.delete(w, del_index)
+            add = np.delete(add,del_index, axis = 1)
+
         return p,v,w,add
 
     def _border_out(self,p,v,w,add,index):
