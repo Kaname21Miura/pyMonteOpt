@@ -603,6 +603,7 @@ class PlateModel(VoxelModel):
         self,*,thickness=[0.2,] ,xy_size=[0.1,0.1],voxel_space = 0.1,
         ma=[1,],ms=[100,],g=[0.9,],n=[1.37,],n_air=1,f = 'float32'):
         self.model_name = 'PlateModel'
+        self.thickness = thickness
         self.n =np.array(n+[n_air]).astype(f)
         self.ms = np.array(ms).astype(f)
         self.ma = np.array(ma).astype(f)
@@ -638,6 +639,7 @@ class PlateModel(VoxelModel):
         #-1はモデルの外側
         self.voxel_space = voxel_space
         self.xy_size = xy_size
+        self.thickness = thickness
         self.borderposit = self._make_borderposit(thickness,f)
         self._make_voxel_model()
 
@@ -648,10 +650,13 @@ class PlateModel(VoxelModel):
         self.getModelSize()
 
     def get_params(self):
-        return {'ms':self.ms,
+        return {
+                'th':self.thickness,
+                'ms':self.ms,
                 'ma':self.ma,
                 'n':self.n,
-                'g':self.g}
+                'g':self.g
+                }
 
     def getModelSize(self):
         print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
