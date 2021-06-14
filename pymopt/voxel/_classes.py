@@ -42,7 +42,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
     @abstractmethod
     def __init__(self,*,nPh,model,fluence_mode =False, dtype='float32',
                  nr=50,nz=20,dr=0.1,dz=0.1,
-                 beam_type = 'TEM00',d_beam = 0,beam_dist=False,
+                 beam_type = 'TEM00',w_beam = 0,beam_dist=False,
                  beam_direct='positive',intermediate_buffer=False):
         super().__init__()
 
@@ -62,7 +62,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
 
         self.dtype = dtype
         self.nPh = nPh
-        self.d_beam = d_beam
+        self.w_beam = w_beam
         self.model = model
         self.fluence = fluence_mode
         self.fluence_mode = fluence_mode
@@ -155,10 +155,10 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         if self.beam_type == 'TEM00':
             self.p = np.zeros((3,self.nPh)).astype(self.dtype)
             self.p[2] = -self.model.voxel_space/2
-            if self.d_beam!= 0:
+            if self.w_beam!= 0:
                 print("%sを入力"%self.beam_type)
                 #ガウシアン分布を生成
-                gb = np.array(self.gaussianBeam(self.d_beam)).astype(self.dtype)
+                gb = np.array(self.gaussianBeam(self.w_beam)).astype(self.dtype)
                 #ガウシアン分布を各アドレスに振り分ける
 
                 l = self.model.voxel_space
@@ -276,10 +276,10 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
 
     def set_monte_params(self,*,nPh,model,
         fluence_mode =False, dtype='float32',
-        nr=50,nz=20,dr=0.1,dz=0.1,d_beam = 0):
+        nr=50,nz=20,dr=0.1,dz=0.1,w_beam = 0):
         self.dtype = dtype
         self.nPh = nPh
-        self.d_beam = d_beam
+        self.w_beam = w_beam
         self.model = model
         self.fluence = fluence_mode
         self.fluence_mode = fluence_mode
@@ -780,22 +780,68 @@ class SeparatedPlateModel(PlateModel):
 # =============================================================================
 class VoxelPlateModel(BaseVoxelMonteCarlo):
     def __init__(self,*,nPh=1000,fluence_mode=False,dtype='float32',
-                 nr=50,nz=20,dr=0.1,dz=0.1,):
+                 nr=50,nz=20,dr=0.1,dz=0.1,w_beam =0):
 
         super().__init__(nPh = nPh,fluence_mode =fluence_mode, model = PlateModel(),
-                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz)
+                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,w_beam=w_beam)
+    def save_result(self,fname,coment=''):
+        start_ = time.time()
 
+        res = self.get_result()
+        save_name = fname+"_LID.pkl.bz2"
+        with bz2.open(save_name, 'wb') as fp:
+            fp.write(pickle.dumps(res))
+        print("Monte Carlo results saved in ")
+        print("-> %s" %(save_name))
+        print('')
+        info = self._calc_info(coment)
+        save_name = fname+"_info.json"
+        with open(save_name, 'w') as fp:
+            json.dump(info,fp,indent=4,cls= ToJsonEncoder)
+        print("Calculation conditions are saved in")
+        print("-> %s" %(save_name))
+        print('')
+        if self.fluence_mode:
+            fe = self.fluence.getArz()
+            save_name = fname+'_fluence'+self.fluence_mode+".pkl.bz2"
+            with bz2.open(save_name, 'wb') as fp:
+                fp.write(pickle.dumps(fe))
+            print("Internal Fluence saved in ")
+            print("-> %s" %(save_name))
+            print('')
+
+        calTime(time.time(), start_)
+
+    def _calc_info(self,coment=''):
+        _params = self.model.get_params()
+        calc_info = {
+            'Date':datetime.datetime.now().isoformat(),
+            'coment':coment,
+            'number_of_photons':self.nPh,
+            'calc_dtype':self.dtype,
+            'model':{
+                'model_name':self.model.model_name,
+                'model_params':_params,
+                'model_voxel_space':self.model.voxel_space,
+                'model_xy_size':self.model.xy_size,
+            },
+            'w_beam':self.w_beam,
+            'beam_mode':'TEM00',
+            'fluence_mode':self.fluence_mode,
+        }
+        return calc_info
+        
 class VoxelSeparatedPlateModel(BaseVoxelMonteCarlo):
     #時に光入射面と透過面の屈折率を変更したい場合が生じる。
     #その時は、このモデルを用いる。
     #SeparatedPlateModelは、光入射面と透過面の屈折率を独立して設定することが可能である。
     def __init__(self,*,nPh=1000,fluence_mode=False,dtype='float32',
-                 nr=50,nz=20,dr=0.1,dz=0.1,d_beam = 0,
+                 nr=50,nz=20,dr=0.1,dz=0.1,w_beam = 0,
                  beam_type = 'TEM00',beam_dist=False,
                  beam_direct='positive',intermediate_buffer=False):
 
         super().__init__(nPh = nPh,fluence_mode =fluence_mode, model = SeparatedPlateModel(),
-                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,d_beam=d_beam,
+                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,w_beam=w_beam,
                          beam_type = beam_type,beam_dist=beam_dist,beam_direct=beam_direct,
                          intermediate_buffer=intermediate_buffer)
     def save_result(self,fname,coment=''):
@@ -839,7 +885,7 @@ class VoxelSeparatedPlateModel(BaseVoxelMonteCarlo):
                 'model_voxel_space':self.model.voxel_space,
                 'model_xy_size':self.model.xy_size,
             },
-            'd_beam':self.d_beam,
+            'w_beam':self.w_beam,
             'beam_mode':'TEM00',
             'fluence_mode':self.fluence_mode,
         }
@@ -924,7 +970,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
 
     def __init__(self,*,nPh=1000,dtype='float32',
                  nr=50,nz=20,dr=0.1,dz=0.1, fluence_mode=False,
-                 model_type = 'binary',d_beam = 0):
+                 model_type = 'binary',w_beam = 0):
 
         self.model_type = model_type
         model = self._model_select(self.model_type)
@@ -969,10 +1015,10 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
 
     def set_monte_params(self,*,nPh,dtype='float32',
                  nr=50,nz=20,dr=0.1,dz=0.1, fluence_mode=False,
-                 model_type = 'binary',d_beam = 0):
+                 model_type = 'binary',w_beam = 0):
         self.dtype = dtype
         self.nPh = nPh
-        self.d_beam = d_beam
+        self.w_beam = w_beam
         self.fluence = fluence_mode
         self.fluence_mode = fluence_mode
 
@@ -1017,7 +1063,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
                     'trim_bottom_pixel':self._bottom,
                     'bone_threshold':self.threshold,
                 },
-                'd_beam':self.d_beam,
+                'w_beam':self.w_beam,
                 'fluence_mode':self.fluence_mode,
             }
         }
