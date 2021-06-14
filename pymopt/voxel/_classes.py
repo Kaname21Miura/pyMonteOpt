@@ -6,6 +6,7 @@ Created on Thu Sep 10 17:12:05 2020
 @author: kaname
 """
 ## *** All parameters should be defined in millimeters ***
+
 import numpy as np
 from scipy import stats
 import pandas as pd
@@ -24,7 +25,7 @@ from ..utils.utilities import calTime,set_params,ToJsonEncoder
 import gc
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
-
+#os.system("taskset -p 0xff %d" % os.getpid())
 __all__ = [
 'VoxelPlateModel',
 'PlateModel',
@@ -40,8 +41,25 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
     #@_deprecate_positional_args
     @abstractmethod
     def __init__(self,*,nPh,model,fluence_mode =False, dtype='float32',
-                 nr=50,nz=20,dr=0.1,dz=0.1,d_beam = 0):
+                 nr=50,nz=20,dr=0.1,dz=0.1,
+                 beam_type = 'TEM00',d_beam = 0,beam_dist=False,
+                 beam_direct='positive',intermediate_buffer=False):
         super().__init__()
+
+        def __check_list_name(name,name_list):
+            if not(name in name_list):
+                raise ValueError('%s is not a permitted for factor. Please choose from %s.'%(name,name_list))
+
+        self.beam_type_list=['TEM00','Free',False]
+        __check_list_name(beam_type,self.beam_type_list)
+        self.beam_type = beam_type
+
+        self.beam_direct_list = ['positive','negative',False]
+        __check_list_name(beam_direct,self.beam_direct_list)
+        self.beam_direct = beam_direct
+        self.intermediate_buffer = intermediate_buffer
+        self.set_beam_dist(beam_dist)
+
         self.dtype = dtype
         self.nPh = nPh
         self.d_beam = d_beam
@@ -74,63 +92,116 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         return self.model.voxel_model
 
     def _generate_initial_coodinate(self,nPh,f = 'float32'):
-        self.add =  np.zeros((3, nPh),dtype = 'int16')
-        self.add[0] = int(self.model.voxel_model.shape[0]/2)
-        self.add[1] = int(self.model.voxel_model.shape[1]/2)
+        self._set_inital_add()
+        self._set_beam_distribution()
+        self._set_inital_vector()
+        self._set_inital_w()
+
+    def set_beam_dist(self,beam_dist):
+        if beam_dist:
+            self.beam_dist=beam_dist.copy()
+            if self.beam_direct==self.beam_direct_list[0]:
+                #positive
+                if self.intermediate_buffer:
+                    self.target_index = np.where((beam_dist['v'][2]>0)\
+                    &(beam_dist['p'][2]>=self.intermediate_buffer-1e-8))[0]
+                else:
+                    self.target_index = np.where(beam_dist['v'][2]>0)[0]
+
+            elif self.beam_direct==self.beam_direct_list[1]:
+                #negative
+                if self.intermediate_buffer:
+                    self.target_index = np.where((beam_dist['v'][2]<0)\
+                    &(beam_dist['p'][2]<=0+1e-8))[0]
+                else:
+                    self.target_index = np.where(beam_dist['v'][2]<0)[0]
+                    self.beam_dist['v'][2] *= -1
+
+            self.beam_dist['v'] = beam_dist['v'][:,self.target_index]
+            self.beam_dist['p'] = beam_dist['p'][:,self.target_index]
+            self.beam_dist['w'] = beam_dist['w'][self.target_index]
+
+    def _set_inital_add(self):
+        if self.beam_type == 'TEM00':
+            self.add =  np.zeros((3, self.nPh),dtype = 'int16')
+        elif self.beam_type == 'Free':
+            self.add =  np.zeros((3, self.beam_dist['p'].shape[1]),dtype = 'int16')
+        self.add[0] = self._get_center_add(self.model.voxel_model.shape[0])
+        self.add[1] = self._get_center_add(self.model.voxel_model.shape[1])
         self.add[2] = 1
-        self.p = np.zeros((3,nPh)).astype(self.dtype)
-        self.p[2] = -self.model.voxel_space/2
-        self._set_beam_diameter()
-        self.v = np.zeros((3,nPh)).astype(self.dtype)
-        self.v[2] = 1
-        self.w = np.ones(nPh).astype(f)
-        self.w = self._initial_weight(self.w)
 
-    def def_initial_coodinate(self,p,v,w,nPh):
-        l = self.model.voxel_space
-        self.add =  np.zeros((3, len(w)),dtype = 'int16')
-        self.p = np.zeros((3,len(w))).astype(self.dtype)
-        self.nPh = nPh
-        self.v = v
-        self.w = w
-        #分布を各アドレスに振り分ける
-        gb = p[:2]
-        pp = (gb/l).astype("int16")
-        ind = np.where(gb<0)
-        pp[ind[0].tolist(),ind[1].tolist()] = \
-            pp[ind[0].tolist(),ind[1].tolist()]-1
-        pa = gb - pp*l -l/2
-        ind = np.where((np.abs(pa)>=l/2))
-        pa[ind[0].tolist(),ind[1].tolist()] = \
-            np.sign(pa[ind[0].tolist(),ind[1].tolist()])*(l/2)
-        pp[0] = pp[0]+int(self.model.voxel_model.shape[0]/2)
-        pp[1] = pp[1]+int(self.model.voxel_model.shape[1]/2)
+    def _get_center_add(self,length):
+        #addの中心がローカル座標（ボックス内）の中心となるため、
+        #ボクセル数が偶数の時は、1/2小さい位置を中心とし光を照射し、
+        #逆変換時（_encooder）も同様に1/2小さい位置を中心として元のマクロな座標に戻す。
+        return int((length-1)/2)
 
-        self.add[:2] = pp
-        self.add[2] = 0
-        self.p[:2] = pa.astype(self.dtype)
-        self.p[2] = 0
-        self.generate_initial = False
+    def _set_inital_vector(self):
+        if self.beam_type == 'TEM00':
+            self.v = np.zeros((3,self.nPh)).astype(self.dtype)
+            self.v[2] = 1
+        elif self.beam_type == 'Free':
+            self.v = self.beam_dist['v']
 
+    def _set_inital_w(self):
+        if self.beam_type == 'TEM00':
+            self.w = np.ones(self.nPh).astype(self.dtype)
+            self.w = self._initial_weight(self.w)
+        elif self.beam_type == 'Free':
+            self.w= self.beam_dist['w']
 
-    def _set_beam_diameter(self):
-        if self.d_beam!= 0:
+    def _set_beam_distribution(self):
+
+        if self.beam_type == 'TEM00':
+            self.p = np.zeros((3,self.nPh)).astype(self.dtype)
+            self.p[2] = -self.model.voxel_space/2
+            if self.d_beam!= 0:
+                print("%sを入力"%self.beam_type)
+                #ガウシアン分布を生成
+                gb = np.array(self.gaussianBeam(self.d_beam)).astype(self.dtype)
+                #ガウシアン分布を各アドレスに振り分ける
+
+                l = self.model.voxel_space
+                pp = (gb/l).astype("int16")
+                ind = np.where(gb<0)
+                pp[ind[0].tolist(),ind[1].tolist()] -= 1
+                pa = gb - (pp+1/2)*l
+                ind = np.where((np.abs(pa)>=l/2))
+                pa[ind[0].tolist(),ind[1].tolist()] = \
+                    np.sign(pa[ind[0].tolist(),ind[1].tolist()])*(l/2)
+                pa += l/2
+                self.add[:2] = self.add[:2] + pp
+                self.p[:2] = pa.astype(self.dtype)
+
+        elif self.beam_type == 'Free':
+            self.p = np.zeros((3,self.beam_dist['p'].shape[1])).astype(self.dtype)
+            self.p[2] = -self.model.voxel_space/2
+            print("%sを入力"%self.beam_type)
+            gb = self.beam_dist['p'][:2]
+            self._get_beam_dist(gb[0],gb[1])
+
             l = self.model.voxel_space
-            print("TEM00を入力")
-            #ガウシアン分布を生成
-            gb = np.array(self.gaussianBeam(self.d_beam)).astype(self.dtype)
-            #ガウシアン分布を各アドレスに振り分ける
             pp = (gb/l).astype("int16")
             ind = np.where(gb<0)
-            pp[ind[0].tolist(),ind[1].tolist()] = \
-                pp[ind[0].tolist(),ind[1].tolist()]-1
-            pa = gb - pp*l -l/2
+            pp[ind[0].tolist(),ind[1].tolist()] -= 1
+            pa = gb - (pp+1/2)*l
             ind = np.where((np.abs(pa)>=l/2))
             pa[ind[0].tolist(),ind[1].tolist()] = \
                 np.sign(pa[ind[0].tolist(),ind[1].tolist()])*(l/2)
-
+            pa += l/2
             self.add[:2] = self.add[:2] + pp
             self.p[:2] = pa.astype(self.dtype)
+
+    def _get_beam_dist(self,x,y):
+        fig = plt.figure(figsize=(10,6),dpi=70)
+        ax = fig.add_subplot(111)
+        ax.set_aspect('equal')
+        H = ax.hist2d(x,y, bins=100,cmap="plasma")
+        ax.set_title('Histogram for laser light intensity')
+        ax.set_xlabel('X [mm]')
+        ax.set_ylabel('Y [mm]')
+        fig.colorbar(H[3],ax=ax)
+        plt.show()
 
     def gaussianBeam(self,w=0.54):
         #TEM00のビームを生成します
@@ -140,7 +211,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         normd = stats.norm(0, w/2)
         x = normd.rvs(self.nPh)
         y = normd.rvs(self.nPh)
-        z = np.zeros(self.nPh)
+        #z = np.zeros(self.nPh)
 
         fig, ax1 = plt.subplots()
         ax1.set_title('Input laser light distribution')
@@ -151,16 +222,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         ax2.set_xlabel('X [mm]')
         ax2.set_ylabel('Probability density')
         plt.show()
-
-        fig = plt.figure(figsize=(10,6),dpi=70)
-        ax = fig.add_subplot(111)
-        ax.set_aspect('equal')
-        H = ax.hist2d(x,y, bins=100,cmap="plasma")
-        ax.set_title('Histogram for laser light intensity')
-        ax.set_xlabel('X [mm]')
-        ax.set_ylabel('Y [mm]')
-        fig.colorbar(H[3],ax=ax)
-        plt.show()
+        self._get_beam_dist(x,y)
         return x,y
 
     def get_result(self):
@@ -183,8 +245,8 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
 
     def _encooder(self,p,add):
         space = self.model.voxel_space
-        center_add_x = int(self.model.voxel_model.shape[0]/2)
-        center_add_y = int(self.model.voxel_model.shape[1]/2)
+        center_add_x = self._get_center_add(self.model.voxel_model.shape[0])
+        center_add_y = self._get_center_add(self.model.voxel_model.shape[1])
         encoded_position = p.copy()
         encoded_position[0] = space*(add[0]-center_add_x)+p[0]
         encoded_position[1] = space*(add[1]-center_add_y)+p[1]
@@ -666,7 +728,8 @@ class SeparatedPlateModel(PlateModel):
     def __init__(
         self,*,thickness=[0.2,] ,xy_size=[0.1,0.1],voxel_space = 0.1,
         ma=[1,],ms=[100,],g=[0.9,],n=[1.37,],n_air=1,n_front=1,n_back=1,f = 'float32'):
-        self.model_name = 'PlateModel'
+        self.model_name = 'SeparatedPlateModel'
+        self.thickness = thickness
         self.n =np.array(n+[n_back,n_front,n_air]).astype(f)
         self.ms = np.array(ms+[0,0,0]).astype(f)
         self.ma = np.array(ma+[0,0,0]).astype(f)
@@ -699,6 +762,7 @@ class SeparatedPlateModel(PlateModel):
         del self.voxel_model
         gc.collect()
         #-1はモデルの外側
+        self.thickness = thickness
         self.voxel_space = voxel_space
         self.xy_size = xy_size
         self.borderposit = self._make_borderposit(thickness,f)
@@ -726,10 +790,14 @@ class VoxelSeparatedPlateModel(BaseVoxelMonteCarlo):
     #その時は、このモデルを用いる。
     #SeparatedPlateModelは、光入射面と透過面の屈折率を独立して設定することが可能である。
     def __init__(self,*,nPh=1000,fluence_mode=False,dtype='float32',
-                 nr=50,nz=20,dr=0.1,dz=0.1,d_beam = 0):
+                 nr=50,nz=20,dr=0.1,dz=0.1,d_beam = 0,
+                 beam_type = 'TEM00',beam_dist=False,
+                 beam_direct='positive',intermediate_buffer=False):
 
         super().__init__(nPh = nPh,fluence_mode =fluence_mode, model = SeparatedPlateModel(),
-                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,d_beam=d_beam)
+                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,d_beam=d_beam,
+                         beam_type = beam_type,beam_dist=beam_dist,beam_direct=beam_direct,
+                         intermediate_buffer=intermediate_buffer)
     def save_result(self,fname,coment=''):
         start_ = time.time()
 
@@ -766,6 +834,7 @@ class VoxelSeparatedPlateModel(BaseVoxelMonteCarlo):
             'number_of_photons':self.nPh,
             'calc_dtype':self.dtype,
             'model':{
+                'model_name':self.model.model_name,
                 'model_params':_params,
                 'model_voxel_space':self.model.voxel_space,
                 'model_xy_size':self.model.xy_size,
