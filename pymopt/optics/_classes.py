@@ -264,12 +264,12 @@ class OBD:
         self.nPh = self.data['nPh']
 
     def open_pklbz2_file(self,path):
-        with bz2.open(path+"_LID.pkl.bz2", 'rb') as fp:
+        with bz2.open(path, 'rb') as fp:
             data = pickle.loads(fp.read())
         return data
 
     def open_jason_file(self,path):
-        with open(path+".json", 'r') as fp:
+        with open(path, 'r') as fp:
             json_load = json.load(fp)
         return json_load
 
@@ -287,6 +287,9 @@ class OBD:
             plt.show()
         self.result = pa.DataFrame(res,index=["Z","int"]).T
         self.result["log(int)"] = np.log10(res[1]/self.nPh)
+
+    def get_result(self):
+        return self.result
 
     def save_result(self,path):
         fname_save = path+"_opt.csv"
