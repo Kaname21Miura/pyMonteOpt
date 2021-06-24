@@ -43,6 +43,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
     def __init__(self,*,nPh,model,fluence_mode =False, dtype='float32',
                  nr=50,nz=20,dr=0.1,dz=0.1,
                  beam_type = 'TEM00',w_beam = 0,beam_dist=False,
+                 beam_angle = 0,initial_refrect_by_angle = False,
                  beam_direct='positive',intermediate_buffer=False):
         super().__init__()
 
@@ -63,6 +64,8 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self.dtype = dtype
         self.nPh = nPh
         self.w_beam = w_beam
+        self.beam_angle = beam_angle
+        self.initial_refrect_by_angle = initial_refrect_by_angle
         self.model = model
         self.fluence = fluence_mode
         self.fluence_mode = fluence_mode
@@ -140,16 +143,74 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         if self.beam_type == 'TEM00':
             self.v = np.zeros((3,self.nPh)).astype(self.dtype)
             self.v[2] = 1
+            if self.beam_angle!=0 and self.w_beam==0:
+                #ビーム径がある場合はとりあえず無視
+                #角度はrad表記
+                ni = self.model.n[-1]
+                nt = self.model.n[0]
+                ai = self.beam_angle
+                at = np.arcsin(np.sin(ai)*ni/nt)
+                self.v[0] = np.sin(at)
+                self.v[2] = np.cos(at)
+                if self.initial_refrect_by_angle:
+                    Ra = ((np.sin(ai-at)/np.sin(ai+at))**2\
+                    +(np.tan(ai-at)/np.tan(ai+at))**2)/2
+
+                    self.inital_del_num = np.count_nonzero(Ra>=np.random.rand(self.nPh))
+                    self.v = np.delete(self.v, np.arange(self.inital_del_num), 1)
+                    self.p = np.delete(self.p, np.arange(self.inital_del_num), 1)
+                    self.add = np.delete(self.add, np.arange(self.inital_del_num), 1)
+                    sub_v = np.zeros((3,self.inital_del_num)).astype(self.dtype)
+                    sub_v[0] = np.sin(ai)
+                    sub_v[2] = -np.cos(ai)
+                    self.v_result = np.concatenate([self.v_result,
+                    sub_v],axis = 1)
+                    self.p_result = np.concatenate([self.p_result,
+                    self.p[:,:self.inital_del_num]],axis = 1)
+                    self.add_result = np.concatenate([self.add_result,
+                    self.add[:,:self.inital_del_num]],axis = 1)
+
         elif self.beam_type == 'Free':
             self.v = self.beam_dist['v']
 
     def _set_inital_w(self):
         if self.beam_type == 'TEM00':
             self.w = np.ones(self.nPh).astype(self.dtype)
-            self.w = self._initial_weight(self.w)
+            Rsp = 0
+            n1 = self.model.n[-1]
+            n2 = self.model.n[0]
+            if n1 != n2:
+                Rsp = ((n1-n2)/(n1+n2))**2
+                if self.beam_angle!=0 and self.w_beam==0:
+                    ai = self.beam_angle
+                    at = np.arcsin(np.sin(ai)*n1/n2)
+                    Rsp = ((np.sin(ai-at)/np.sin(ai+at))**2\
+                    +(np.tan(ai-at)/np.tan(ai+at))**2)/2
+
+                self.w -= Rsp
+
+            if self.beam_angle!=0 and self.w_beam==0:
+                if self.initial_refrect_by_angle:
+                    self.w[:] = 1
+                    self.w = np.delete(self.w, np.arange(self.inital_del_num), 0)
+                    self.w_result = np.concatenate([self.w_result,
+                    self.w[:self.inital_del_num]],axis = 0)
+
         elif self.beam_type == 'Free':
             self.w= self.beam_dist['w']
 
+    def _initial_weight(self,w):
+        Rsp = 0
+        n1 = self.model.n[-1]
+        n2 = self.model.n[0]
+        if n1 != n2:
+            Rsp = ((n1-n2)/(n1+n2))**2
+            if self.beam_angle!=0 and self.w_beam==0:
+                ai = self.beam_angle
+                at = np.arcsin(np.sin(ai)*n1/n2)
+                Rsp = ((np.sin(ai-at)/np.sin(ai+at))**2\
+                +(np.tan(ai-at)/np.tan(ai+at))**2)/2
+        return w-Rsp
     def _set_beam_distribution(self):
 
         if self.beam_type == 'TEM00':
@@ -265,14 +326,6 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self.p_result = self.p_result[:,1:]
         self.add_result = self.add_result[:,1:]
         self.w_result = self.w_result[1:]
-
-    def _initial_weight(self,w):
-        Rsp = 0
-        n1 = self.model.n[-1]
-        n2 = self.model.n[0]
-        if n1 != n2:
-            Rsp = ((n1-n2)/(n1+n2))**2
-        return w-Rsp
 
     def set_monte_params(self,*,nPh,model,
         fluence_mode =False, dtype='float32',
@@ -780,10 +833,14 @@ class SeparatedPlateModel(PlateModel):
 # =============================================================================
 class VoxelPlateModel(BaseVoxelMonteCarlo):
     def __init__(self,*,nPh=1000,fluence_mode=False,dtype='float32',
-                 nr=50,nz=20,dr=0.1,dz=0.1,w_beam =0):
+                 nr=50,nz=20,dr=0.1,dz=0.1,w_beam =0,
+                 beam_angle = 0,initial_refrect_by_angle = False,
+                 ):
 
         super().__init__(nPh = nPh,fluence_mode =fluence_mode, model = PlateModel(),
-                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,w_beam=w_beam)
+                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,
+                         w_beam=w_beam,beam_angle = beam_angle,
+                         initial_refrect_by_angle = initial_refrect_by_angle)
     def save_result(self,fname,coment=''):
         start_ = time.time()
 
@@ -830,18 +887,19 @@ class VoxelPlateModel(BaseVoxelMonteCarlo):
             'fluence_mode':self.fluence_mode,
         }
         return calc_info
-        
+
 class VoxelSeparatedPlateModel(BaseVoxelMonteCarlo):
     #時に光入射面と透過面の屈折率を変更したい場合が生じる。
     #その時は、このモデルを用いる。
     #SeparatedPlateModelは、光入射面と透過面の屈折率を独立して設定することが可能である。
     def __init__(self,*,nPh=1000,fluence_mode=False,dtype='float32',
                  nr=50,nz=20,dr=0.1,dz=0.1,w_beam = 0,
+                 beam_angle = 0,
                  beam_type = 'TEM00',beam_dist=False,
                  beam_direct='positive',intermediate_buffer=False):
 
         super().__init__(nPh = nPh,fluence_mode =fluence_mode, model = SeparatedPlateModel(),
-                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,w_beam=w_beam,
+                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,w_beam=w_beam,beam_angle = beam_angle,
                          beam_type = beam_type,beam_dist=beam_dist,beam_direct=beam_direct,
                          intermediate_buffer=intermediate_buffer)
     def save_result(self,fname,coment=''):
@@ -910,7 +968,7 @@ class VoxelPlateLedModel(BaseVoxelMonteCarlo):
     def set_led_params(self,*initial_data, **kwargs):
         set_params(self.led_params,self.led_keys,*initial_data, **kwargs)
 
-    def _generate_inisal_coodinate(self,nPh,f = 'float32'):
+    """def _generate_inisal_coodinate(self,nPh,f = 'float32'):
         self.add =  np.zeros((3, nPh),dtype = 'int16')
         self.add[0] = int(self.model.voxel_model.shape[0]/2)
         self.add[1] = int(self.model.voxel_model.shape[1]/2)
@@ -921,7 +979,7 @@ class VoxelPlateLedModel(BaseVoxelMonteCarlo):
         self.v[2] = 1
         self._set_led()
         self.w = np.ones(nPh).astype(f)
-        self.w = self._initial_weight(self.w)
+        self.w = self._initial_weight(self.w)"""
 
     def _set_led(self):
         l = self.model.voxel_space
@@ -970,14 +1028,17 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
 
     def __init__(self,*,nPh=1000,dtype='float32',
                  nr=50,nz=20,dr=0.1,dz=0.1, fluence_mode=False,
-                 model_type = 'binary',w_beam = 0):
+                 model_type = 'binary',w_beam = 0,beam_angle=0,
+                 initial_refrect_by_angle = False):
 
         self.model_type = model_type
         model = self._model_select(self.model_type)
         self.model = model
 
         super().__init__(nPh = nPh,fluence_mode =fluence_mode,model = model,
-                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz)
+                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,
+                         beam_angle=beam_angle,
+                         initial_refrect_by_angle = initial_refrect_by_angle,)
 
         self._right = 0
         self._left = 0
