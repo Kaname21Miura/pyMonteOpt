@@ -944,6 +944,8 @@ class VoxelSeparatedPlateModel(BaseVoxelMonteCarlo):
                 'model_xy_size':self.model.xy_size,
             },
             'w_beam':self.w_beam,
+            'beam_angle':self.beam_angle,
+            'initial_refrection':self.initial_refrect_by_angle,
             'beam_mode':'TEM00',
             'fluence_mode':self.fluence_mode,
         }

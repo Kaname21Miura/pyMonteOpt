@@ -18,6 +18,34 @@ __all__ = ['OBD']
 # =============================================================================
 
 #### スリットの親クラス ####
+def _get_inital_angle(slit_diameter = 20,
+                      lens_curvature_radius = 51.68,
+                     wavelength = 850,
+                     grass_type = 'N-BK7'):
+    n_1 = _glass_params(wavelength,grass_type)
+    n_air = 1.
+    a1 = np.arcsin(slit_diameter/(2*lens_curvature_radius))
+    a2 = np.arcsin(n_air*np.sin(a1)/n_1)
+    a3 = np.arcsin(n_1*np.sin(a1-a2)/n_air)
+    return a3
+
+def _glass_params(ramda,grass_type = 'N-BK7'):
+    n = 1.517
+    if grass_type == 'N-BK7':
+        n = _NBK7(ramda)
+    return n
+
+def _NBK7(ramda):
+    x = ramda*1e-3
+    if ramda >= 312.6 and ramda <= 486.1:
+        n = -2.4880*x**3 + 3.5910*x**2 - 1.8102*x + 1.8395
+    elif ramda > 486.1 and ramda <= 852.1:
+        n = -0.1605*x**3 + 0.3866*x**2 - 0.3307*x + 1.6102
+    elif ramda > 852.1 and ramda <= 2325:
+        n = -0.0029*x**3 + 0.0125*x**2 - 0.0304*x + 1.5284
+    else:
+        raise ValueError("The wavelength is over the range that can be supported.")
+    return n
 class Slit(object):
     def __init__(self,outerD,slitD,width,thickness,position):
         self.outerD = outerD/2
@@ -190,7 +218,56 @@ class Lens (object):
 
     def cosAi(self,nn,v):
         return (nn[0]*v[0]+nn[1]*v[1]+nn[2]*v[2])
+#### ガラスの親クラス ####
+class Grass:
+    def __init__(self):
+        self.supported_type = [
+        'N-BK7','N-SF11'
+        ]
 
+    def get_inital_angle(self,slit_diameter = 20,
+                          lens_curvature_radius = 51.68,
+                         wavelength = 850,
+                         grass_type = 'N-BK7'):
+        n_1 = self._glass_params(wavelength,grass_type)
+        n_air = 1.
+        a1 = np.arcsin(slit_diameter/(2*lens_curvature_radius))
+        a2 = np.arcsin(n_air*np.sin(a1)/n_1)
+        a3 = np.arcsin(n_1*np.sin(a1-a2)/n_air)
+        return a3
+
+    def get_refrective_index(self,ramda,grass_type = 'N-BK7'):
+        n = 1.517
+        if grass_type == 'N-BK7':
+            n = self._NBK7(ramda)
+        if grass_type == 'N-SF11':
+            n = self._NSF11(ramda)
+        return n
+
+    def _NBK7(self,ramda):
+        x = ramda*1e-3
+        if ramda >= 312.6 and ramda <= 486.1:
+            n = -2.4880*x**3 + 3.5910*x**2 - 1.8102*x + 1.8395
+        elif ramda > 486.1 and ramda <= 852.1:
+            n = -0.1605*x**3 + 0.3866*x**2 - 0.3307*x + 1.6102
+        elif ramda > 852.1 and ramda <= 2325:
+            n = -0.0029*x**3 + 0.0125*x**2 - 0.0304*x + 1.5284
+        else:
+            raise ValueError("The wavelength is over the range that can be supported.")
+        return n
+    def _NSF11(self,ramda):
+        x = ramda*1e-3
+        if ramda >= 404.7 and ramda <= 589.3:
+            n = -4.4506*x**3 + 7.8207*x**2 - 4.7512*x + 2.7792
+        elif ramda > 589.3 and ramda <= 852.1:
+            n = -0.4659*x**3 + 1.1864*x**2 - 1.0622*x + 2.0937
+        elif ramda > 852.1 and ramda <= 1060:
+            n = 0.0427*x**2 - 0.1192*x + 1.8324
+        elif ramda > 1060 and ramda <= 2325.4:
+            n = -0.0046*x**3 + 0.0257*x**2 - 0.0648*x + 1.7993
+        else:
+            raise ValueError("The wavelength is over the range that can be supported.")
+        return n
 
 ##### 曲面が負の方向を向いているレンズ #####
 class Lens1(Lens):
@@ -238,26 +315,70 @@ class Photodiode(object):
 # =============================================================================
 # OBD class
 # =============================================================================
+class SideOBD(OBD):
+    def __init__(self):
+        super().__init__()
+
+    #光学系の挙動を定義
+    def opticalAnalysisMeth(self):
+        start_ = time.time()
+        step = np.arange(
+            self.params['start'],
+            self.params['end'],
+            self.params['split'])
+        rd_index = np.where(self.data['v'][2]<0)[0]
+        p = self.data['p'][:,rd_index]
+        p[2] = 0
+        v = self.data['v'][:,rd_index]
+        w = self.data['w'][rd_index]
+        intdist = np.empty_like(step)
+        grass = Grass()
+        theta0 = get_inital_angle(
+            slit_diameter = self.params['slit_D'],
+            lens_curvature_radius = self.params['wavelength'],
+            wavelength = self.params['r_1'],
+            grass_type = 'N-BK7'
+            )
+        for (i,Z) in enumerate(tqdm(step)):
+            p[0] -= Z*tan(theta0)
+            intdist[i] = self.opticalUnit(Z,p,v,w)
+        calTime(time.time(), start_)
+        return step,intdist
+
+
 class OBD:
     def __init__(self):
         #self.dtype = 'float64'
         self.params ={
-            'start':-10,'end':65,'split':1,
+            'start':-2.04,'end':62.96,'split':0.25,'wavelength':850,
             'outerD_1':50,'efl_1':100,'bfl_1':93.41,
             'ct_1':10,'et_1':3.553,'r_1':51.68,'n_1':1.517,
+            'substrate_1':'N-BK7',
             'outerD_2' : 50,'efl_2' : 50,'bfl_2' : 43.28,
             'ct_2':12,'et_2':3.01,'r_2':39.24,'n_2':1.758,
+            'substrate_2':'N-SF11',
             'slit_outerD':50,'slit_D':20,'slit_width':2,'slit_thickness':5,
             'd_pd':3,
             'distance_2slits':37,'pd_poit_correction':0,
         }
+        self._set_refrective_index()
         self.keys_params  = list(self.params.keys())
         self.data = {'p':0,'v':0,'w':0,'nPh':1000}
         self.keys_data = list(self.data.keys())
         self.nPh = 1000
 
+    def _set_refrective_index(self):
+        grass = Grass()
+        self.params[n_1] = grass.get_refrective_index(
+        self.params['wavelength'],self.params['substrate_1']
+        )
+        self.params[n_2] = grass.get_refrective_index(
+        self.params['wavelength'],self.params['substrate_2']
+        )
+
     def set_params(self,*initial_data, **kwargs):
         set_params(self.params,self.keys_params,*initial_data, **kwargs)
+        self._set_refrective_index()
 
     def set_monte_data(self,*initial_data, **kwargs):
         set_params(self.data,self.keys_data,*initial_data, **kwargs)
