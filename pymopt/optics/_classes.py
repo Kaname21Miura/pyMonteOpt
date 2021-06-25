@@ -12,7 +12,7 @@ from ..utils.utilities import calTime,set_params
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 import bz2,pickle,json
-__all__ = ['OBD']
+__all__ = ['OBD','SideOBD','Grass']
 # =============================================================================
 # Optical parts
 # =============================================================================
@@ -46,6 +46,7 @@ def _NBK7(ramda):
     else:
         raise ValueError("The wavelength is over the range that can be supported.")
     return n
+
 class Slit(object):
     def __init__(self,outerD,slitD,width,thickness,position):
         self.outerD = outerD/2
@@ -225,18 +226,19 @@ class Grass:
         'N-BK7','N-SF11'
         ]
 
-    def get_inital_angle(self,slit_diameter = 20,
-                          lens_curvature_radius = 51.68,
-                         wavelength = 850,
-                         grass_type = 'N-BK7'):
-        n_1 = self._glass_params(wavelength,grass_type)
+    def get_inital_angle(self,
+        slit_radius = 10,
+        lens_curvature_radius = 51.68,
+        wavelength = 850,
+        grass_type = 'N-BK7'):
+        n_1 = self.get_refractive_index(wavelength,grass_type)
         n_air = 1.
-        a1 = np.arcsin(slit_diameter/(2*lens_curvature_radius))
+        a1 = np.arcsin(slit_radius/(lens_curvature_radius))
         a2 = np.arcsin(n_air*np.sin(a1)/n_1)
         a3 = np.arcsin(n_1*np.sin(a1-a2)/n_air)
         return a3
 
-    def get_refrective_index(self,ramda,grass_type = 'N-BK7'):
+    def get_refractive_index(self,ramda,grass_type = 'N-BK7'):
         n = 1.517
         if grass_type == 'N-BK7':
             n = self._NBK7(ramda)
@@ -315,36 +317,6 @@ class Photodiode(object):
 # =============================================================================
 # OBD class
 # =============================================================================
-class SideOBD(OBD):
-    def __init__(self):
-        super().__init__()
-
-    #光学系の挙動を定義
-    def opticalAnalysisMeth(self):
-        start_ = time.time()
-        step = np.arange(
-            self.params['start'],
-            self.params['end'],
-            self.params['split'])
-        rd_index = np.where(self.data['v'][2]<0)[0]
-        p = self.data['p'][:,rd_index]
-        p[2] = 0
-        v = self.data['v'][:,rd_index]
-        w = self.data['w'][rd_index]
-        intdist = np.empty_like(step)
-        grass = Grass()
-        theta0 = get_inital_angle(
-            slit_diameter = self.params['slit_D'],
-            lens_curvature_radius = self.params['wavelength'],
-            wavelength = self.params['r_1'],
-            grass_type = 'N-BK7'
-            )
-        for (i,Z) in enumerate(tqdm(step)):
-            p[0] -= Z*tan(theta0)
-            intdist[i] = self.opticalUnit(Z,p,v,w)
-        calTime(time.time(), start_)
-        return step,intdist
-
 
 class OBD:
     def __init__(self):
@@ -369,10 +341,10 @@ class OBD:
 
     def _set_refrective_index(self):
         grass = Grass()
-        self.params[n_1] = grass.get_refrective_index(
+        self.params['n_1'] = grass.get_refractive_index(
         self.params['wavelength'],self.params['substrate_1']
         )
-        self.params[n_2] = grass.get_refrective_index(
+        self.params['n_2'] = grass.get_refractive_index(
         self.params['wavelength'],self.params['substrate_2']
         )
 
@@ -466,6 +438,36 @@ class OBD:
         w = self.data['w'][rd_index]
         intdist = np.empty_like(step)
         for (i,Z) in enumerate(tqdm(step)):
+            intdist[i] = self.opticalUnit(Z,p,v,w)
+        calTime(time.time(), start_)
+        return step,intdist
+
+class SideOBD(OBD):
+    def __init__(self):
+        super().__init__()
+
+    #光学系の挙動を定義
+    def opticalAnalysisMeth(self):
+        start_ = time.time()
+        step = np.arange(
+            self.params['start'],
+            self.params['end'],
+            self.params['split'])
+        rd_index = np.where(self.data['v'][2]<0)[0]
+        p = self.data['p'][:,rd_index]
+        p[2] = 0
+        v = self.data['v'][:,rd_index]
+        w = self.data['w'][rd_index]
+        intdist = np.empty_like(step)
+        grass = Grass()
+        theta0 = grass.get_inital_angle(
+            slit_radius = self.params['slit_D']/2,
+            wavelength = self.params['wavelength'],
+            lens_curvature_radius = self.params['r_1'],
+            grass_type = 'N-BK7'
+            )
+        for (i,Z) in enumerate(tqdm(step)):
+            p[0] -= Z*np.tan(theta0)
             intdist[i] = self.opticalUnit(Z,p,v,w)
         calTime(time.time(), start_)
         return step,intdist

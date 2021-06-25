@@ -22,6 +22,7 @@ from ..utils import readDicom,reConstArray_8,reConstArray
 from ..utils.validation import _deprecate_positional_args
 from ..fluence import Fluence2D,Fluence3D
 from ..utils.utilities import calTime,set_params,ToJsonEncoder
+from ..optics._classes import Grass
 import gc
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -42,8 +43,11 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
     @abstractmethod
     def __init__(self,*,nPh,model,fluence_mode =False, dtype='float32',
                  nr=50,nz=20,dr=0.1,dz=0.1,
-                 beam_type = 'TEM00',w_beam = 0,beam_dist=False,
+                 beam_type = 'TEM00',w_beam = 0,
                  beam_angle = 0,initial_refrect_by_angle = False,
+                 wavelength = 850,beam_posision = 10,
+                 lens_curvature_radius = 51.68,grass_type = 'N-BK7',
+                 beam_dist=False,
                  beam_direct='positive',intermediate_buffer=False):
         super().__init__()
 
@@ -64,8 +68,25 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self.dtype = dtype
         self.nPh = nPh
         self.w_beam = w_beam
-        self.beam_angle = beam_angle
+
         self.initial_refrect_by_angle = initial_refrect_by_angle
+        self.wavelength = wavelength
+        self.grass_type = grass_type
+        self.lens_curvature_radius = lens_curvature_radius
+        self.beam_posision = beam_posision
+        self.beam_angle_mode = False
+        if beam_angle == 'lens_f':
+            grass = Grass()
+            self.beam_angle_mode = True
+            self.beam_angle = grass.get_inital_angle(
+                slit_radius = self.beam_posision,
+                lens_curvature_radius = self.lens_curvature_radius,
+                wavelength = self.wavelength,
+                grass_type = self.grass_type
+            )
+        else:
+            self.beam_angle = beam_angle
+
         self.model = model
         self.fluence = fluence_mode
         self.fluence_mode = fluence_mode
@@ -832,15 +853,25 @@ class SeparatedPlateModel(PlateModel):
 # Public montecalro model
 # =============================================================================
 class VoxelPlateModel(BaseVoxelMonteCarlo):
-    def __init__(self,*,nPh=1000,fluence_mode=False,dtype='float32',
-                 nr=50,nz=20,dr=0.1,dz=0.1,w_beam =0,
-                 beam_angle = 0,initial_refrect_by_angle = False,
-                 ):
+    def __init__(
+        self,*,nPh=1000,fluence_mode=False,dtype='float32',
+        nr=50,nz=20,dr=0.1,dz=0.1,w_beam =0,
+        beam_angle = 0,initial_refrect_by_angle = False,
+        wavelength = 850,beam_posision = 10,
+        lens_curvature_radius = 51.68,grass_type = 'N-BK7',
+    ):
 
-        super().__init__(nPh = nPh,fluence_mode =fluence_mode, model = PlateModel(),
-                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,
-                         w_beam=w_beam,beam_angle = beam_angle,
-                         initial_refrect_by_angle = initial_refrect_by_angle)
+        super().__init__(
+            nPh = nPh,fluence_mode =fluence_mode, model = PlateModel(),
+            dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,
+            w_beam=w_beam,beam_angle = beam_angle,
+            initial_refrect_by_angle = initial_refrect_by_angle,
+            wavelength = wavelength,
+            beam_posision = beam_posision,
+            lens_curvature_radius = lens_curvature_radius,
+            grass_type = grass_type,
+        )
+
     def save_result(self,fname,coment=''):
         start_ = time.time()
 
@@ -883,9 +914,16 @@ class VoxelPlateModel(BaseVoxelMonteCarlo):
                 'model_xy_size':self.model.xy_size,
             },
             'w_beam':self.w_beam,
+            'beam_angle':self.beam_angle,
+            'initial_refrect_mode':self.initial_refrect_by_angle,
             'beam_mode':'TEM00',
             'fluence_mode':self.fluence_mode,
         }
+        if self.beam_angle_mode:
+            calc_info['wavelength'] = self.wavelength
+            calc_info['beam_posision'] = self.beam_posision
+            calc_info['lens_curvature_radius'] = self.lens_curvature_radius
+            calc_info['grass_type'] = self.grass_type
         return calc_info
 
 class VoxelSeparatedPlateModel(BaseVoxelMonteCarlo):
@@ -949,6 +987,7 @@ class VoxelSeparatedPlateModel(BaseVoxelMonteCarlo):
             'beam_mode':'TEM00',
             'fluence_mode':self.fluence_mode,
         }
+
         return calc_info
 
 
@@ -970,18 +1009,6 @@ class VoxelPlateLedModel(BaseVoxelMonteCarlo):
     def set_led_params(self,*initial_data, **kwargs):
         set_params(self.led_params,self.led_keys,*initial_data, **kwargs)
 
-    """def _generate_inisal_coodinate(self,nPh,f = 'float32'):
-        self.add =  np.zeros((3, nPh),dtype = 'int16')
-        self.add[0] = int(self.model.voxel_model.shape[0]/2)
-        self.add[1] = int(self.model.voxel_model.shape[1]/2)
-        self.add[2] = 1
-        self.p = np.zeros((3,nPh)).astype(f)
-        self.p[2] = -self.model.voxel_space/2
-        self.v = np.zeros((3,nPh)).astype(f)
-        self.v[2] = 1
-        self._set_led()
-        self.w = np.ones(nPh).astype(f)
-        self.w = self._initial_weight(self.w)"""
 
     def _set_led(self):
         l = self.model.voxel_space
@@ -1028,19 +1055,30 @@ class VoxelPlateLedModel(BaseVoxelMonteCarlo):
 
 class VoxelDicomModel(BaseVoxelMonteCarlo):
 
-    def __init__(self,*,nPh=1000,dtype='float32',
-                 nr=50,nz=20,dr=0.1,dz=0.1, fluence_mode=False,
-                 model_type = 'binary',w_beam = 0,beam_angle=0,
-                 initial_refrect_by_angle = False):
+    def __init__(
+        self,*,nPh=1000,dtype='float32',
+        nr=50,nz=20,dr=0.1,dz=0.1, fluence_mode=False,
+        model_type = 'binary',w_beam = 0,beam_angle=0,
+        initial_refrect_by_angle = False,
+        wavelength = 850,beam_posision = 10,
+        lens_curvature_radius = 51.68,grass_type = 'N-BK7',
+    ):
 
         self.model_type = model_type
         model = self._model_select(self.model_type)
         self.model = model
 
-        super().__init__(nPh = nPh,fluence_mode =fluence_mode,model = model,
-                         dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,
-                         beam_angle=beam_angle,
-                         initial_refrect_by_angle = initial_refrect_by_angle,)
+        super().__init__(
+            nPh = nPh,fluence_mode =fluence_mode,model = model,
+            dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,
+            beam_angle=beam_angle,
+            initial_refrect_by_angle = initial_refrect_by_angle,
+            wavelength = wavelength,
+            beam_posision = beam_posision,
+            lens_curvature_radius = lens_curvature_radius,
+            grass_type = grass_type,
+
+        )
 
         self._right = 0
         self._left = 0
@@ -1127,9 +1165,17 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
                     'bone_threshold':self.threshold,
                 },
                 'w_beam':self.w_beam,
+                'beam_angle':self.beam_angle,
+                'initial_refrection':self.initial_refrect_by_angle,
+                'beam_mode':'TEM00',
                 'fluence_mode':self.fluence_mode,
             }
         }
+        if self.beam_angle_mode:
+            calc_info['wavelength'] = self.wavelength
+            calc_info['beam_posision'] = self.beam_posision
+            calc_info['lens_curvature_radius'] = self.lens_curvature_radius
+            calc_info['grass_type'] = self.grass_type
         return calc_info
 
     def save_result(self,fname,coment=''):
