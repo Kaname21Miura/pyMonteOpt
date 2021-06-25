@@ -238,7 +238,7 @@ class Grass:
         a3 = np.arcsin(n_1*np.sin(a1-a2)/n_air)
         return a3
 
-    def get_real_bfl(self
+    def get_real_bfl(self,
         slit_radius = 10,
         lens_curvature_radius = 51.68,
         lens_ct = 10.,
@@ -276,6 +276,7 @@ class Grass:
         else:
             raise ValueError("The wavelength is over the range that can be supported.")
         return n
+
     def _NSF11(self,ramda):
         x = ramda*1e-3
         if ramda >= 404.7 and ramda <= 589.3:
@@ -332,6 +333,48 @@ class Photodiode(object):
         index_ = np.where(pp<self.r)[0].tolist()
         return np.sum(w[index_]),p
 
+class LdFixingPart(object):
+    def __init__(self,position):
+        self.angle = 68/180
+        self.th = 5
+        self.w = 6
+        self.front_z = position
+        self.back_z = position - self.th
+
+        self.a1 = (1/np.tan(self.angle)-1\
+        /(np.sin(self.angle)*np.cos(self.angle)))
+        self.b1 = self.w/np.cos(self.angle)
+        self.a2 = (np.cos(self.angle)+1)/np.sin(self.angle)
+        self.b2 = -self.w
+        self.b3 = -self.w
+
+    #LD固定台で弾かれる光子を削除
+    def delLdFixingPart(self,p,v,w):
+        index_ = np.where(
+            (p[1]<self.a1*p[0]+self.b1)\
+            &(p[1]>self.a2*p[0]+self.b2)\
+            &(p[1]>self.b3)
+        )[0].tolist()
+        index_ = np.delete(
+            np.arange(p.shape[1]), index_,0)
+        p = p[:,index_]
+        v = v[:,index_]
+        w = w[index_]
+        return p,v,w
+
+    def hittingPotision(self,p,v,posit):
+        a = (posit-p[2])/v[2]
+        return p + a*v
+
+    #Slit全体の動きを定義
+    def opticalAnalysis(self,p,v,w):
+        p = self.hittingPotision(p,v,self.front_z)
+        p,v,w = self.delLdFixingPart(p,v,w)
+        p = self.hittingPotision(p,v,self.back_z)
+        p,v,w = self.delLdFixingPart(p,v,w)
+        return p,v,w
+
+
 
 # =============================================================================
 # OBD class
@@ -350,6 +393,7 @@ class OBD:
             'substrate_2':'N-SF11',
             'slit_outerD':50,'slit_D':20,'slit_width':2,'slit_thickness':5,
             'd_pd':3,
+            'ld_fix_part':True,
             'distance_2slits':37,'pd_poit_correction':0,
         }
         self._set_refrective_index()
@@ -434,10 +478,15 @@ class OBD:
             self.params['slit_outerD'],self.params['slit_D'],
             self.params['slit_width'],self.params['slit_thickness'],z_slit2
             )
+
         pd = Photodiode(self.params['d_pd'],z_pd)
         #解析
         p,v,w = lens_1.opticalAnalysis(p,v,w)
         p,v,w = slit_1.opticalAnalysis(p,v,w)
+        if self.params['ld_fix_part']:
+            z_lfp = z_slit1 -self.params['slit_thickness']-10
+            lfp = LdFixingPart(z_lfp)
+            p,v,w = lfp.opticalAnalysis(p,v,w)
         p,v,w = slit_2.opticalAnalysis(p,v,w)
         p,v,w = lens_2.opticalAnalysis(p,v,w)
         intdist,p = pd.catcherInThePhotodiode(p,v,w)
@@ -485,7 +534,7 @@ class SideOBD(OBD):
             lens_curvature_radius = self.params['r_1'],
             grass_type = 'N-BK7'
         )
-        z_rel = grass.get_real_bfl(self
+        z_rel = grass.get_real_bfl(
             slit_radius = self.params['slit_D']/2,
             lens_curvature_radius = self.params['r_1'],
             lens_ct = self.params['ct_1'],
