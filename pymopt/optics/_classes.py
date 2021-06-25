@@ -493,10 +493,10 @@ class SideOBD(OBD):
             grass_type = 'N-BK7'
         )
         dz = z_rel - self.params['bfl_1']
+        p_sub = p[0].copy()
 
         for (i,Z) in enumerate(tqdm(step)):
-            p[0] -= (Z+dz)*np.tan(theta0)
-
+            p[0] = p_sub - (Z+dz)*np.tan(theta0)
             intdist[i] = self.opticalUnit(Z,p,v,w)
         calTime(time.time(), start_)
         return step,intdist
