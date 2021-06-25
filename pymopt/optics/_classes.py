@@ -238,6 +238,25 @@ class Grass:
         a3 = np.arcsin(n_1*np.sin(a1-a2)/n_air)
         return a3
 
+    def get_real_bfl(self
+        slit_radius = 10,
+        lens_curvature_radius = 51.68,
+        lens_ct = 10.,
+        wavelength = 850,
+        grass_type = 'N-BK7'):
+        n_1 = self.get_refractive_index(wavelength,grass_type)
+        n_air = 1.
+        a1 = np.arcsin(slit_radius/(lens_curvature_radius))
+        a2 = np.arcsin(n_air*np.sin(a1)/n_1)
+        a3 = a1-a2
+        a4 = np.arcsin(n_1*np.sin(a3)/n_air)
+        l = np.sqrt(lens_curvature_radius**2-slit_radius**2)\
+            -lens_curvature_radius+lens_ct
+        dx = l*np.tan(a3)
+        z_rel = (slit_radius-dx)/np.tan(a4)
+        return z_rel
+
+
     def get_refractive_index(self,ramda,grass_type = 'N-BK7'):
         n = 1.517
         if grass_type == 'N-BK7':
@@ -465,9 +484,19 @@ class SideOBD(OBD):
             wavelength = self.params['wavelength'],
             lens_curvature_radius = self.params['r_1'],
             grass_type = 'N-BK7'
-            )
+        )
+        z_rel = grass.get_real_bfl(self
+            slit_radius = self.params['slit_D']/2,
+            lens_curvature_radius = self.params['r_1'],
+            lens_ct = self.params['ct_1'],
+            wavelength = self.params['wavelength'],
+            grass_type = 'N-BK7'
+        )
+        dz = z_rel - self.params['bfl_1']
+
         for (i,Z) in enumerate(tqdm(step)):
-            p[0] -= Z*np.tan(theta0)
+            p[0] -= (Z+dz)*np.tan(theta0)
+
             intdist[i] = self.opticalUnit(Z,p,v,w)
         calTime(time.time(), start_)
         return step,intdist
