@@ -125,8 +125,6 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self._set_beam_distribution()
         self._set_inital_vector()
         self._set_inital_w()
-        if self.z_max_mode:
-            self.z_max = np.zeros_like(self.w)
 
     def set_beam_dist(self,beam_dist):
         if beam_dist:
@@ -204,6 +202,10 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
     def _set_inital_w(self):
         if self.beam_type == 'TEM00':
             self.w = np.ones(self.nPh).astype(self.dtype)
+
+            if self.z_max_mode:
+                self.z_max = np.zeros_like(self.w)
+
             Rsp = 0
             n1 = self.model.n[-1]
             n2 = self.model.n[0]
