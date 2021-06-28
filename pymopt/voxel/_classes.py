@@ -45,6 +45,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
                  nr=50,nz=20,dr=0.1,dz=0.1,
                  beam_type = 'TEM00',w_beam = 0,
                  beam_angle = 0,initial_refrect_by_angle = False,
+                 z_max_mode = False,
                  wavelength = 850,beam_posision = 10,
                  lens_curvature_radius = 51.68,grass_type = 'N-BK7',
                  beam_dist=False,
@@ -64,6 +65,8 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self.beam_direct = beam_direct
         self.intermediate_buffer = intermediate_buffer
         self.set_beam_dist(beam_dist)
+
+        self.z_max_mode = z_max_mode
 
         self.dtype = dtype
         self.nPh = nPh
@@ -106,11 +109,13 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         return self
 
     def _reset_results(self):
-            self.v_result = np.empty((3,1)).astype(self.f_bit)
-            self.p_result = np.empty((3,1)).astype(self.f_bit)
-            self.add_result = np.empty((3,1)).astype('int16')
-            self.w_result = np.empty(1).astype(self.f_bit)
-            return self
+        self.v_result = np.empty((3,1)).astype(self.f_bit)
+        self.p_result = np.empty((3,1)).astype(self.f_bit)
+        self.add_result = np.empty((3,1)).astype('int16')
+        self.w_result = np.empty(1).astype(self.f_bit)
+        if self.z_max_mode:
+            self.z_max_result = np.empty(1).astype(self.f_bit)
+        return self
 
     def get_voxel_model(self):
         return self.model.voxel_model
@@ -120,6 +125,8 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self._set_beam_distribution()
         self._set_inital_vector()
         self._set_inital_w()
+        if self.z_max_mode:
+            self.z_max = np.zeros_like(self.w)
 
     def set_beam_dist(self,beam_dist):
         if beam_dist:
@@ -216,6 +223,10 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
                     self.w = np.delete(self.w, np.arange(self.inital_del_num), 0)
                     self.w_result = np.concatenate([self.w_result,
                     self.w[:self.inital_del_num]],axis = 0)
+                    if self.z_max_mode:
+                        self.z_max_result = np.concatenate([self.z_max,
+                        self.z_max[:self.inital_del_num]],axis = 0)
+                        self.z_max = np.delete(self.z_max, np.arange(self.inital_del_num), 0)
 
         elif self.beam_type == 'Free':
             self.w= self.beam_dist['w']
@@ -309,12 +320,16 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
 
     def get_result(self):
         encoded_position = self._encooder(self.p_result,self.add_result)
-        return{
+        df_result = {
             'p':encoded_position,
             'v':self.v_result,
             'w':self.w_result,
             'nPh':self.nPh
         }
+        if self.z_max_mode:
+            df_result['z_max'] = self.z_max_result
+        return df_result
+
 
     def get_fluence(self):
         return {'Arz':self.fluence.getArz(),
@@ -347,6 +362,8 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self.p_result = self.p_result[:,1:]
         self.add_result = self.add_result[:,1:]
         self.w_result = self.w_result[1:]
+        if self.z_max_mode:
+            self.z_max_result = self.z_max_result[1:]
 
     def set_monte_params(self,*,nPh,model,
         fluence_mode =False, dtype='float32',
@@ -377,6 +394,8 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
             p = np.delete(p, del_index, axis = 1)
             w = np.delete(w, del_index)
             add = np.delete(add,del_index, axis = 1)
+            if self.z_max_mode:
+                self.z_max = np.delete(self.z_max, del_index)
 
         # nanデータを削除
         # なぜnanになるのかは究明する必要がある。
@@ -389,7 +408,8 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
             p = np.delete(p, del_index, axis = 1)
             w = np.delete(w, del_index)
             add = np.delete(add,del_index, axis = 1)
-
+            if self.z_max_mode:
+                self.z_max = np.delete(self.z_max, del_index)
         return p,v,w,add
 
     def _border_out(self,p,v,w,add,index):
@@ -397,6 +417,9 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self.p_result = np.concatenate([self.p_result, p[:,index]],axis = 1)
         self.add_result = np.concatenate([self.add_result, add[:,index]],axis = 1)
         self.w_result = np.concatenate([self.w_result,w[index]])
+        if self.z_max_mode:
+            self.z_max_result = np.concatenate([self.z_max_result,self.z_max[index]])
+            self.z_max = np.delete(self.z_max,index)
 
         p = np.delete(p,index, axis = 1)
         v = np.delete(v,index, axis = 1)
@@ -516,6 +539,11 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
 
     def stepMovement(self):
         self.v,self.p,self.add,index = self._boundary_judgment(self.v,self.p,self.add)
+        if self.z_max_mode:
+            encoded_p = self._encooder(self.p.copy(),self.add.copy())[2]
+            ind_zmax = np.where(encoded_p-self.z_max>0)[0]
+            if list(ind_zmax) != []:
+                self.z_max[ind_zmax] = encoded_p[ind_zmax]
 
         self.p,self.v,self.w,self.add = self._border_out(self.p,self.v,self.w,self.add,index)
 
@@ -856,6 +884,7 @@ class VoxelPlateModel(BaseVoxelMonteCarlo):
     def __init__(
         self,*,nPh=1000,fluence_mode=False,dtype='float32',
         nr=50,nz=20,dr=0.1,dz=0.1,w_beam =0,
+        z_max_mode = False,
         beam_angle = 0,initial_refrect_by_angle = False,
         wavelength = 850,beam_posision = 10,
         lens_curvature_radius = 51.68,grass_type = 'N-BK7',
@@ -863,7 +892,7 @@ class VoxelPlateModel(BaseVoxelMonteCarlo):
 
         super().__init__(
             nPh = nPh,fluence_mode =fluence_mode, model = PlateModel(),
-            dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,
+            dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,z_max_mode = z_max_mode,
             w_beam=w_beam,beam_angle = beam_angle,
             initial_refrect_by_angle = initial_refrect_by_angle,
             wavelength = wavelength,
