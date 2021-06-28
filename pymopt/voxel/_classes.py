@@ -124,7 +124,16 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self._set_inital_add()
         self._set_beam_distribution()
         self._set_inital_vector()
+        if self.z_max_mode:
+            self.z_max = np.zeros(self.nPh).astype(self.dtype)
+            if self.beam_angle!=0 and self.w_beam==0:
+                if self.initial_refrect_by_angle:
+                    self.z_max = np.delete(self.z_max, np.arange(self.inital_del_num), 0)
+                    self.z_max_result = np.concatenate([self.z_max_result,
+                    self.z_max[:self.inital_del_num]],axis = 0)
+
         self._set_inital_w()
+
 
     def set_beam_dist(self,beam_dist):
         if beam_dist:
@@ -200,11 +209,10 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
             self.v = self.beam_dist['v']
 
     def _set_inital_w(self):
+
+
         if self.beam_type == 'TEM00':
             self.w = np.ones(self.nPh).astype(self.dtype)
-
-            if self.z_max_mode:
-                self.z_max = np.zeros_like(self.w)
 
             Rsp = 0
             n1 = self.model.n[-1]
@@ -225,10 +233,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
                     self.w = np.delete(self.w, np.arange(self.inital_del_num), 0)
                     self.w_result = np.concatenate([self.w_result,
                     self.w[:self.inital_del_num]],axis = 0)
-                    if self.z_max_mode:
-                        self.z_max_result = np.concatenate([self.z_max,
-                        self.z_max[:self.inital_del_num]],axis = 0)
-                        self.z_max = np.delete(self.z_max, np.arange(self.inital_del_num), 0)
+
 
         elif self.beam_type == 'Free':
             self.w= self.beam_dist['w']
