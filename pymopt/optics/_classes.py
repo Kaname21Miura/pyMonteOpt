@@ -351,12 +351,10 @@ class LdFixingPart(object):
     #LD固定台で弾かれる光子を削除
     def delLdFixingPart(self,p,v,w):
         index_ = np.where(
-            (p[1]<self.a1*p[0]+self.b1)\
-            &(p[1]>self.a2*p[0]+self.b2)\
-            &(p[1]>self.b3)
+            (p[1]>self.a1*p[0]+self.b1)|(p[1]<self.a2*p[0]+self.b2)|(p[1]<self.b3)
         )[0].tolist()
-        index_ = np.delete(
-            np.arange(p.shape[1]), index_,0)
+        """index_ = np.delete(
+            np.arange(p.shape[1]), index_,0)"""
         p = p[:,index_]
         v = v[:,index_]
         w = w[index_]
