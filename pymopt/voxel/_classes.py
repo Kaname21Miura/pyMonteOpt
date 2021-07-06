@@ -32,7 +32,8 @@ __all__ = [
 'PlateModel',
 'VoxelDicomModel',
 'VoxelSeparatedPlateModel',
-'VoxelPlateLedModel']
+'VoxelPlateLedModel',
+'VoxelWhiteNoiseModel']
 
 # =============================================================================
 # Base solid model
@@ -564,6 +565,60 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
 
         return self.w.size
 
+    def save_result(self,fname,coment=''):
+        start_ = time.time()
+
+        res = self.get_result()
+        save_name = fname+"_LID.pkl.bz2"
+        with bz2.open(save_name, 'wb') as fp:
+            fp.write(pickle.dumps(res))
+        print("Monte Carlo results saved in ")
+        print("-> %s" %(save_name))
+        print('')
+        info = self._calc_info(coment)
+        save_name = fname+"_info.json"
+        with open(save_name, 'w') as fp:
+            json.dump(info,fp,indent=4,cls= ToJsonEncoder)
+        print("Calculation conditions are saved in")
+        print("-> %s" %(save_name))
+        print('')
+        if self.fluence_mode:
+            fe = self.fluence.getArz()
+            save_name = fname+'_fluence'+self.fluence_mode+".pkl.bz2"
+            with bz2.open(save_name, 'wb') as fp:
+                fp.write(pickle.dumps(fe))
+            print("Internal Fluence saved in ")
+            print("-> %s" %(save_name))
+            print('')
+
+        calTime(time.time(), start_)
+
+    def _calc_info(self,coment=''):
+        _params = self.model.get_params()
+        calc_info = {
+            'Date':datetime.datetime.now().isoformat(),
+            'coment':coment,
+            'number_of_photons':self.nPh,
+            'calc_dtype':self.dtype,
+            'model':{
+                'model_name':self.model.model_name,
+                'model_params':_params,
+                'model_voxel_space':self.model.voxel_space,
+                'model_xy_size':self.model.xy_size,
+            },
+            'w_beam':self.w_beam,
+            'beam_angle':self.beam_angle,
+            'initial_refrect_mode':self.initial_refrect_by_angle,
+            'beam_mode':'TEM00',
+            'fluence_mode':self.fluence_mode,
+        }
+        if self.beam_angle_mode:
+            calc_info['wavelength'] = self.wavelength
+            calc_info['beam_posision'] = self.beam_posision
+            calc_info['lens_curvature_radius'] = self.lens_curvature_radius
+            calc_info['grass_type'] = self.grass_type
+        return calc_info
+
 
 # =============================================================================
 # Modeling class
@@ -832,6 +887,111 @@ class PlateModel(VoxelModel):
     def getModelSize(self):
         print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
 
+class WhiteNoiseModel(VoxelModel):
+    def __init__(self):
+        self.model_name = 'WhiteNoiseModel'
+        self.dtype = 'int8'
+        self.dtype_f = 'float32'
+        self.subc_num=2
+        self.skin_num=3
+        self.params = {
+            'xy_size':[40,40],'voxel_space':0.01,'bv_tv':0.138,
+            'th_dermis':1.2,'th_subcutaneus':2.8,'th_bone':40,
+            'n_space':1.,'n_trabecular':1.4,'n_subcutaneus':1.4,'n_dermis':1.4,'n_air':1.,
+            'ma_space':1e-8,'ma_trabecular':0.02374,'ma_subcutaneus':0.011,'ma_dermis':0.037,
+            'ms_space':1e-8,'ms_trabecular':20.536,'ms_subcutaneus':20,'ms_dermis':20,
+            'g_space':0.90,'g_trabecular':0.90,'g_subcutaneus':0.90,'g_dermis':.90,
+            }
+        self.keys = list(self.params.keys())
+
+        self._make_model_params()
+        self.bmd = self._get_bone_vbmd()
+        self.voxel_space = self.params['voxel_space']
+        self.voxel_model = np.zeros((3,3,3),dtype = self.dtype)
+        self.model_shape = (3,3,3)
+
+    def _get_bone_vbmd(self):
+        ms_ugru = self.params['ms_trabecular']*(1-self.params['g_trabecular'])
+        ms_ugru = ms_ugru/(1-0.93)
+        bmd_wet = 0.0382*ms_ugru+0.8861
+        bmd_ash = 0.9784*bmd_wet - 0.8026
+        return bmd_ash*self.params['bv_tv']*1000
+
+
+    def build(self):
+        #thickness,xy_size,voxel_space,ma,ms,g,n,n_air
+        del self.voxel_model
+        gc.collect()
+
+        self.voxel_space = self.params['voxel_space']
+        self._make_voxel_model()
+        self.getModelSize()
+
+
+    def set_params(self,*initial_data, **kwargs):
+        set_params(self.params,self.keys,*initial_data, **kwargs)
+        self._make_model_params()
+        self.bmd = self._get_bone_vbmd()
+        print('Trabecular vBMD = %4f [mg/cm^3]'%self.bmd)
+
+    def _make_model_params(self):
+        # パラメーターは、[骨梁間隙, 海綿骨, 皮下組織, 皮膚, 外気]のように設定されています。
+        name_list = ['_space','_trabecular','_subcutaneus','_dermis']
+        _n = [];_ma = [];_ms = [];_g = []
+        for i in name_list:
+            _n.append(self.params['n'+i])
+            _ma.append(self.params['ma'+i])
+            _ms.append(self.params['ms'+i])
+            _g.append(self.params['g'+i])
+        _n.append(self.params['n_air'])
+        self.n = np.array(_n).astype(self.dtype_f)
+        self.ma = np.array(_ma).astype(self.dtype_f)
+        self.ms = np.array(_ms).astype(self.dtype_f)
+        self.g = np.array(_g).astype(self.dtype_f)
+
+    def _make_voxel_model(self):
+        #骨梁間隙を0,海綿骨を1、皮下組織を2、皮膚を３、領域外を-1に設定する
+        self.xyz_size = [
+            int(self.params['xy_size'][0]/self.voxel_space),
+            int(self.params['xy_size'][1]/self.voxel_space),
+            int(self.params['th_bone']/self.voxel_space)
+        ]
+        self.voxel_model = np.zeros(
+            self.xyz_size[0]*self.xyz_size[1]*self.xyz_size[2]
+            ,dtype = self.dtype)
+
+        index = np.where(
+            np.random.rand(
+            self.xyz_size[0]*self.xyz_size[1]*self.xyz_size[2]
+            )<=self.params['bv_tv'])[0]
+
+        self.voxel_model[index] = 1
+        self.voxel_model = self.voxel_model.reshape(
+            self.xyz_size[0],self.xyz_size[1],self.xyz_size[2])
+
+        if self.params['th_subcutaneus'] !=0:
+            ct = np.ones((self.xyz_size[0],
+                         self.xyz_size[1],
+                         int(self.params['th_subcutaneus']/self.voxel_space)),
+                         dtype = self.dtype)*self.subc_num
+            self.voxel_model = np.concatenate((ct.T,self.voxel_model.T)).T
+
+        if self.params['th_dermis'] != 0:
+            skin = np.ones((self.xyz_size[0],
+                           self.xyz_size[1],
+                           int(self.params['th_dermis']/self.voxel_space)+1),
+                           dtype = self.dtype)*self.skin_num
+            self.voxel_model = np.concatenate((skin.T,self.voxel_model.T)).T
+
+        self.voxel_model[0,:,:] = -1
+        self.voxel_model[-1,:,:] = -1
+        self.voxel_model[:,0,:] = -1
+        self.voxel_model[:,-1,:] = -1
+        self.voxel_model[:,:,0] = -1
+        self.voxel_model[:,:,-1] = -1
+
+    def getModelSize(self):
+        print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
 
 class SeparatedPlateModel(PlateModel):
     def __init__(
@@ -887,6 +1047,87 @@ class SeparatedPlateModel(PlateModel):
 # =============================================================================
 # Public montecalro model
 # =============================================================================
+class VoxelWhiteNoiseModel(BaseVoxelMonteCarlo):
+    def __init__(
+        self,*,nPh=1000,fluence_mode=False,dtype='float32',
+        nr=50,nz=20,dr=0.1,dz=0.1,w_beam =0,
+        z_max_mode = False,
+        beam_angle = 0,initial_refrect_by_angle = False,
+        wavelength = 850,beam_posision = 10,
+        lens_curvature_radius = 51.68,grass_type = 'N-BK7',
+    ):
+        super().__init__(
+            nPh = nPh,fluence_mode =fluence_mode, model = WhiteNoiseModel(),
+            dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,z_max_mode = z_max_mode,
+            w_beam=w_beam,beam_angle = beam_angle,
+            initial_refrect_by_angle = initial_refrect_by_angle,
+            wavelength = wavelength,
+            beam_posision = beam_posision,
+            lens_curvature_radius = lens_curvature_radius,
+            grass_type = grass_type,
+        )
+    def build(self,*initial_data, **kwargs):
+        if initial_data == () and kwargs == {}:
+            pass
+        else:
+            self.model.set_params(*initial_data, **kwargs)
+        self.model.build()
+        """
+        try:
+            self.model.build()
+        except:
+            warnings.warn('New voxel_model was not built')"""
+
+    def set_params(self,*initial_data, **kwargs):
+        self.model.set_params(*initial_data, **kwargs)
+
+    def get_model_fig(self,*,dpi=300,save_path = False,):
+        image = self.model.voxel_model
+        resol0 = (image.shape[0]+1)*self.model.params['voxel_space']/2-\
+        np.array([self.model.params['voxel_space']*i for i in range(image.shape[1]+1)])
+
+        resol2 = np.array([self.model.params['voxel_space']*i for i in range(image.shape[2]+1)])
+
+        plt.figure(figsize=(5,5),dpi=100)
+        plt.set_cmap(plt.get_cmap('gray'))
+        plt.pcolormesh(resol0,resol2,image[:,int(image.shape[1]/2),:].T)
+        plt.xlabel('X [mm]')
+        plt.ylabel('Z [mm]')
+        plt.ylim(resol2[-1],resol2[0])
+        if save_path:
+            plt.savefig(
+                save_path,
+                dpi=dpi,
+                orientation='portrait',
+                transparent=False,
+                pad_inches=0.0)
+        plt.show()
+
+    def _calc_info(self,coment=''):
+        calc_info = {
+            'Date':datetime.datetime.now().isoformat(),
+            'coment':coment,
+            'number_of_photons':self.nPh,
+            'calc_dtype':self.dtype,
+            'model':{
+                'model_name':self.model.model_name,
+                'model_params':self.model.params,
+                'model_bmd':self.model.bmd,
+            },
+            'w_beam':self.w_beam,
+            'beam_angle':self.beam_angle,
+            'initial_refrect_mode':self.initial_refrect_by_angle,
+            'beam_mode':'TEM00',
+            'fluence_mode':self.fluence_mode,
+        }
+        if self.beam_angle_mode:
+            calc_info['wavelength'] = self.wavelength
+            calc_info['beam_posision'] = self.beam_posision
+            calc_info['lens_curvature_radius'] = self.lens_curvature_radius
+            calc_info['grass_type'] = self.grass_type
+        return calc_info
+
+
 class VoxelPlateModel(BaseVoxelMonteCarlo):
     def __init__(
         self,*,nPh=1000,fluence_mode=False,dtype='float32',
@@ -908,59 +1149,7 @@ class VoxelPlateModel(BaseVoxelMonteCarlo):
             grass_type = grass_type,
         )
 
-    def save_result(self,fname,coment=''):
-        start_ = time.time()
 
-        res = self.get_result()
-        save_name = fname+"_LID.pkl.bz2"
-        with bz2.open(save_name, 'wb') as fp:
-            fp.write(pickle.dumps(res))
-        print("Monte Carlo results saved in ")
-        print("-> %s" %(save_name))
-        print('')
-        info = self._calc_info(coment)
-        save_name = fname+"_info.json"
-        with open(save_name, 'w') as fp:
-            json.dump(info,fp,indent=4,cls= ToJsonEncoder)
-        print("Calculation conditions are saved in")
-        print("-> %s" %(save_name))
-        print('')
-        if self.fluence_mode:
-            fe = self.fluence.getArz()
-            save_name = fname+'_fluence'+self.fluence_mode+".pkl.bz2"
-            with bz2.open(save_name, 'wb') as fp:
-                fp.write(pickle.dumps(fe))
-            print("Internal Fluence saved in ")
-            print("-> %s" %(save_name))
-            print('')
-
-        calTime(time.time(), start_)
-
-    def _calc_info(self,coment=''):
-        _params = self.model.get_params()
-        calc_info = {
-            'Date':datetime.datetime.now().isoformat(),
-            'coment':coment,
-            'number_of_photons':self.nPh,
-            'calc_dtype':self.dtype,
-            'model':{
-                'model_name':self.model.model_name,
-                'model_params':_params,
-                'model_voxel_space':self.model.voxel_space,
-                'model_xy_size':self.model.xy_size,
-            },
-            'w_beam':self.w_beam,
-            'beam_angle':self.beam_angle,
-            'initial_refrect_mode':self.initial_refrect_by_angle,
-            'beam_mode':'TEM00',
-            'fluence_mode':self.fluence_mode,
-        }
-        if self.beam_angle_mode:
-            calc_info['wavelength'] = self.wavelength
-            calc_info['beam_posision'] = self.beam_posision
-            calc_info['lens_curvature_radius'] = self.lens_curvature_radius
-            calc_info['grass_type'] = self.grass_type
-        return calc_info
 
 class VoxelSeparatedPlateModel(BaseVoxelMonteCarlo):
     #時に光入射面と透過面の屈折率を変更したい場合が生じる。
@@ -976,55 +1165,8 @@ class VoxelSeparatedPlateModel(BaseVoxelMonteCarlo):
                          dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,w_beam=w_beam,beam_angle = beam_angle,
                          beam_type = beam_type,beam_dist=beam_dist,beam_direct=beam_direct,
                          intermediate_buffer=intermediate_buffer)
-    def save_result(self,fname,coment=''):
-        start_ = time.time()
 
-        res = self.get_result()
-        save_name = fname+"_LID.pkl.bz2"
-        with bz2.open(save_name, 'wb') as fp:
-            fp.write(pickle.dumps(res))
-        print("Monte Carlo results saved in ")
-        print("-> %s" %(save_name))
-        print('')
-        info = self._calc_info(coment)
-        save_name = fname+"_info.json"
-        with open(save_name, 'w') as fp:
-            json.dump(info,fp,indent=4,cls= ToJsonEncoder)
-        print("Calculation conditions are saved in")
-        print("-> %s" %(save_name))
-        print('')
-        if self.fluence_mode:
-            fe = self.fluence.getArz()
-            save_name = fname+'_fluence'+self.fluence_mode+".pkl.bz2"
-            with bz2.open(save_name, 'wb') as fp:
-                fp.write(pickle.dumps(fe))
-            print("Internal Fluence saved in ")
-            print("-> %s" %(save_name))
-            print('')
 
-        calTime(time.time(), start_)
-
-    def _calc_info(self,coment=''):
-        _params = self.model.get_params()
-        calc_info = {
-            'Date':datetime.datetime.now().isoformat(),
-            'coment':coment,
-            'number_of_photons':self.nPh,
-            'calc_dtype':self.dtype,
-            'model':{
-                'model_name':self.model.model_name,
-                'model_params':_params,
-                'model_voxel_space':self.model.voxel_space,
-                'model_xy_size':self.model.xy_size,
-            },
-            'w_beam':self.w_beam,
-            'beam_angle':self.beam_angle,
-            'initial_refrection':self.initial_refrect_by_angle,
-            'beam_mode':'TEM00',
-            'fluence_mode':self.fluence_mode,
-        }
-
-        return calc_info
 
 
 class VoxelPlateLedModel(BaseVoxelMonteCarlo):
