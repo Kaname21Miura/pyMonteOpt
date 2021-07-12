@@ -892,15 +892,16 @@ class WhiteNoiseModel(VoxelModel):
         self.model_name = 'WhiteNoiseModel'
         self.dtype = 'int8'
         self.dtype_f = 'float32'
-        self.subc_num=2
-        self.skin_num=3
+        self.ct_num=2
+        self.subc_num=3
+        self.skin_num=4
         self.params = {
             'xy_size':[40,40],'voxel_space':0.01,'bv_tv':0.138,
-            'th_dermis':1.2,'th_subcutaneus':2.8,'th_bone':40,
-            'n_space':1.,'n_trabecular':1.4,'n_subcutaneus':1.4,'n_dermis':1.4,'n_air':1.,
-            'ma_space':1e-8,'ma_trabecular':0.02374,'ma_subcutaneus':0.011,'ma_dermis':0.037,
-            'ms_space':1e-8,'ms_trabecular':20.536,'ms_subcutaneus':20,'ms_dermis':20,
-            'g_space':0.90,'g_trabecular':0.90,'g_subcutaneus':0.90,'g_dermis':.90,
+            'th_trabecular':40,'th_cortical':1.,'th_subcutaneus':2.6,'th_dermis':1.4,
+            'n_space':1.,'n_trabecular':1.4,'n_cortical':1.4,'n_subcutaneus':1.4,'n_dermis':1.4,'n_air':1.,
+            'ma_space':1e-8,'ma_trabecular':0.02374,'ma_cortical':0.02374,'ma_subcutaneus':0.011,'ma_dermis':0.037,
+            'ms_space':1e-8,'ms_trabecular':20.54,'ms_cortical':17.67,'ms_subcutaneus':20,'ms_dermis':20,
+            'g_space':0.90,'g_trabecular':0.90,'g_cortical':0.90,'g_subcutaneus':0.90,'g_dermis':.90,
             }
         self.keys = list(self.params.keys())
 
@@ -935,8 +936,8 @@ class WhiteNoiseModel(VoxelModel):
         print('Trabecular vBMD = %4f [mg/cm^3]'%self.bmd)
 
     def _make_model_params(self):
-        # パラメーターは、[骨梁間隙, 海綿骨, 皮下組織, 皮膚, 外気]のように設定されています。
-        name_list = ['_space','_trabecular','_subcutaneus','_dermis']
+        # パラメーターは、[骨梁間隙, 海綿骨, 緻密骨, 皮下組織, 皮膚, 外気]のように設定されています。
+        name_list = ['_space','_trabecular','_cortical','_subcutaneus','_dermis']
         _n = [];_ma = [];_ms = [];_g = []
         for i in name_list:
             _n.append(self.params['n'+i])
@@ -950,11 +951,11 @@ class WhiteNoiseModel(VoxelModel):
         self.g = np.array(_g).astype(self.dtype_f)
 
     def _make_voxel_model(self):
-        #骨梁間隙を0,海綿骨を1、皮下組織を2、皮膚を３、領域外を-1に設定する
+        #骨梁間隙を0,海綿骨を1、緻密骨を2、 皮下組織を3、皮膚を4、領域外を-1に設定する
         self.xyz_size = [
             int(self.params['xy_size'][0]/self.voxel_space),
             int(self.params['xy_size'][1]/self.voxel_space),
-            int(self.params['th_bone']/self.voxel_space)
+            int(self.params['th_trabecular']/self.voxel_space)
         ]
         self.voxel_model = np.zeros(
             self.xyz_size[0]*self.xyz_size[1]*self.xyz_size[2]
@@ -968,6 +969,13 @@ class WhiteNoiseModel(VoxelModel):
         self.voxel_model[index] = 1
         self.voxel_model = self.voxel_model.reshape(
             self.xyz_size[0],self.xyz_size[1],self.xyz_size[2])
+
+        if self.params['th_cortical'] !=0:
+            ct = np.ones((self.xyz_size[0],
+                         self.xyz_size[1],
+                         int(self.params['th_cortical']/self.voxel_space)),
+                         dtype = self.dtype)*self.ct_num
+            self.voxel_model = np.concatenate((ct.T,self.voxel_model.T)).T
 
         if self.params['th_subcutaneus'] !=0:
             ct = np.ones((self.xyz_size[0],
