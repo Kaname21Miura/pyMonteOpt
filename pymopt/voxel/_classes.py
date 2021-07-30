@@ -899,7 +899,7 @@ class WhiteNoiseModel(VoxelModel):
         self.subc_num=3
         self.skin_num=4
         self.params = {
-            'xy_size':[40,40],'voxel_space':0.01,'bv_tv':0.138,
+            'xy_size':[40,40],'voxel_space':0.01,'bv_tv':0.138,'symmetrization':False,
             'th_trabecular':40,'th_cortical':1.,'th_subcutaneus':2.6,'th_dermis':1.4,
             'n_space':1.,'n_trabecular':1.4,'n_cortical':1.4,'n_subcutaneus':1.4,'n_dermis':1.4,'n_air':1.,
             'ma_space':1e-8,'ma_trabecular':0.02374,'ma_cortical':0.02374,'ma_subcutaneus':0.011,'ma_dermis':0.037,
@@ -979,13 +979,17 @@ class WhiteNoiseModel(VoxelModel):
                          int(self.params['th_cortical']/self.voxel_space)),
                          dtype = self.dtype)*self.ct_num
             self.voxel_model = np.concatenate((ct.T,self.voxel_model.T)).T
+            if self.params['symmetrization']:
+                self.voxel_model = np.concatenate((self.voxel_model.T,ct.T)).T
 
         if self.params['th_subcutaneus'] !=0:
-            ct = np.ones((self.xyz_size[0],
+            subc = np.ones((self.xyz_size[0],
                          self.xyz_size[1],
                          int(self.params['th_subcutaneus']/self.voxel_space)),
                          dtype = self.dtype)*self.subc_num
-            self.voxel_model = np.concatenate((ct.T,self.voxel_model.T)).T
+            self.voxel_model = np.concatenate((subc.T,self.voxel_model.T)).T
+            if self.params['symmetrization']:
+                self.voxel_model = np.concatenate((self.voxel_model.T,subc.T)).T
 
         if self.params['th_dermis'] != 0:
             skin = np.ones((self.xyz_size[0],
@@ -993,6 +997,8 @@ class WhiteNoiseModel(VoxelModel):
                            int(self.params['th_dermis']/self.voxel_space)+1),
                            dtype = self.dtype)*self.skin_num
             self.voxel_model = np.concatenate((skin.T,self.voxel_model.T)).T
+            if self.params['symmetrization']:
+                self.voxel_model = np.concatenate((self.voxel_model.T,skin.T)).T
 
         self.voxel_model[0,:,:] = -1
         self.voxel_model[-1,:,:] = -1

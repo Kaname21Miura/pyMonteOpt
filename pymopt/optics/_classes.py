@@ -396,7 +396,7 @@ class OBD:
         }
         self._set_refrective_index()
         self.keys_params  = list(self.params.keys())
-        self.data = {'p':0,'v':0,'w':0,'nPh':1000}
+        self.data = {'p':0,'v':0,'w':0,'nPh':1000,'z_max':0}
         self.keys_data = list(self.data.keys())
         self.nPh = 1000
 
