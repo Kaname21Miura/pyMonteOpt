@@ -53,7 +53,8 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
                  wavelength = 850,beam_posision = 10,
                  lens_curvature_radius = 51.68,grass_type = 'N-BK7',
                  beam_dist=False,
-                 beam_direct='positive',intermediate_buffer=False):
+                 beam_direct='positive',intermediate_buffer=False,
+                 first_layer_clear = False):
         super().__init__()
 
         def __check_list_name(name,name_list):
@@ -98,6 +99,8 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self.fluence = fluence_mode
         self.fluence_mode = fluence_mode
         self.generate_initial = True
+        self.first_layer_clear=first_layer_clear
+
         if self.fluence:
             if fluence_mode == '2D':
                 self.fluence = Fluence2D(nr=nr,nz=nz,dr=dr,dz=dz)
@@ -170,7 +173,10 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
             self.add =  np.zeros((3, self.beam_dist['p'].shape[1]),dtype = 'int16')
         self.add[0] = self._get_center_add(self.model.voxel_model.shape[0])
         self.add[1] = self._get_center_add(self.model.voxel_model.shape[1])
-        self.add[2] = 1
+        if self.first_layer_clear:
+            self.add[2] = self.model.get_second_layer_addz()
+        else:
+            self.add[2] = 1
 
     def _get_center_add(self,length):
         #addの中心がローカル座標（ボックス内）の中心となるため、
@@ -214,7 +220,6 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
 
     def _set_inital_w(self):
 
-
         if self.beam_type == 'TEM00':
             self.w = np.ones(self.nPh).astype(self.dtype)
 
@@ -228,7 +233,10 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
                     at = np.arcsin(np.sin(ai)*n1/n2)
                     Rsp = ((np.sin(ai-at)/np.sin(ai+at))**2\
                     +(np.tan(ai-at)/np.tan(ai+at))**2)/2
-
+                elif self.first_layer_clear:
+                    n3=self.model.n[1]
+                    r2 = ((n3-n2)/(n3+n2))**2
+                    Rsp = Rsp+r2*(1-Rsp)**2/(1-Rsp*r2)
                 self.w -= Rsp
 
             if self.beam_angle!=0 and self.w_beam==0:
@@ -644,6 +652,8 @@ class VoxelModel:
     def getReflectiveIndex(self,add):
         index = self.voxel_model[add[0],add[1],add[2]]
         return self.n[index]
+    def get_second_layer_addz(self):
+        return np.where(self.voxel_model==self.voxel_model[1,1,1])[2][-1]+1
 
 
 class DicomBinaryModel(VoxelModel):
@@ -1190,7 +1200,7 @@ class VoxelWhiteNoiseModel(BaseVoxelMonteCarlo):
         z_max_mode = False,
         beam_angle = 0,initial_refrect_by_angle = False,
         wavelength = 850,beam_posision = 10,
-        lens_curvature_radius = 51.68,grass_type = 'N-BK7',
+        lens_curvature_radius = 51.68,grass_type = 'N-BK7',first_layer_clear=False
     ):
         super().__init__(
             nPh = nPh,fluence_mode =fluence_mode, model = WhiteNoiseModel(),
@@ -1200,7 +1210,7 @@ class VoxelWhiteNoiseModel(BaseVoxelMonteCarlo):
             wavelength = wavelength,
             beam_posision = beam_posision,
             lens_curvature_radius = lens_curvature_radius,
-            grass_type = grass_type,
+            grass_type = grass_type,first_layer_clear=first_layer_clear
         )
     def build(self,*initial_data, **kwargs):
         if initial_data == () and kwargs == {}:
@@ -1271,7 +1281,7 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
         z_max_mode = False,
         beam_angle = 0,initial_refrect_by_angle = False,
         wavelength = 850,beam_posision = 10,
-        lens_curvature_radius = 51.68,grass_type = 'N-BK7',
+        lens_curvature_radius = 51.68,grass_type = 'N-BK7',first_layer_clear=False
     ):
         super().__init__(
             nPh = nPh,fluence_mode =fluence_mode, model = TuringModel(),
@@ -1281,7 +1291,7 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
             wavelength = wavelength,
             beam_posision = beam_posision,
             lens_curvature_radius = lens_curvature_radius,
-            grass_type = grass_type,
+            grass_type = grass_type,first_layer_clear=first_layer_clear
         )
     def build(self,*initial_data, **kwargs):
         if initial_data == () and kwargs == {}:
@@ -1353,7 +1363,7 @@ class VoxelPlateModel(BaseVoxelMonteCarlo):
         z_max_mode = False,
         beam_angle = 0,initial_refrect_by_angle = False,
         wavelength = 850,beam_posision = 10,
-        lens_curvature_radius = 51.68,grass_type = 'N-BK7',
+        lens_curvature_radius = 51.68,grass_type = 'N-BK7',first_layer_clear = False
     ):
 
         super().__init__(
@@ -1364,7 +1374,7 @@ class VoxelPlateModel(BaseVoxelMonteCarlo):
             wavelength = wavelength,
             beam_posision = beam_posision,
             lens_curvature_radius = lens_curvature_radius,
-            grass_type = grass_type,
+            grass_type = grass_type,first_layer_clear=first_layer_clear
         )
 
 
@@ -1377,12 +1387,12 @@ class VoxelSeparatedPlateModel(BaseVoxelMonteCarlo):
                  nr=50,nz=20,dr=0.1,dz=0.1,w_beam = 0,
                  beam_angle = 0,
                  beam_type = 'TEM00',beam_dist=False,
-                 beam_direct='positive',intermediate_buffer=False):
+                 beam_direct='positive',intermediate_buffer=False,first_layer_clear=False):
 
         super().__init__(nPh = nPh,fluence_mode =fluence_mode, model = SeparatedPlateModel(),
                          dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,w_beam=w_beam,beam_angle = beam_angle,
                          beam_type = beam_type,beam_dist=beam_dist,beam_direct=beam_direct,
-                         intermediate_buffer=intermediate_buffer)
+                         intermediate_buffer=intermediate_buffer,first_layer_clear=first_layer_clear)
 
 
 
@@ -1457,7 +1467,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         model_type = 'binary',w_beam = 0,beam_angle=0,
         initial_refrect_by_angle = False,
         wavelength = 850,beam_posision = 10,
-        lens_curvature_radius = 51.68,grass_type = 'N-BK7',
+        lens_curvature_radius = 51.68,grass_type = 'N-BK7',first_layer_clear=False
     ):
 
         self.model_type = model_type
@@ -1472,7 +1482,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
             wavelength = wavelength,
             beam_posision = beam_posision,
             lens_curvature_radius = lens_curvature_radius,
-            grass_type = grass_type,
+            grass_type = grass_type,first_layer_clear=first_layer_clear
 
         )
 
