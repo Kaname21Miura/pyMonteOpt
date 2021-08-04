@@ -3,7 +3,7 @@ import json
 import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
-
+import os
 
 
 def calTime(end, start):
@@ -15,6 +15,9 @@ def calTime(end, start):
         q2, mod2 = divmod(q, 60)
         print('Calculation time: %d h %0.3f minutes.' % (q2, mod2))
 
+def check_folder(folder_dir):
+    if not os.path.exists(folder_dir):
+        os.makedirs(folder_dir)
 
 def set_params(data,keys,*initial_data, **kwargs):
     for dictionary in initial_data:

@@ -421,7 +421,7 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         # 現在以下のモデルでp,vがnanになる可能性が確認されている。
         # VoxelSeparatedPlateModel,
         if np.isnan(p).any():
-            print('Nan occurs in vector p')
+            #print('Nan occurs in vector p')
             del_index = np.where(np.isnan(p)[0])[0]
             v = np.delete(v, del_index, axis = 1)
             p = np.delete(p, del_index, axis = 1)
@@ -1022,14 +1022,14 @@ class WhiteNoiseModel(VoxelModel):
 
 class TuringModel(VoxelModel):
     def __init__(self):
-        self.model_name = 'WhiteNoiseModel'
+        self.model_name = 'TuringModel'
         self.dtype = 'int8'
         self.dtype_f = 'float32'
         self.ct_num=2
         self.subc_num=3
         self.skin_num=4
         self.params = {
-            'xy_size':[40,40],'voxel_space':0.01,'dicom_path':"dicom_p085",'bv_tv':0.138,
+            'xy_size':[40,40],'voxel_space':0.01,'dicom_path':False,'bv_tv':0.138,
             'th_trabecular':40,'th_cortical':1.,'th_subcutaneus':2.6,'th_dermis':1.4,
             'n_space':1.,'n_trabecular':1.4,'n_cortical':1.4,'n_subcutaneus':1.4,'n_dermis':1.4,'n_air':1.,
             'ma_space':1e-8,'ma_trabecular':0.02374,'ma_cortical':0.02374,'ma_subcutaneus':0.011,'ma_dermis':0.037,
@@ -1052,10 +1052,11 @@ class TuringModel(VoxelModel):
         return bmd_ash*self.params['bv_tv']*1000
 
 
-    def build(self):
+    def build(self,bone_model):
         #thickness,xy_size,voxel_space,ma,ms,g,n,n_air
         del self.voxel_model
         gc.collect()
+        self.voxel_model = bone_model
 
         self.voxel_space = self.params['voxel_space']
         self._make_voxel_model()
@@ -1093,19 +1094,18 @@ class TuringModel(VoxelModel):
         for i in files:
             ds.append(pydicom.dcmread(path+"/"+i,force=True).pixel_array)
         ds = np.array(ds).astype("int8")
-        self.xyz_size = [
-        ds.shape[0],ds.shape[1],ds.shape[2]
-        ]
-
-        self.params['xy_size'][0] = self.xyz_size[0]*self.params['voxel_space']
-        self.params['xy_size'][1] = self.xyz_size[1]*self.params['voxel_space']
-        self.params['th_trabecular'] = self.xyz_size[2]*self.params['voxel_space']
-
         return ds
 
     def _make_voxel_model(self):
         #骨梁間隙を0,海綿骨を1、緻密骨を2、 皮下組織を3、皮膚を4、領域外を-1に設定する
-        self.voxel_model = self._read_dicom()
+        if self.params['dicom_path']:
+            self.voxel_model = self._read_dicom()
+        self.xyz_size = [
+        self.voxel_model.shape[0],self.voxel_model.shape[1],self.voxel_model.shape[2]
+        ]
+        self.params['xy_size'][0] = self.xyz_size[0]*self.params['voxel_space']
+        self.params['xy_size'][1] = self.xyz_size[1]*self.params['voxel_space']
+        self.params['th_trabecular'] = self.xyz_size[2]*self.params['voxel_space']
 
         if self.params['th_cortical'] !=0:
             ct = np.ones((self.xyz_size[0],
@@ -1282,7 +1282,7 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
         beam_angle = 0,initial_refrect_by_angle = False,
         wavelength = 850,beam_posision = 10,
         lens_curvature_radius = 51.68,grass_type = 'N-BK7',first_layer_clear=False
-    ):
+        ):
         super().__init__(
             nPh = nPh,fluence_mode =fluence_mode, model = TuringModel(),
             dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,z_max_mode = z_max_mode,
@@ -1293,17 +1293,20 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
             lens_curvature_radius = lens_curvature_radius,
             grass_type = grass_type,first_layer_clear=first_layer_clear
         )
+
+        self.bone_model = False
+
     def build(self,*initial_data, **kwargs):
         if initial_data == () and kwargs == {}:
             pass
         else:
             self.model.set_params(*initial_data, **kwargs)
-        self.model.build()
-        """
-        try:
-            self.model.build()
-        except:
-            warnings.warn('New voxel_model was not built')"""
+        self.model.build(self.bone_model)
+        del self.bone_model
+        gc.collect()
+
+    def set_model(self,u):
+        self.bone_model = u
 
     def set_params(self,*initial_data, **kwargs):
         self.model.set_params(*initial_data, **kwargs)
