@@ -3,14 +3,16 @@ from pymopt.voxel import VoxelTuringModel
 from pymopt.utils import generate_variable_params
 from pymopt.optics import OBD
 
-import datetime
-import os
+import datetime,time
+import os,gc
+import numpy as np
 import pandas as pa
-import gc
+from multiprocessing import Pool
 
 
 repetitions = 8
 pool_num = 8
+nPh = 1e7
 
 range_params = {
     'th_dermis':[1,2],             # 皮膚厚さの範囲
@@ -30,7 +32,7 @@ model_params ={
     'dt':1,
     'du':0.0002,
     'dv':0.01,
-    'length':2,
+    'length':16,
     'repetition':150,
     'voxelsize':0.0295,
     'seed':False,
@@ -97,10 +99,6 @@ opt_params ={
     'pd_poit_correction':0.22,
     'ld_fix_part':False,
 }
-
-vp = get_variable_params(repetitions)
-iteral_num=np.arange(repetitions)
-pa.DataFrame(vp).to_csv('variable_params.csv')
 
 
 def get_variable_params(n,range_params):
@@ -178,7 +176,8 @@ def calc_ray_tracing(res,opt_params,path):
 
 
 def calc(iteral):
-    alias_name = str(datetime.datetime.now().isoformat()).split('.')[0]+'_it'+f'{iteral:04}' 
+    alias_name = "-".join((str(datetime.datetime.now().isoformat()).split('.')[0]).split(':'))+'_it'+f'{iteral:04}' 
+
     print('')
     print('### iteral number ',iteral)
     print('Alias name: ',alias_name)
@@ -193,12 +192,15 @@ def calc(iteral):
     res = calc_montecalro(vp,iteral,monte_params,path_,u)
     
     path_ = opt_path+alias_name
-    calc_ray_tracing(res,opt_params,path)
+    calc_ray_tracing(res,opt_params,path_)
     
     print('')
     print('############### End %s it ###################'%iteral)
     print('')
     
+vp = get_variable_params(repetitions,range_params)
+iteral_num=np.arange(repetitions)
+pa.DataFrame(vp).to_csv('variable_params.csv')
     
 if __name__ == "__main__":
     
