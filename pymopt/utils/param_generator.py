@@ -13,6 +13,8 @@ class generate_variable_params:
             'th_subcutaneus':[1,6],        # 皮下組織厚さの範囲
             'ma_subcutaneus':[0.005,0.012],# 皮下組織吸収係数の範囲
             'msd_subcutaneus':[0.83,1.396],# 皮下組織減衰散乱係数の範囲
+            'ma_marrow':[0.005,0.012],     # 骨髄吸収係数の範囲
+            'msd_marrow':[0.83,1.396],     # 骨髄減衰散乱係数の範囲
             'bv_tv':[0.115,0.02],          # 海綿骨BV/TVの平均と分散
             'th_cortical':[0.669, 0.133],  # 皮質骨厚さの平均と分散
             'corr':0.54,                   # 皮質骨と海綿骨の相関係数 Boutry2005
@@ -26,6 +28,7 @@ class generate_variable_params:
         drmis = self._get_dermis_params(n)
         subcut = self._get_subcut_params(n)
         bone = self._get_bone_params(n)
+        marrow = self._get_marrow_params(n)
         self.int_params ={
             'th_dermis':drmis[0],
             'ma_dermis':drmis[1],
@@ -33,6 +36,8 @@ class generate_variable_params:
             'th_subcutaneus':subcut[0],
             'ma_subcutaneus':subcut[1],
             'msd_subcutaneus':subcut[2],
+            'ma_marrow':,marrow[0],
+            'msd_marrow':,marrow[1],
             'bv_tv':bone[0],
             'th_cortical':bone[1],
         }
@@ -50,7 +55,6 @@ class generate_variable_params:
         msd_ = self._uniform_dist(self.params['msd_dermis'],n)
         return th_,ma_,msd_
 
-
     def _get_subcut_params(self,n):
         th_ = self._uniform_dist(self.params['th_subcutaneus'],n)
         ma_ = self._uniform_dist(self.params['ma_subcutaneus'],n)
@@ -67,3 +71,8 @@ class generate_variable_params:
 
         bvtv, cth = np.random.multivariate_normal(mean, cov, n).T
         return bvtv, cth
+
+    def _get_marrow_params(self,n):
+        ma_ = self._uniform_dist(self.params['ma_marrow'],n)
+        msd_ = self._uniform_dist(self.params['msd_marrow'],n)
+        return ma_, msd_
