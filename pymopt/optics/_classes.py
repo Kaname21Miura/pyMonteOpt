@@ -8,6 +8,7 @@ import pandas as pa
 from tqdm import tqdm
 import gc
 from ..utils.utilities import calTime,set_params
+from numba import njit
 
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -66,22 +67,26 @@ class Slit(object):
         return p + a*v
 
     #slitで弾かれる光子を削除
-    def delBySlit(self,p,v,w):
+    def delBySlit(self,p,v,w,x):
+        p_sub = p.copy()
         pp = np.sqrt(p[0]**2+p[1]**2)
         index_ = np.where((pp<self.d_out)&(pp>self.d_in))[0].tolist()
         #index_ = np.where(pp>self.d_in)[0].tolist()
+        x += np.linalg.norm(p-p_sub,axis = 0)
         p = p[:,index_]
         v = v[:,index_]
         w = w[index_]
-        return p,v,w
+        x = x[index_]
+        return p,v,w,x
 
     #Slit全体の動きを定義
-    def opticalAnalysis(self,p,v,w):
+    def opticalAnalysis(self,p,v,w,x):
         p = self.hittingPotision(p,v,self.front_z)
-        p,v,w = self.delBySlit(p,v,w)
+        p,v,w,x = self.delBySlit(p,v,w,x)
+
         p = self.hittingPotision(p,v,self.back_z)
-        p,v,w = self.delBySlit(p,v,w)
-        return p,v,w
+        p,v,w,x = self.delBySlit(p,v,w,x)
+        return p,v,w,x
 
 #### レンズの親クラス ####
 class Lens (object):
@@ -100,34 +105,46 @@ class Lens (object):
             print("レンズの向きが入力されていないか間違っています")
 
     #レンズ平面での屈折と反射と位置の変更
-    def updaterAtPlano(self,p,v,w):#######
+    def updaterAtPlano(self,p,v,w,x):
+        p_sub = p.copy()
         v = self.normVector(v)
         p = self.hittingPointPlano(p,v)
-        p,v,w = self.deleteOutOfLens(p,v,w)
+        p,v,w,ind = self.deleteOutOfLens(p,v,w)
+        p_sub = p_sub[:,ind]
         nn = self.orthVectorPlano(p)
         if self.typ == "Inward":#レンズ2
-            p,v,w = self.intLensToAir(p,v,w,nn)
+            p,v,w,ind = self.intLensToAir(p,v,w,nn)
+            x = x[ind]
+            x += np.linalg.norm(p-p_sub[:,ind],axis = 0)*self.n
         elif self.typ =="Outward":#レンズ1
-            p,v,w = self.intAirToLens(p,v,w,nn)
-        return p,self.normVector(v),w
+            p,v,w,ind = self.intAirToLens(p,v,w,nn)
+            x = x[ind]
+            x += np.linalg.norm(p-p_sub[:,ind],axis = 0)
+        return p,self.normVector(v),w,x
 
     #球面レンズ曲面での屈折、反射、光子位置の変更
-    def updaterAtConvex(self,p,v,w):
+    def updaterAtConvex(self,p,v,w,x):
+        p_sub = p.copy()
         v = self.normVector(v)
         p = self.hittingPointConvex(p,v)
-        p,v,w = self.deleteOutOfLens(p,v,w)
+        p,v,w,ind = self.deleteOutOfLens(p,v,w)
+        p_sub = p_sub[:,ind]
         nn = self.orthVectorConvex(p)
         if self.typ == "Inward":#レンズ2
-            p,v,w = self.intAirToLens(p,v,w,nn)
+            p,v,w,ind = self.intAirToLens(p,v,w,nn)
+            x = x[ind]
+            x += np.linalg.norm(p-p_sub[:,ind],axis = 0)
         elif self.typ == "Outward":#レンズ1
-            p,v,w = self.intLensToAir(p,v,w,nn)
-        return p,self.normVector(v),w
+            p,v,w,ind = self.intLensToAir(p,v,w,nn)
+            x = x[ind]
+            x += np.linalg.norm(p-p_sub[:,ind],axis = 0)*self.n
+        return p,self.normVector(v),w,x
 
     #レンズ外に飛び出した光子の削除
     def deleteOutOfLens(self,p,v,w):
         pp = np.sqrt(p[0]**2 + p[1]**2)
         index_ = np.where(pp<=self.outerD)[0].tolist()
-        return p[:,index_],v[:,index_],w[index_]
+        return p[:,index_],v[:,index_],w[index_],index_
 
     #レンズ平面部の当たる光子の位置
     def hittingPointPlano(self,p,v):
@@ -164,7 +181,7 @@ class Lens (object):
         w = w[index_]
         g = cos_at[index_]-a*cos_ai[index_]
         v = a*v[:,index_]+g*nn[:,index_]
-        return p,v,w
+        return p,v,w,index_
 
     #レンズ→空気の順での光入射
     def intLensToAir(self,p,v,w,nn):
@@ -185,7 +202,7 @@ class Lens (object):
         w = w[index_]
         g = cos_at[index_]-a*cos_ai[index_]
         v = a*v[:,index_]+g*nn[:,index_]
-        return p,v,w
+        return p,v,w,index_
 
     def normVector(self,v):
         return v/np.sqrt(v[0]**2+v[1]**2+v[2]**2)
@@ -296,20 +313,20 @@ class Lens1(Lens):
     def __init__(self,outerD,ct,r,n,position):
         super().__init__(outerD,ct,r,n,position,typ = "Outward")
 
-    def opticalAnalysis(self,p,v,w):
-        p,v,w = self.updaterAtPlano(p,v,w)
-        p,v,w = self.updaterAtConvex(p,v,w)
-        return p,v,w
+    def opticalAnalysis(self,p,v,w,x):
+        p,v,w,x = self.updaterAtPlano(p,v,w,x)
+        p,v,w,x = self.updaterAtConvex(p,v,w,x)
+        return p,v,w,x
 
 ##### 曲面が正の方向を向いたレンズ #####
 class Lens2(Lens):
     def __init__(self,outerD,ct,r,n,position):
         super().__init__(outerD,ct,r,n,position,typ = "Inward")
 
-    def opticalAnalysis(self,p,v,w):
-        p,v,w = self.updaterAtConvex(p,v,w)
-        p,v,w = self.updaterAtPlano(p,v,w)
-        return p,v,w
+    def opticalAnalysis(self,p,v,w,x):
+        p,v,w,x = self.updaterAtConvex(p,v,w,x)
+        p,v,w,x = self.updaterAtPlano(p,v,w,x)
+        return p,v,w,x
 
 
 #### フォトダイオードのクラス ####
@@ -327,11 +344,14 @@ class Photodiode(object):
         return p + a*v
 
     #Pdで観測される光子の層エネルギー量
-    def catcherInThePhotodiode(self,p,v,w):
+    def catcherInThePhotodiode(self,p,v,w,x):
+        p_sub = p.copy()
         p = self.hittingPotision(p,v)
         pp = np.sqrt(p[0]**2+p[1]**2)
         index_ = np.where(pp<self.r)[0].tolist()
-        return np.sum(w[index_]),p
+        x = x[index_]
+        x += np.linalg.norm(p[:,index_]-p_sub[:,index_],axis = 0)
+        return w[index_],x
 
 class LdFixingPart(object):
     def __init__(self,position):
@@ -432,15 +452,20 @@ class OBD:
         self.nPh = self.data['nPh']
 
     def start(self,show_graph = False):
-        res = self.opticalAnalysisMeth()
+        step,res,res_add = self.opticalAnalysisMeth()
         if show_graph:
             plt.figure(figsize=(8,6),dpi=90)
-            plt.plot(res[0],np.log10(res[1]/self.nPh),"-",c = "k")
+            plt.plot(step,np.log10(res/self.nPh),"-",c = "k")
             plt.xlabel("$Z\ [mm]$")
             plt.ylabel("$log_{10}(I/I_0)$")
             plt.show()
-        self.result = pa.DataFrame(res,index=["Z","int"]).T
-        self.result["log(int)"] = np.log10(res[1]/self.nPh)
+        self.result = pa.DataFrame()
+        self.result['Z'] = step
+        self.result['int'] = res
+        self.result['int_add'] = res_add
+
+        self.result["log(int)"] = np.log10(np.array(res)/self.nPh)
+        self.result["log(int_add)"] = np.log10(np.array(res_add)/self.nPh)
 
     def get_result(self):
         return self.result
@@ -479,16 +504,17 @@ class OBD:
 
         pd = Photodiode(self.params['d_pd'],z_pd)
         #解析
-        p,v,w = lens_1.opticalAnalysis(p,v,w)
-        p,v,w = slit_1.opticalAnalysis(p,v,w)
+        x = np.zeros_like(w)
+        p,v,w,x = lens_1.opticalAnalysis(p,v,w,x)
+        p,v,w,x = slit_1.opticalAnalysis(p,v,w,x)
         if self.params['ld_fix_part']:
             z_lfp = z_slit1 -self.params['slit_thickness']-10
             lfp = LdFixingPart(z_lfp)
             p,v,w = lfp.opticalAnalysis(p,v,w)
-        p,v,w = slit_2.opticalAnalysis(p,v,w)
-        p,v,w = lens_2.opticalAnalysis(p,v,w)
-        intdist,p = pd.catcherInThePhotodiode(p,v,w)
-        return intdist
+        p,v,w,x = slit_2.opticalAnalysis(p,v,w,x)
+        p,v,w,x = lens_2.opticalAnalysis(p,v,w,x)
+        w,x = pd.catcherInThePhotodiode(p,v,w,x)
+        return w,x
 
     #光学系の挙動を定義
     def opticalAnalysisMeth(self):
@@ -502,11 +528,25 @@ class OBD:
         p[2] = 0
         v = self.data['v'][:,rd_index]
         w = self.data['w'][rd_index]
-        intdist = np.empty_like(step)
+        k = 2*np.pi/(self.params['wavelength']*1e-6)
+        intdist = []#np.empty_like(step)
+        intdist_add = []
         for (i,Z) in enumerate(tqdm(step)):
-            intdist[i] = self.opticalUnit(Z,p,v,w)
+            W,X = self.opticalUnit(Z,p,v,w)
+            intdist.append(np.sum(W))
+            intdist_add.append(self._intensity_add(W,X,k))
         calTime(time.time(), start_)
-        return step,intdist
+        return step,intdist,intdist_add
+
+    @staticmethod
+    @njit('f8(f4[:],f4[:],f8)')
+    def _intensity_add(w,x,k):
+        i_add = 0
+        for i in range(w.shape[0]):
+            for j in range(w.shape[0]):
+                i_add += (np.sqrt(w[i]*w[j]))*np.cos(-k*x[i]+k*x[j])/(x[i]*x[j])
+        i_add = i_add/2
+        return i_add
 
 class SideOBD(OBD):
     def __init__(self):

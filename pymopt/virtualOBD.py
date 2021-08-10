@@ -29,14 +29,14 @@ range_params = {
 }
 
 model_params ={
-    'grid':32,
-    'dx':1/32,
+    'grid':40,
+    'dx':1/40,
     'dt':1,
     'du':0.0002,
     'dv':0.01,
-    'length':16,
+    'length':13,
     'repetition':150,
-    'voxelsize':0.0295,
+    'voxelsize':0.024,
     'seed':False,
     'ct_coef':4.5e4,
     'tile_num':2,
@@ -115,7 +115,7 @@ def generate_bone_model(bv_tv,path,model_params):
     tp.set_params(model_params)
     if not os.path.exists(path):
         os.makedirs(path)
-    u = tp.modeling(path,save_dicom=False,)#True)
+    u = tp.modeling(path,save_dicom=True)
 
     del tp
     gc.collect()
@@ -145,7 +145,7 @@ def calc_montecalro(vp,iteral,params,path,u):
 
     model = VoxelTuringModel(
         nPh = nPh,
-        z_max_mode = True,
+        z_max_mode = False,
         beam_angle = deg*np.pi/180,
         wavelength = lamda,
         beam_posision = 10,
@@ -198,7 +198,6 @@ def calc(iteral):
 
     path_ = opt_path+alias_name
     calc_ray_tracing(res,opt_params,path_)
-
     print('')
     print('############### End %s it ###################'%iteral)
     print('')

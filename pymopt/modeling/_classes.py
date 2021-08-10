@@ -41,6 +41,7 @@ class TuringPattern:
         'ct_coef':9e4,
         'tile_num':1,
         }
+        self.coef = np.array([-7.59832191,1.68512028,-0.49735391,0.60474624])
         self.keys_params  = list(self.params.keys())
         self._setatter_params()
         self.f = lambda u,v: u+self.dt*(0.6*u-v-u**3)
@@ -56,15 +57,18 @@ class TuringPattern:
         print("Model Size: %s Mb"%(sys.getsizeof(u)/1e6))
         del v
         gc.collect()
+        if save_dicom:
+            self._save_dicom(u,path)
         u = self._adjust_vbtv(u)
         self._calc_microarchitecture(u)
         self._save_info(path)
-        if save_dicom:
-            self._save_dicom(u,path)
         u = self._model_binarization(u)
         if self.tile_num != 0:
             u = np.tile(u, (self.tile_num,self.tile_num,self.tile_num))
         return u
+
+    def set_threshold_fun_coef(self,coef):
+        self.coef = np.array(coef)
 
     def set_params(self,*initial_data, **kwargs):
         set_params(self.params,self.keys_params,*initial_data, **kwargs)
@@ -118,7 +122,7 @@ class TuringPattern:
 
     def _get_threshold(self):
         x = self.bv_tv
-        self.threshold = -11.092*x**3+2.7461*x**2-0.5083*x+0.6037
+        self.threshold = np.poly1d(self.coef)(x)
 
     def _adjust_vbtv(self,u):
         self._get_threshold()
@@ -166,9 +170,11 @@ class TuringPattern:
             json.dump(info,fp,indent=4,cls= ToJsonEncoder)
 
     def _save_dicom(self,pixel_array,path):
-        pixel_array = (pixel_array*self.ct_coef).astype("uint16")
+        pixel_array = (pixel_array.copy()*self.ct_coef).astype("uint16")
         for i in range(0, np.shape(pixel_array)[2]):
             self._write_dicom(pixel_array[:,:,i], i,path,self.voxelsize)
+        del pixel_array
+        gc.collect()
 
     def _write_dicom(self,pixel_array, level,path,voxelsize):
         suffix=  f'{level:04}' + ".dcm"

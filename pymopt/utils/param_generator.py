@@ -36,8 +36,8 @@ class generate_variable_params:
             'th_subcutaneus':subcut[0],
             'ma_subcutaneus':subcut[1],
             'msd_subcutaneus':subcut[2],
-            'ma_marrow':,marrow[0],
-            'msd_marrow':,marrow[1],
+            'ma_marrow':marrow[0],
+            'msd_marrow':marrow[1],
             'bv_tv':bone[0],
             'th_cortical':bone[1],
         }
