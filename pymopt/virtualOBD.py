@@ -10,8 +10,8 @@ import pandas as pa
 from multiprocessing import Pool
 
 
-repetitions = 8
-pool_num = 8
+repetitions = 3
+pool_num = 3
 nPh = 1e7
 
 range_params = {
@@ -21,8 +21,6 @@ range_params = {
     'th_subcutaneus':[1,6],        # 皮下組織厚さの範囲
     'ma_subcutaneus':[0.005,0.012],# 皮下組織吸収係数の範囲
     'msd_subcutaneus':[0.83,1.396],# 皮下組織減衰散乱係数の範囲
-    'ma_marrow':[0.005,0.012],     # 骨髄吸収係数の範囲
-    'msd_marrow':[0.83,1.396],     # 骨髄減衰散乱係数の範囲
     'bv_tv':[0.115,0.02],          # 海綿骨BV/TVの平均と分散
     'th_cortical':[0.669, 0.133],  # 皮質骨厚さの平均と分散
     'corr':0.54,                   # 皮質骨と海綿骨の相関係数 Boutry2005
@@ -35,8 +33,8 @@ model_params ={
     'du':0.0002,
     'dv':0.01,
     'length':13,
-    'repetition':150,
-    'voxelsize':0.024,
+    'repetition':100,
+    'voxelsize':0.0245,
     'seed':False,
     'ct_coef':4.5e4,
     'tile_num':2,
@@ -54,18 +52,20 @@ monte_params = {
     'ma_space':0.00862,
     'ma_trabecular':0.02374,
     'ma_cortical':0.02374,
-    #'ma_subcutaneus':0.011,'ma_dermis':0.05925,
+    'ma_subcutaneus':0.011,
+    'ma_dermis':0.05925,
 
     'ms_space':11.13,
     'ms_trabecular':20.588,
     'ms_cortical':20.588,
-    #'ms_subcutaneus':20,'ms_dermis':19.63,
+    'ms_subcutaneus':20,
+    'ms_dermis':19.63,
 
     'g_space':0.90,
     'g_trabecular':0.90,
     'g_cortical':0.90,
     'g_subcutaneus':0.90,
-    'g_dermis':.90,
+    'g_dermis':0.90,
 }
 
 opt_params ={
@@ -103,19 +103,13 @@ opt_params ={
 }
 
 
-def get_variable_params(n,range_params):
-    gvp = generate_variable_params()
-    gvp.set_params(range_params)
-    gvp.generate(n)
-    return gvp.get_variable_params()
-
 def generate_bone_model(bv_tv,path,model_params):
     model_params['bv_tv']=bv_tv
     tp = TuringPattern()
     tp.set_params(model_params)
     if not os.path.exists(path):
         os.makedirs(path)
-    u = tp.modeling(path,save_dicom=True)
+    u = tp.modeling(path,save_dicom=False)
 
     del tp
     gc.collect()
@@ -128,20 +122,20 @@ def calc_montecalro(vp,iteral,params,path,u):
 
     lamda = 850
     deg = 0
+    nn = 0
+    params['th_dermis'] = vp['th_dermis'][nn]
+    params['ma_dermis'] = vp['ma_dermis'][nn]
+    params['ms_dermis'] = vp['msd_dermis'][nn]/(1-params['g_dermis'])
 
-    params['th_dermis'] = vp['th_dermis'][iteral]
-    params['ma_dermis'] = vp['ma_dermis'][iteral]
-    params['ms_dermis'] = (1-params['g_dermis'])*vp['msd_dermis'][iteral]
+    params['th_subcutaneus'] = vp['th_subcutaneus'][nn]
+    params['ma_subcutaneus'] = vp['ma_subcutaneus'][nn]
+    params['ms_subcutaneus'] = vp['msd_subcutaneus'][nn]/(1-params['g_subcutaneus'])
 
-    params['th_subcutaneus'] = vp['th_subcutaneus'][iteral]
-    params['ma_subcutaneus'] = vp['ma_subcutaneus'][iteral]
-    params['ms_subcutaneus'] = (1-params['g_subcutaneus'])*vp['msd_subcutaneus'][iteral]
+    params['ma_space'] = vp['ma_subcutaneus'][nn]
+    params['ms_space'] = vp['msd_subcutaneus'][nn]/(1-params['g_space'])
 
-    params['ma_space'] = vp['ma_marrow'][iteral]
-    params['ms_space'] = (1-params['g_space'])*vp['msd_marrow'][iteral]
-
-    params['bv_tv'] = vp['bv_tv'][iteral]
-    params['th_cortical'] = vp['th_cortical'][iteral]
+    params['bv_tv'] = vp['bv_tv'][nn]
+    params['th_cortical'] = vp['th_cortical'][nn]
 
     model = VoxelTuringModel(
         nPh = nPh,
@@ -154,7 +148,7 @@ def calc_montecalro(vp,iteral,params,path,u):
         initial_refrect_by_angle = True,
     )
     model.set_model(u)
-
+    
     model.build(**params)
     start = time.time()
     model = model.start()
@@ -182,8 +176,10 @@ def calc_ray_tracing(res,opt_params,path):
 
 def calc(iteral):
     alias_name = "-".join((str(datetime.datetime.now().isoformat()).split('.')[0]).split(':'))+'_it'+f'{iteral:04}'
-
-    print('')
+    gvp = generate_variable_params()
+    gvp.set_params(range_params)
+    vp = gvp.generate(1)
+    
     print('### iteral number ',iteral)
     print('Alias name: ',alias_name)
     model_path = './model_result/'
@@ -191,20 +187,20 @@ def calc(iteral):
     opt_path = './opt_result/'
 
     path_ = model_path+alias_name+'_dicom'
-    u = generate_bone_model(vp['bv_tv'][iteral],path_,model_params)
-
+    u = generate_bone_model(vp['bv_tv'][0],path_,model_params)
+    print('it: ',iteral,', bvtv: ',u)
     path_ = monte_path+alias_name
     res = calc_montecalro(vp,iteral,monte_params,path_,u)
-
+    print('###### end monte calro in it: ',iteral)
+    
     path_ = opt_path+alias_name
     calc_ray_tracing(res,opt_params,path_)
     print('')
     print('############### End %s it ###################'%iteral)
     print('')
 
-vp = get_variable_params(repetitions,range_params)
 iteral_num=np.arange(repetitions)
-pa.DataFrame(vp).to_csv('variable_params.csv')
+
 
 if __name__ == "__main__":
 
@@ -214,3 +210,4 @@ if __name__ == "__main__":
     print()
     print('######################')
     print(datetime.datetime.now())
+    

@@ -28,20 +28,20 @@ class TuringPattern:
         self.dtype = 'float32'
         self.save_dicom=False
         self.params ={
-        'grid':32,
-        'dx':0.03125,
+        'grid':40,
+        'dx':1/40,
         'dt':1,
         'du':0.0002,
         'dv':0.01,
-        'length':16,
-        'repetition':150,
+        'length':13,
+        'repetition':100,
         'bv_tv':0.138,
         'voxelsize':0.0295,
         'seed':False,
-        'ct_coef':9e4,
+        'ct_coef':4.5e4,
         'tile_num':1,
         }
-        self.coef = np.array([-7.59832191,1.68512028,-0.49735391,0.60474624])
+        self.coef = np.array([-7.67681281,1.65199492,-0.45314158,0.60424417])
         self.keys_params  = list(self.params.keys())
         self._setatter_params()
         self.f = lambda u,v: u+self.dt*(0.6*u-v-u**3)
