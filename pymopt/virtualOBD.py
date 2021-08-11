@@ -110,10 +110,10 @@ def generate_bone_model(bv_tv,path,model_params):
     if not os.path.exists(path):
         os.makedirs(path)
     u = tp.modeling(path,save_dicom=False)
-
+    bvtv_ = tp.bv_tv_real
     del tp
     gc.collect()
-    return u
+    return u,bvtv_
 
 def calc_montecalro(vp,iteral,params,path,u):
     print()
@@ -148,7 +148,7 @@ def calc_montecalro(vp,iteral,params,path,u):
         initial_refrect_by_angle = True,
     )
     model.set_model(u)
-    
+
     model.build(**params)
     start = time.time()
     model = model.start()
@@ -179,7 +179,7 @@ def calc(iteral):
     gvp = generate_variable_params()
     gvp.set_params(range_params)
     vp = gvp.generate(1)
-    
+
     print('### iteral number ',iteral)
     print('Alias name: ',alias_name)
     model_path = './model_result/'
@@ -187,12 +187,13 @@ def calc(iteral):
     opt_path = './opt_result/'
 
     path_ = model_path+alias_name+'_dicom'
-    u = generate_bone_model(vp['bv_tv'][0],path_,model_params)
-    print('it: ',iteral,', bvtv: ',u)
+    u,bv_tv = generate_bone_model(vp['bv_tv'][0],path_,model_params)
+    print('it: ',iteral,', change bvtv: ',vp['bv_tv'][0],'-->',bvtv_)
+    vp['bv_tv'][0] = bv_tv
     path_ = monte_path+alias_name
     res = calc_montecalro(vp,iteral,monte_params,path_,u)
     print('###### end monte calro in it: ',iteral)
-    
+
     path_ = opt_path+alias_name
     calc_ray_tracing(res,opt_params,path_)
     print('')
@@ -210,4 +211,3 @@ if __name__ == "__main__":
     print()
     print('######################')
     print(datetime.datetime.now())
-    
