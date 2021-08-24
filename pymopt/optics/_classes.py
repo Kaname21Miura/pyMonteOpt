@@ -411,8 +411,9 @@ class OBD:
             'substrate_2':'N-SF11',
             'slit_outerD':50,'slit_D':20,'slit_width':2,'slit_thickness':5,
             'd_pd':3,
-            'ld_fix_part':True,
+            'ld_fix_part':False,
             'distance_2slits':37,'pd_poit_correction':0,
+            'inversion':False,
         }
         self._set_refrective_index()
         self.keys_params  = list(self.params.keys())
@@ -524,9 +525,17 @@ class OBD:
             self.params['end'],
             self.params['split'])
         rd_index = np.where(self.data['v'][2]<0)[0]
+        if self.params['inversion']:
+            rd_index = np.where(self.data['v'][2]>0)[0]
+
         p = self.data['p'][:,rd_index]
         p[2] = 0
         v = self.data['v'][:,rd_index]
+
+        if self.params['inversion']:
+            p[1]*=-1
+            v[2]*=-1
+            v[1]*=-1
         w = self.data['w'][rd_index]
         k = 2*np.pi/(self.params['wavelength']*1e-6)
         intdist = []#np.empty_like(step)

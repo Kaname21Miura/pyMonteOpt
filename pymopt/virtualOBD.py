@@ -73,8 +73,8 @@ monte_params = {
 
 opt_params ={
     'start':15,
-    'end':90,
-    'split':0.25,
+    'end':85,
+    'split':0.5,
 
     'wavelength':850,
 
@@ -103,8 +103,12 @@ opt_params ={
     'distance_2slits':32,
     'pd_poit_correction':0.22,
     'ld_fix_part':False,
+    'inversion':False,
 }
 
+opt_params_inv = opt_params.copy()
+opt_params_inv['inversion']=True
+opt_params_inv['start']=0
 
 def generate_bone_model(bv_tv,path,model_params):
     model_params['bv_tv']=bv_tv
@@ -199,6 +203,9 @@ def calc(iteral):
 
     path_ = opt_path+alias_name
     calc_ray_tracing(res,opt_params,path_)
+
+    path_ = opt_path+alias_name+'_inv'
+    calc_ray_tracing(res,opt_params_inv,path_)
     print('')
     print('############### End %s it ###################'%iteral)
     print('')
