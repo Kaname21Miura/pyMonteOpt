@@ -10,16 +10,17 @@ import pandas as pa
 from multiprocessing import Pool
 
 
-repetitions = 3
-pool_num = 3
+repetitions = 78
+pool_num = 8
 nPh = 1e7
+iteral_num=np.arange(repetitions)
 
 range_params = {
     'th_dermis':[1,2],             # 皮膚厚さの範囲
     'ma_dermis':[0.00633,0.08560], # 皮膚吸収係数の範囲
     'msd_dermis':[1.420,2.506],    # 皮膚減衰散乱係数の範囲
     'th_subcutaneus':[1,6],        # 皮下組織厚さの範囲
-    'ma_subcutaneus':[0.005,0.012],# 皮下組織吸収係数の範囲
+    'ma_subcutaneus':[0.00485,0.01239],# 皮下組織吸収係数の範囲
     'msd_subcutaneus':[0.83,1.396],# 皮下組織減衰散乱係数の範囲
     'bv_tv':[0.115,0.02],          # 海綿骨BV/TVの平均と分散
     'th_cortical':[0.669, 0.133],  # 皮質骨厚さの平均と分散
@@ -42,6 +43,8 @@ model_params ={
 
 monte_params = {
     'voxel_space':model_params['voxelsize'],
+    'symmetrization':True,
+
     'n_space':1.4,
     'n_trabecular':1.55,
     'n_cortical':1.55,
@@ -188,7 +191,7 @@ def calc(iteral):
 
     path_ = model_path+alias_name+'_dicom'
     u,bv_tv = generate_bone_model(vp['bv_tv'][0],path_,model_params)
-    print('it: ',iteral,', change bvtv: ',vp['bv_tv'][0],'-->',bvtv_)
+    print('it: ',iteral,', change bvtv: ',vp['bv_tv'][0],'-->',bv_tv)
     vp['bv_tv'][0] = bv_tv
     path_ = monte_path+alias_name
     res = calc_montecalro(vp,iteral,monte_params,path_,u)
@@ -199,8 +202,6 @@ def calc(iteral):
     print('')
     print('############### End %s it ###################'%iteral)
     print('')
-
-iteral_num=np.arange(repetitions)
 
 
 if __name__ == "__main__":
