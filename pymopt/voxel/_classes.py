@@ -1029,7 +1029,8 @@ class TuringModel(VoxelModel):
         self.subc_num=3
         self.skin_num=4
         self.params = {
-            'xy_size':[40,40],'voxel_space':0.01,'dicom_path':False,'bv_tv':0.138,'symmetrization':False,
+            'xy_size':[40,40],'voxel_space':0.01,'dicom_path':False,'bv_tv':0.138,
+            'symmetrization':False,'enclosure':False,
             'th_trabecular':40,'th_cortical':1.,'th_subcutaneus':2.6,'th_dermis':1.4,
             'n_space':1.,'n_trabecular':1.4,'n_cortical':1.4,'n_subcutaneus':1.4,'n_dermis':1.4,'n_air':1.,
             'ma_space':1e-8,'ma_trabecular':0.02374,'ma_cortical':0.02374,'ma_subcutaneus':0.011,'ma_dermis':0.037,
@@ -1107,32 +1108,39 @@ class TuringModel(VoxelModel):
         self.params['xy_size'][1] = self.xyz_size[1]*self.params['voxel_space']
         self.params['th_trabecular'] = self.xyz_size[2]*self.params['voxel_space']
 
-        if self.params['th_cortical'] !=0:
-            ct = np.ones((self.xyz_size[0],
-                         self.xyz_size[1],
-                         int(self.params['th_cortical']/self.voxel_space)),
-                         dtype = self.dtype)*self.ct_num
-            self.voxel_model = np.concatenate((ct.T,self.voxel_model.T)).T
-            if self.params['symmetrization']:
-                self.voxel_model = np.concatenate((self.voxel_model.T,ct.T)).T
+        def _soft_data_add(params,voxel_model,th_name,space,num,dtype):
+            if params[th_name] !=0:
+                num_pix = int(params[th_name]/space)
+                ct = np.ones((
+                voxel_model.shape[0],voxel_model.shape[1],num_pix),
+                dtype = dtype)*num
+                voxel_model = np.concatenate((ct,voxel_model),2)
+                if params['symmetrization'] or params['enclosure']:
+                    voxel_model = np.concatenate((voxel_model,ct),2)
+                if params['enclosure']:
+                    #y方向の追加
+                    ct = np.ones((
+                    voxel_model.shape[0],num_pix,voxel_model.shape[2]
+                    ),dtype = dtype)*num
+                    voxel_model = np.concatenate((voxel_model,ct),1)
+                    voxel_model = np.concatenate((ct,voxel_model),1)
+                    #x方向の追加
+                    ct = np.ones((
+                    num_pix,voxel_model.shape[1],voxel_model.shape[2]
+                    ),dtype = dtype)*num
+                    voxel_model = np.concatenate((voxel_model,ct),0)
+                    voxel_model = np.concatenate((ct,voxel_model),0)
+            return voxel_model
 
-        if self.params['th_subcutaneus'] !=0:
-            subc = np.ones((self.xyz_size[0],
-                         self.xyz_size[1],
-                         int(self.params['th_subcutaneus']/self.voxel_space)),
-                         dtype = self.dtype)*self.subc_num
-            self.voxel_model = np.concatenate((subc.T,self.voxel_model.T)).T
-            if self.params['symmetrization']:
-                self.voxel_model = np.concatenate((self.voxel_model.T,subc.T)).T
-
-        if self.params['th_dermis'] != 0:
-            skin = np.ones((self.xyz_size[0],
-                           self.xyz_size[1],
-                           int(self.params['th_dermis']/self.voxel_space)+1),
-                           dtype = self.dtype)*self.skin_num
-            self.voxel_model = np.concatenate((skin.T,self.voxel_model.T)).T
-            if self.params['symmetrization']:
-                self.voxel_model = np.concatenate((self.voxel_model.T,skin.T)).T
+        self.voxel_model = _soft_data_add(
+        self.params,self.voxel_model,'th_cortical',self.voxel_space,self.ct_num,self.dtype
+        )
+        self.voxel_model = _soft_data_add(
+        self.params,self.voxel_model,'th_subcutaneus',self.voxel_space,self.subc_num,self.dtype
+        )
+        self.voxel_model = _soft_data_add(
+        self.params,self.voxel_model,'th_dermis',self.voxel_space,self.skin_num,self.dtype
+        )
 
         self.voxel_model[0,:,:] = -1
         self.voxel_model[-1,:,:] = -1

@@ -10,7 +10,7 @@ import pandas as pa
 from multiprocessing import Pool
 
 
-repetitions = 78
+repetitions = 130
 pool_num = 8
 nPh = 1e7
 iteral_num=np.arange(repetitions)
@@ -33,7 +33,7 @@ model_params ={
     'dt':1,
     'du':0.0002,
     'dv':0.01,
-    'length':13,
+    'length':9,
     'repetition':100,
     'voxelsize':0.0245,
     'seed':False,
@@ -41,9 +41,12 @@ model_params ={
     'tile_num':2,
 }
 
+th_coef = np.array([-7.61194835,1.62003258,-0.44989454,0.60428882])
+
 monte_params = {
     'voxel_space':model_params['voxelsize'],
     'symmetrization':True,
+    'enclosure':True,
 
     'n_space':1.4,
     'n_trabecular':1.55,
@@ -108,12 +111,18 @@ opt_params ={
 
 opt_params_inv = opt_params.copy()
 opt_params_inv['inversion']=True
+opt_params_side['side']=False
 opt_params_inv['start']=0
+opt_params_side = opt_params.copy()
+opt_params_side['inversion']=False
+opt_params_side['side']=True
+opt_params_side['start']=0
 
 def generate_bone_model(bv_tv,path,model_params):
     model_params['bv_tv']=bv_tv
     tp = TuringPattern()
     tp.set_params(model_params)
+    tp.set_threshold_func_coef(th_coef)
     if not os.path.exists(path):
         os.makedirs(path)
     u = tp.modeling(path,save_dicom=False)
@@ -206,6 +215,9 @@ def calc(iteral):
 
     path_ = opt_path+alias_name+'_inv'
     calc_ray_tracing(res,opt_params_inv,path_)
+
+    path_ = opt_path+alias_name+'_side'
+    calc_ray_tracing(res,opt_params_side,path_)
     print('')
     print('############### End %s it ###################'%iteral)
     print('')

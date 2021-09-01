@@ -67,7 +67,7 @@ class TuringPattern:
             u = np.tile(u, (self.tile_num,self.tile_num,self.tile_num))
         return u
 
-    def set_threshold_fun_coef(self,coef):
+    def set_threshold_func_coef(self,coef):
         self.coef = np.array(coef)
 
     def set_params(self,*initial_data, **kwargs):
