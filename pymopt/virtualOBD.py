@@ -11,7 +11,7 @@ from multiprocessing import Pool
 
 
 repetitions = 130
-pool_num = 8
+pool_num = 6
 nPh = 1e7
 iteral_num=np.arange(repetitions)
 
@@ -107,11 +107,12 @@ opt_params ={
     'pd_poit_correction':0.22,
     'ld_fix_part':False,
     'inversion':False,
+    'side':False,
 }
 
 opt_params_inv = opt_params.copy()
 opt_params_inv['inversion']=True
-opt_params_side['side']=False
+opt_params_inv['side']=False
 opt_params_inv['start']=0
 opt_params_side = opt_params.copy()
 opt_params_side['inversion']=False
