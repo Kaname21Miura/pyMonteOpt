@@ -1477,14 +1477,14 @@ class VoxelPlateLedModel(BaseVoxelMonteCarlo):
         self.v = gv
 
 class VoxelDicomModel(BaseVoxelMonteCarlo):
-
     def __init__(
-        self,*,nPh=1000,dtype='float32',
-        nr=50,nz=20,dr=0.1,dz=0.1, fluence_mode=False,
-        model_type = 'binary',w_beam = 0,beam_angle=0,
-        initial_refrect_by_angle = False,
+        self,*,nPh=1000,fluence_mode=False,dtype='float32',
+        nr=50,nz=20,dr=0.1,dz=0.1,w_beam =0,
+        z_max_mode = False,
+        beam_angle = 0,initial_refrect_by_angle = False,
         wavelength = 850,beam_posision = 10,
-        lens_curvature_radius = 51.68,grass_type = 'N-BK7',first_layer_clear=False
+        lens_curvature_radius = 51.68,grass_type = 'N-BK7',first_layer_clear=False,
+        model_type = 'binary'
     ):
 
         self.model_type = model_type
@@ -1492,9 +1492,9 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         self.model = model
 
         super().__init__(
-            nPh = nPh,fluence_mode =fluence_mode,model = model,
-            dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,
-            beam_angle=beam_angle,
+            nPh = nPh,fluence_mode =fluence_mode, model = self.model,
+            dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,z_max_mode = z_max_mode,
+            w_beam=w_beam,beam_angle = beam_angle,
             initial_refrect_by_angle = initial_refrect_by_angle,
             wavelength = wavelength,
             beam_posision = beam_posision,
@@ -1537,26 +1537,81 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
             model = DicomLinearModel()
         return model
 
-    def set_monte_params(self,*,nPh,dtype='float32',
+    def set_monte_params(
+            self,*,nPh=1000,fluence_mode=False,dtype='float32',
+            nr=50,nz=20,dr=0.1,dz=0.1,w_beam =0,
+            z_max_mode = False,
+            beam_angle = 0,initial_refrect_by_angle = False,
+            wavelength = 850,beam_posision = 10,
+            lens_curvature_radius = 51.68,grass_type = 'N-BK7',first_layer_clear=False,
+            model_type = 'binary',beam_type='TEM00'
+        ):
+        self.model_type = model_type
+        model = self._model_select(self.model_type)
+        self.model = model
+        '''self,*,nPh,dtype='float32',
                  nr=50,nz=20,dr=0.1,dz=0.1, fluence_mode=False,
-                 model_type = 'binary',w_beam = 0):
+                 model_type = 'binary',w_beam = 0
+
+                 ):'''
         self.dtype = dtype
         self.nPh = nPh
         self.w_beam = w_beam
         self.fluence = fluence_mode
         self.fluence_mode = fluence_mode
 
-        if self.fluence:
+        '''if self.fluence:
             if fluence_mode == '2D':
                 self.fluence = Fluence2D(nr=nr,nz=nz,dr=dr,dz=dz)
             elif fluence_mode == '3D':
-                self.fluence = Fluence3D(nr=nr,nz=nz,dr=dr,dz=dz)
+                self.fluence = Fluence3D(nr=nr,nz=nz,dr=dr,dz=dz)'''
         if model_type != 'keep':
             params = self.model.params
             self.model_type = model_type
             model = self._model_select(self.model_type)
             self.model = model
             self.model.set_params(params)
+
+        def __check_list_name(name,name_list):
+            if not(name in name_list):
+                raise ValueError('%s is not a permitted for factor. Please choose from %s.'%(name,name_list))
+
+
+        self.z_max_mode = z_max_mode
+
+        self.dtype = dtype
+        self.nPh = nPh
+        self.w_beam = w_beam
+
+        self.initial_refrect_by_angle = initial_refrect_by_angle
+        self.wavelength = wavelength
+        self.grass_type = grass_type
+        self.lens_curvature_radius = lens_curvature_radius
+        self.beam_posision = beam_posision
+        self.beam_angle_mode = False
+        if beam_angle == 'lens_f':
+            grass = Grass()
+            self.beam_angle_mode = True
+            self.beam_angle = grass.get_inital_angle(
+                slit_radius = self.beam_posision,
+                lens_curvature_radius = self.lens_curvature_radius,
+                wavelength = self.wavelength,
+                grass_type = self.grass_type
+            )
+        else:
+            self.beam_angle = beam_angle
+
+        self.model = model
+        self.fluence = fluence_mode
+        self.fluence_mode = fluence_mode
+        self.generate_initial = True
+        self.first_layer_clear=first_layer_clear
+
+        if self.fluence:
+            if fluence_mode == '2D':
+                self.fluence = Fluence2D(nr=nr,nz=nz,dr=dr,dz=dz)
+            elif fluence_mode == '3D':
+                self.fluence = Fluence3D(nr=nr,nz=nz,dr=dr,dz=dz)
 
     def _calc_info(self,coment=''):
         calc_info = {
@@ -1660,92 +1715,93 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
                               int_pix = True, section_line = True,
                               graph_type = 'ALL', hist_type = 'XY',cmap = 'gray',
                               image = False,):
-        if image is False:
-            image = self.array_dicom
+        if graph_type:
+            if image is False:
+                image = self.array_dicom
 
-        if int_pix:
-            x_size = xx*self.ConstPixelSpacing[0]
-            y_size = yy*self.ConstPixelSpacing[1]
-            z_size = zz*self.ConstPixelSpacing[2]
-        else:
-            x_size = int(xx)
-            y_size = int(yy)
-            z_size = int(zz)
-            xx = int(x_size/self.ConstPixelSpacing[0])
-            yy = int(y_size/self.ConstPixelSpacing[1])
-            zz = int(z_size/self.ConstPixelSpacing[2])
+            if int_pix:
+                x_size = xx*self.ConstPixelSpacing[0]
+                y_size = yy*self.ConstPixelSpacing[1]
+                z_size = zz*self.ConstPixelSpacing[2]
+            else:
+                x_size = int(xx)
+                y_size = int(yy)
+                z_size = int(zz)
+                xx = int(x_size/self.ConstPixelSpacing[0])
+                yy = int(y_size/self.ConstPixelSpacing[1])
+                zz = int(z_size/self.ConstPixelSpacing[2])
 
-        resol0 = [self.ConstPixelSpacing[0]*i for i in range(image.shape[0]+1)]
-        resol1 = [self.ConstPixelSpacing[1]*i for i in range(image.shape[1]+1)]
-        resol2 = [self.ConstPixelSpacing[2]*i for i in range(image.shape[2]+1)]
-        if graph_type == 'XY':
-            plt.figure(figsize=(6,6),dpi=100)
-            plt.set_cmap(plt.get_cmap(cmap))
-            plt.title('X-Y pic in Z = %0.3f mm' %(z_size))
-            plt.pcolormesh(resol1,resol0,image[:,:,zz])
-            plt.xlabel('X mm')
-            plt.ylabel("Y mm")
+            resol0 = [self.ConstPixelSpacing[0]*i for i in range(image.shape[0]+1)]
+            resol1 = [self.ConstPixelSpacing[1]*i for i in range(image.shape[1]+1)]
+            resol2 = [self.ConstPixelSpacing[2]*i for i in range(image.shape[2]+1)]
+            if graph_type == 'XY':
+                plt.figure(figsize=(6,6),dpi=100)
+                plt.set_cmap(plt.get_cmap(cmap))
+                plt.title('X-Y pic in Z = %0.3f mm' %(z_size))
+                plt.pcolormesh(resol1,resol0,image[:,:,zz])
+                plt.xlabel('X mm')
+                plt.ylabel("Y mm")
+                plt.show()
+            if graph_type == 'XY-YZ':
+                fig,ax = plt.subplots(1,2,figsize=[12,6],dpi=90)
+                plt.set_cmap(plt.get_cmap(cmap))
+                ax[0].set_title('X-Y pic in Z = %0.3f mm' %(z_size))
+                ax[0].pcolormesh(resol1,resol0,image[:,:,zz])
+                ax[0].set_xlabel("X mm")
+                ax[0].set_ylabel("Y mm")
+                if section_line:
+                    ax[0].plot([x_size,x_size],[0,resol0[-1]],'-',c = 'r')
+
+                ax[1].set_title('Y-Z pic in X = %0.3f mm' %(x_size))
+                ax[1].pcolormesh(resol2,resol0,image[:,xx,:])
+                ax[1].set_xlabel("Z mm")
+                ax[1].set_ylabel("Y mm")
+                if section_line:
+                    ax[1].plot([z_size,z_size],[0,resol0[-1]],'-',c = 'r')
+                plt.show()
+            if graph_type == 'ALL' or graph_type == 'NO_HIST':
+                fig,ax = plt.subplots(2,2,figsize=[12,12],dpi=90)
+                plt.set_cmap(plt.get_cmap(cmap))
+                ax[0,0].set_title('X-Y pic in Z = %0.3f mm' %(z_size))
+                ax[0,0].pcolormesh(resol1,resol0,image[:,:,zz])
+                ax[0,0].set_xlabel("X mm")
+                ax[0,0].set_ylabel("Y mm")
+                if section_line:
+                    ax[0,0].plot([x_size,x_size],[0,resol0[-1]],'-',c = 'r')
+                    ax[0,0].plot([0,resol1[-1]],[y_size,y_size],'-',c = 'r')
+
+                ax[0,1].set_title('Y-Z pic in X = %0.3f mm' %(x_size))
+                ax[0,1].pcolormesh(resol2,resol0,image[:,xx,:])
+                ax[0,1].set_xlabel("Z mm")
+                ax[0,1].set_ylabel("Y mm")
+                if section_line:
+                    ax[0,1].plot([z_size,z_size],[0,resol0[-1]],'-',c = 'r')
+
+                ax[1,0].set_title('X-Z pic in Y = %0.3f mm' %(y_size))
+                ax[1,0].pcolormesh(resol1,resol2,image[yy,:,:].T)
+                ax[1,0].set_ylim(resol2[-1],resol2[0])
+                ax[1,0].set_xlabel("X mm")
+                ax[1,0].set_ylabel("Z mm")
+                if section_line:
+                    ax[1,0].plot([0,resol1[-1]],[z_size,z_size],'-',c = 'r')
+
+                if graph_type == 'ALL':
+                    if hist_type == 'XY':
+                        ax[1,1].set_title('Histogram of X-Y pic pixel values')
+                        ax[1,1].hist(image[:,:,zz].flatten(),bins=50, color='c')
+                    elif hist_type == 'YZ':
+                        ax[1,1].set_title('Histogram of Y-Z pic pixel values')
+                        ax[1,1].hist(image[xx,:,].flatten(),bins=50, color='c')
+                    elif hist_type == 'XZ':
+                        ax[1,1].set_title('Histogram of X-Z pic pixel values')
+                        ax[1,1].hist(image[:,yy,].flatten(),bins=50, color='c')
+                    elif hist_type =='ALL':
+                        ax[1,1].set_title('Histogram of X-Z pic pixel values')
+                        ax[1,1].hist(image.flatten(),bins=50, color='c')
+                    ax[1,1].set_yscale('log')
+                    ax[1,1].set_xlabel("Voxel values")
+                    ax[1,1].set_ylabel("Frequency")
             plt.show()
-        if graph_type == 'XY-YZ':
-            fig,ax = plt.subplots(1,2,figsize=[12,6],dpi=90)
-            plt.set_cmap(plt.get_cmap(cmap))
-            ax[0].set_title('X-Y pic in Z = %0.3f mm' %(z_size))
-            ax[0].pcolormesh(resol1,resol0,image[:,:,zz])
-            ax[0].set_xlabel("X mm")
-            ax[0].set_ylabel("Y mm")
-            if section_line:
-                ax[0].plot([x_size,x_size],[0,resol0[-1]],'-',c = 'r')
-
-            ax[1].set_title('Y-Z pic in X = %0.3f mm' %(x_size))
-            ax[1].pcolormesh(resol2,resol0,image[:,xx,:])
-            ax[1].set_xlabel("Z mm")
-            ax[1].set_ylabel("Y mm")
-            if section_line:
-                ax[1].plot([z_size,z_size],[0,resol0[-1]],'-',c = 'r')
-            plt.show()
-        if graph_type == 'ALL' or graph_type == 'NO_HIST':
-            fig,ax = plt.subplots(2,2,figsize=[12,12],dpi=90)
-            plt.set_cmap(plt.get_cmap(cmap))
-            ax[0,0].set_title('X-Y pic in Z = %0.3f mm' %(z_size))
-            ax[0,0].pcolormesh(resol1,resol0,image[:,:,zz])
-            ax[0,0].set_xlabel("X mm")
-            ax[0,0].set_ylabel("Y mm")
-            if section_line:
-                ax[0,0].plot([x_size,x_size],[0,resol0[-1]],'-',c = 'r')
-                ax[0,0].plot([0,resol1[-1]],[y_size,y_size],'-',c = 'r')
-
-            ax[0,1].set_title('Y-Z pic in X = %0.3f mm' %(x_size))
-            ax[0,1].pcolormesh(resol2,resol0,image[:,xx,:])
-            ax[0,1].set_xlabel("Z mm")
-            ax[0,1].set_ylabel("Y mm")
-            if section_line:
-                ax[0,1].plot([z_size,z_size],[0,resol0[-1]],'-',c = 'r')
-
-            ax[1,0].set_title('X-Z pic in Y = %0.3f mm' %(y_size))
-            ax[1,0].pcolormesh(resol1,resol2,image[yy,:,:].T)
-            ax[1,0].set_ylim(resol2[-1],resol2[0])
-            ax[1,0].set_xlabel("X mm")
-            ax[1,0].set_ylabel("Z mm")
-            if section_line:
-                ax[1,0].plot([0,resol1[-1]],[z_size,z_size],'-',c = 'r')
-
-            if graph_type == 'ALL':
-                if hist_type == 'XY':
-                    ax[1,1].set_title('Histogram of X-Y pic pixel values')
-                    ax[1,1].hist(image[:,:,zz].flatten(),bins=50, color='c')
-                elif hist_type == 'YZ':
-                    ax[1,1].set_title('Histogram of Y-Z pic pixel values')
-                    ax[1,1].hist(image[xx,:,].flatten(),bins=50, color='c')
-                elif hist_type == 'XZ':
-                    ax[1,1].set_title('Histogram of X-Z pic pixel values')
-                    ax[1,1].hist(image[:,yy,].flatten(),bins=50, color='c')
-                elif hist_type =='ALL':
-                    ax[1,1].set_title('Histogram of X-Z pic pixel values')
-                    ax[1,1].hist(image.flatten(),bins=50, color='c')
-                ax[1,1].set_yscale('log')
-                ax[1,1].set_xlabel("Voxel values")
-                ax[1,1].set_ylabel("Frequency")
-        plt.show()
 
     def rot180_y(self):
         self.rot180_y_status = not self.rot180_y_status
@@ -1822,7 +1878,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         self._bottom = bottom
         self._top = top
 
-    def set_trim(self,threshold=False,cmap = 'gray'):
+    def set_trim(self,threshold=False,cmap = 'gray',graph_type='All'):
         if not threshold is False:
             if self.dtype == 'int8':
                 self.threshold = int(threshold*2**8)
@@ -1860,7 +1916,7 @@ class VoxelDicomModel(BaseVoxelMonteCarlo):
         self.display_cross_section(zz = 0,
                               xx = int(self.array_dicom.shape[1]/2),
                               yy = int(self.array_dicom.shape[0]/2),
-                              cmap = cmap)
+                              cmap = cmap,graph_type = graph_type)
 
         print("#########  Size  #########")
         print('* Image shape was changed')
