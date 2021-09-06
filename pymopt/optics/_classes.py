@@ -430,6 +430,9 @@ class OBD:
         self.params['wavelength'],self.params['substrate_2']
         )
 
+    def set_sample_l(self,l):
+        self.sample_l = l
+
     def set_params(self,*initial_data, **kwargs):
         set_params(self.params,self.keys_params,*initial_data, **kwargs)
         self._set_refrective_index()
@@ -525,12 +528,9 @@ class OBD:
             self.params['end'],
             self.params['split'])
         if self.params['side']:
-            v = self.data['v'].copy()
-            self.data['v'][2] = v[1]
-            self.data['v'][1] = v[2]
-            p = self.data['p'].copy()
-            self.data['p'][2] = p[1]
-            self.data['p'][1] = p[2]
+            self.data['v'][[2,1,0]] = self.data['v'][[2,1,0]]
+            self.data['p'][[2,1,0]] = self.data['p'][[2,1,0]]
+
 
         rd_index = np.where(self.data['v'][2]<0)[0]
         if self.params['inversion']:
