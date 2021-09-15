@@ -11,7 +11,7 @@ from multiprocessing import Pool
 
 
 repetitions = 130
-pool_num = 6
+pool_num = 8
 nPh = 1e7
 iteral_num=np.arange(repetitions)
 
@@ -218,6 +218,11 @@ def calc(iteral):
     calc_ray_tracing(res,opt_params_inv,path_)
 
     path_ = opt_path+alias_name+'_side'
+    thickness = (vp['th_subcutaneus'][0]+vp['th_dermis'][0]+\
+                vp['th_cortical'][0])/2+\
+                model_params['grid']*model_params['length']*\
+                model_params['tile_num']*model_params['voxelsize']
+    opt_params_side['side']=thickness
     calc_ray_tracing(res,opt_params_side,path_)
     print('')
     print('############### End %s it ###################'%iteral)

@@ -393,6 +393,7 @@ class OBD:
             'd_pd':3,
             'ld_fix_part':True,
             'distance_2slits':37,'pd_poit_correction':0,
+            'inversion':False,'side':False,
         }
         self._set_refrective_index()
         self.keys_params  = list(self.params.keys())
@@ -497,10 +498,25 @@ class OBD:
             self.params['start'],
             self.params['end'],
             self.params['split'])
+
+        if self.params['side']:
+            self.data['v'][1] = self.data[']'][[2,1,0]]
+            self.data['p'] =  self.data['p'][[2,1,0]]
+            self.data['p'][0]-=self.params['side']/2
+
         rd_index = np.where(self.data['v'][2]<0)[0]
+        if self.params['inversion']:
+            rd_index = np.where(self.data['v'][2]>0)[0]
+
         p = self.data['p'][:,rd_index]
         p[2] = 0
         v = self.data['v'][:,rd_index]
+
+        if self.params['inversion']:
+            p[1]*=-1
+            v[2]*=-1
+            v[1]*=-1
+            
         w = self.data['w'][rd_index]
         intdist = np.empty_like(step)
         for (i,Z) in enumerate(tqdm(step)):
@@ -520,6 +536,7 @@ class SideOBD(OBD):
             self.params['end'],
             self.params['split'])
         rd_index = np.where(self.data['v'][2]<0)[0]
+
         p = self.data['p'][:,rd_index]
         p[2] = 0
         v = self.data['v'][:,rd_index]
