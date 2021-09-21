@@ -500,9 +500,10 @@ class OBD:
             self.params['split'])
 
         if self.params['side']:
-            self.data['v'][1] = self.data[']'][[2,1,0]]
+            self.data['v'] = self.data['v'][[2,1,0]]
             self.data['p'] =  self.data['p'][[2,1,0]]
             self.data['p'][0]-=self.params['side']/2
+            self.data['p'][2]+=self.params['side']/2
 
         rd_index = np.where(self.data['v'][2]<0)[0]
         if self.params['inversion']:
@@ -516,7 +517,7 @@ class OBD:
             p[1]*=-1
             v[2]*=-1
             v[1]*=-1
-            
+
         w = self.data['w'][rd_index]
         intdist = np.empty_like(step)
         for (i,Z) in enumerate(tqdm(step)):
