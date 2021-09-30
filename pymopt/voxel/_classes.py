@@ -1029,7 +1029,7 @@ class TuringModel(VoxelModel):
         self.subc_num=3
         self.skin_num=4
         self.params = {
-            'xy_size':[40,40],'voxel_space':0.01,'dicom_path':False,'bv_tv':0.138,
+            'xz_size':17.15,'voxel_space':0.0245,'dicom_path':False,'bv_tv':0.138,
             'symmetrization':False,'enclosure':False,
             'th_trabecular':40,'th_cortical':1.,'th_subcutaneus':2.6,'th_dermis':1.4,
             'n_space':1.,'n_trabecular':1.4,'n_cortical':1.4,'n_subcutaneus':1.4,'n_dermis':1.4,'n_air':1.,
@@ -1101,12 +1101,24 @@ class TuringModel(VoxelModel):
         #骨梁間隙を0,海綿骨を1、緻密骨を2、 皮下組織を3、皮膚を4、領域外を-1に設定する
         if self.params['dicom_path']:
             self.voxel_model = self._read_dicom()
-        self.xyz_size = [
-        self.voxel_model.shape[0],self.voxel_model.shape[1],self.voxel_model.shape[2]
-        ]
-        self.params['xy_size'][0] = self.xyz_size[0]*self.params['voxel_space']
-        self.params['xy_size'][1] = self.xyz_size[1]*self.params['voxel_space']
-        self.params['th_trabecular'] = self.xyz_size[2]*self.params['voxel_space']
+        #　骨サイズに合わせてデータを削除
+        #### 注意 ####
+        #　xz_sizeはチューリングモデルよりも小さくなくてはならない
+        num_pix = int((self.voxel_model.shape[0]-int(self.params['xz_size']/self.voxel_space))/2)
+        self.voxel_model = self.voxel_model[num_pix:-num_pix,:,num_pix:-num_pix]
+
+        def _cort_data_add(params,voxel_model,th_name,space,num,dtype):
+            if params[th_name] !=0:
+                num_pix = int(params[th_name]/space)
+                # x軸
+                voxel_model[:num_pix,:,:] = num
+                voxel_model[-num_pix:,:,:] = num
+                # y軸
+                voxel_model[:,:num_pix,:] = num
+                # z軸
+                voxel_model[:,:,:num_pix] = num
+                voxel_model[:,:,-num_pix:] = num
+            return voxel_model
 
         def _soft_data_add(params,voxel_model,th_name,space,num,dtype):
             if params[th_name] !=0:
@@ -1119,11 +1131,11 @@ class TuringModel(VoxelModel):
                     voxel_model = np.concatenate((voxel_model,ct),2)
                 if params['enclosure']:
                     #y方向の追加
-                    ct = np.ones((
+                    '''ct = np.ones((
                     voxel_model.shape[0],num_pix,voxel_model.shape[2]
                     ),dtype = dtype)*num
                     voxel_model = np.concatenate((voxel_model,ct),1)
-                    voxel_model = np.concatenate((ct,voxel_model),1)
+                    voxel_model = np.concatenate((ct,voxel_model),1)'''
                     #x方向の追加
                     ct = np.ones((
                     num_pix,voxel_model.shape[1],voxel_model.shape[2]
@@ -1132,7 +1144,7 @@ class TuringModel(VoxelModel):
                     voxel_model = np.concatenate((ct,voxel_model),0)
             return voxel_model
 
-        self.voxel_model = _soft_data_add(
+        self.voxel_model = _cort_data_add(
         self.params,self.voxel_model,'th_cortical',self.voxel_space,self.ct_num,self.dtype
         )
         self.voxel_model = _soft_data_add(
@@ -1244,8 +1256,7 @@ class VoxelWhiteNoiseModel(BaseVoxelMonteCarlo):
     def get_model_fig(self,*,dpi=300,save_path = False,):
         image = self.model.voxel_model
         resol0 = (image.shape[0]+1)*self.model.params['voxel_space']/2-\
-        np.array([self.model.params['voxel_space']*i for i in range(image.shape[1]+1)])
-
+        np.array([self.model.params['voxel_space']*i for i in range(image.shape[0]+1)])
         resol2 = np.array([self.model.params['voxel_space']*i for i in range(image.shape[2]+1)])
 
         plt.figure(figsize=(5,5),dpi=100)
@@ -1328,14 +1339,30 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
     def get_model_fig(self,*,dpi=300,save_path = False,):
         image = self.model.voxel_model
         resol0 = (image.shape[0]+1)*self.model.params['voxel_space']/2-\
+        np.array([self.model.params['voxel_space']*i for i in range(image.shape[0]+1)])
+        resol1 = (image.shape[1]+1)*self.model.params['voxel_space']/2-\
         np.array([self.model.params['voxel_space']*i for i in range(image.shape[1]+1)])
-
         resol2 = np.array([self.model.params['voxel_space']*i for i in range(image.shape[2]+1)])
 
         plt.figure(figsize=(5,5),dpi=100)
         plt.set_cmap(plt.get_cmap('gray'))
         plt.pcolormesh(resol0,resol2,image[:,int(image.shape[1]/2),:].T)
         plt.xlabel('X [mm]')
+        plt.ylabel('Z [mm]')
+        plt.ylim(resol2[-1],resol2[0])
+        if save_path:
+            plt.savefig(
+                save_path,
+                dpi=dpi,
+                orientation='portrait',
+                transparent=False,
+                pad_inches=0.0)
+        plt.show()
+
+        plt.figure(figsize=(6,5),dpi=100)
+        plt.set_cmap(plt.get_cmap('gray'))
+        plt.pcolormesh(resol1,resol2,image[int(image.shape[0]/2),:,:].T)
+        plt.xlabel('Y [mm]')
         plt.ylabel('Z [mm]')
         plt.ylim(resol2[-1],resol2[0])
         if save_path:

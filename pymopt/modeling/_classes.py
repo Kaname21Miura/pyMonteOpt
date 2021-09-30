@@ -39,7 +39,8 @@ class TuringPattern:
         'voxelsize':0.0295,
         'seed':False,
         'ct_coef':4.5e4,
-        'tile_num':1,
+        'tile_num_xz':1,
+        'tile_num_y':1,
         }
         self.coef = np.array([-7.67681281,1.65199492,-0.45314158,0.60424417])
         self.keys_params  = list(self.params.keys())
@@ -63,8 +64,8 @@ class TuringPattern:
         self._calc_microarchitecture(u)
         self._save_info(path)
         u = self._model_binarization(u)
-        if self.tile_num != 0:
-            u = np.tile(u, (self.tile_num,self.tile_num,self.tile_num))
+        if self.tile_num_xz != 0:
+            u = np.tile(u, (self.tile_num_xz,self.tile_num_y,self.tile_num_xz))
         return u
 
     def set_threshold_func_coef(self,coef):

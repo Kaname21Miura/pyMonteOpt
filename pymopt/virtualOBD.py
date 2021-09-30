@@ -22,8 +22,8 @@ range_params = {
     'th_subcutaneus':[1,6],        # 皮下組織厚さの範囲
     'ma_subcutaneus':[0.00485,0.01239],# 皮下組織吸収係数の範囲
     'msd_subcutaneus':[0.83,1.396],# 皮下組織減衰散乱係数の範囲
-    'bv_tv':[0.115,0.02],          # 海綿骨BV/TVの平均と分散
-    'th_cortical':[0.669, 0.133],  # 皮質骨厚さの平均と分散
+    'bv_tv':[0.134,0.028],          # 海綿骨BV/TVの平均と分散
+    'th_cortical':[0.804, 0.149],  # 皮質骨厚さの平均と分散
     'corr':0.54,                   # 皮質骨と海綿骨の相関係数 Boutry2005
 }
 
@@ -38,13 +38,15 @@ model_params ={
     'voxelsize':0.0245,
     'seed':False,
     'ct_coef':4.5e4,
-    'tile_num':2,
+    'tile_num_xz':2,
+    'tile_num_y':4,
 }
 
 th_coef = np.array([-7.61194835,1.62003258,-0.44989454,0.60428882])
 
 monte_params = {
     'voxel_space':model_params['voxelsize'],
+    'xz_size':17.15,
     'symmetrization':True,
     'enclosure':True,
 
@@ -75,7 +77,7 @@ monte_params = {
 }
 
 opt_params ={
-    'start':15,
+    'start':0,
     'end':85,
     'split':0.5,
 
@@ -113,11 +115,9 @@ opt_params ={
 opt_params_inv = opt_params.copy()
 opt_params_inv['inversion']=True
 opt_params_inv['side']=False
-opt_params_inv['start']=0
 opt_params_side = opt_params.copy()
 opt_params_side['inversion']=False
 opt_params_side['side']=True
-opt_params_side['start']=0
 
 def generate_bone_model(bv_tv,path,model_params):
     model_params['bv_tv']=bv_tv
@@ -192,41 +192,48 @@ def calc_ray_tracing(res,opt_params,path):
 
 
 def calc(iteral):
-    alias_name = "-".join((str(datetime.datetime.now().isoformat()).split('.')[0]).split(':'))+'_it'+f'{iteral:04}'
     gvp = generate_variable_params()
     gvp.set_params(range_params)
     vp = gvp.generate(1)
 
-    print('### iteral number ',iteral)
-    print('Alias name: ',alias_name)
-    model_path = './model_result/'
-    monte_path = './monte_result/'
-    opt_path = './opt_result/'
+    if vp['bv_tv'][0] > 0 and vp['th_cortical'][0] > 0:
+        alias_name = "-".join((str(datetime.datetime.now().isoformat()).split('.')[0]).split(':'))+'_it'+f'{iteral:04}'
 
-    path_ = model_path+alias_name+'_dicom'
-    u,bv_tv = generate_bone_model(vp['bv_tv'][0],path_,model_params)
-    print('it: ',iteral,', change bvtv: ',vp['bv_tv'][0],'-->',bv_tv)
-    vp['bv_tv'][0] = bv_tv
-    path_ = monte_path+alias_name
-    res = calc_montecalro(vp,iteral,monte_params,path_,u)
-    print('###### end monte calro in it: ',iteral)
 
-    path_ = opt_path+alias_name
-    calc_ray_tracing(res,opt_params,path_)
+        print('### iteral number ',iteral)
+        print('Alias name: ',alias_name)
+        model_path = './model_result/'
+        monte_path = './monte_result/'
+        opt_path = './opt_result/'
 
-    path_ = opt_path+alias_name+'_inv'
-    calc_ray_tracing(res,opt_params_inv,path_)
+        path_ = model_path+alias_name+'_dicom'
+        u,bv_tv = generate_bone_model(vp['bv_tv'][0],path_,model_params)
+        print('it: ',iteral,', change bvtv: ',vp['bv_tv'][0],'-->',bv_tv)
+        vp['bv_tv'][0] = bv_tv
+        path_ = monte_path+alias_name
+        res = calc_montecalro(vp,iteral,monte_params,path_,u)
+        print('###### end monte calro in it: ',iteral)
 
-    path_ = opt_path+alias_name+'_side'
-    thickness = (vp['th_subcutaneus'][0]+vp['th_dermis'][0]+\
-                vp['th_cortical'][0])/2+\
-                model_params['grid']*model_params['length']*\
-                model_params['tile_num']*model_params['voxelsize']
-    opt_params_side['side']=thickness
-    calc_ray_tracing(res,opt_params_side,path_)
-    print('')
-    print('############### End %s it ###################'%iteral)
-    print('')
+        path_ = opt_path+alias_name
+        calc_ray_tracing(res,opt_params,path_)
+
+        path_ = opt_path+alias_name+'_inv'
+        calc_ray_tracing(res,opt_params_inv,path_)
+
+        path_ = opt_path+alias_name+'_side'
+        thickness = vp['th_subcutaneus'][0]+vp['th_dermis'][0]+monte_params['xz_size']/2
+        opt_params_side['side']=thickness
+        calc_ray_tracing(res,opt_params_side,path_)
+        print('')
+        print('############### End %s it ###################'%iteral)
+        print('')
+    else:
+        print("Invalid parameter was generated")
+        print("BV/TV : ",vp['bv_tv'][0])
+        print("th_cortical : ",vp['th_cortical'][0])
+
+
+
 
 
 if __name__ == "__main__":
