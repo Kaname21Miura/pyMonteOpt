@@ -11,6 +11,8 @@ import warnings
 from collections import defaultdict
 import inspect
 from ..utils.utilities import calTime
+import datetime
+
 
 class MonteCalro:
     def __init__(self):
@@ -60,6 +62,7 @@ class MonteCalro:
                 counter*=2
                 print("Progress: %s [％]"%round((1-w_size/self.nPh)*100,3))
                 calTime(time.time(), start_)
+                print('Time: ',datetime.datetime.now().isoformat())
                 print()
         return count
 

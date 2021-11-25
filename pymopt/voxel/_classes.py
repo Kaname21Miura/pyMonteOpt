@@ -114,7 +114,6 @@ class BaseVoxelMonteCarlo(MonteCalro,metaclass = ABCMeta):
         self._reset_results()
         if self.generate_initial:
             self._generate_initial_coodinate(self.nPh)
-        print(self.add)
         super().start()
         return self
 
@@ -1522,7 +1521,8 @@ class VoxelPlateExModel(BaseVoxelMonteCarlo):
         z_max_mode = False,
         beam_angle = 0,initial_refrect_by_angle = False,
         wavelength = 850,beam_posision = 10,
-        lens_curvature_radius = 51.68,grass_type = 'N-BK7',first_layer_clear=False
+        lens_curvature_radius = 51.68,grass_type = 'N-BK7',
+        first_layer_clear=True
         ):
         super().__init__(
             nPh = nPh,fluence_mode =fluence_mode, model = PlateExModel(),
