@@ -2,6 +2,7 @@
 from ._classes import VoxelPlateModel,VoxelDicomModel
 from ._classes import VoxelPlateLedModel,VoxelSeparatedPlateModel
 from ._classes import VoxelWhiteNoiseModel,VoxelTuringModel
+from ._classes import VoxelPlateExModel
 #from ._classes_cy import VoxelPlateModelCy
 __all__ = [
 'VoxelPlateModel',
@@ -11,4 +12,5 @@ __all__ = [
 'VoxelPlateLedModel',
 'VoxelWhiteNoiseModel',
 'VoxelTuringModel',
+'VoxelPlateExModel'
 ]
