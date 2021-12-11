@@ -1254,6 +1254,108 @@ class TuringModel(VoxelModel):
     def getModelSize(self):
         print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
 
+class TuringModel_cylinder(TuringModel):
+    def __init__(self):
+        self.model_name = 'TuringModel_cylinder'
+        self.model_name = 'TuringModel_cylinder'
+        self.dtype = 'int8'
+        self.dtype_f = 'float32'
+        self.ct_num=2
+        self.subc_num=3
+        self.skin_num=4
+        self.air_num=5
+        self.params = {
+            'r_bone':9.17,'voxel_space':0.0245,'dicom_path':False,'bv_tv':0.138,
+            'th_cortical':1.,'th_subcutaneus':2.6,'th_dermis':1.4,
+            'n_space':1.,'n_trabecular':1.4,'n_cortical':1.4,'n_subcutaneus':1.4,'n_dermis':1.4,'n_air':1.,
+            'ma_space':1e-8,'ma_trabecular':0.02374,'ma_cortical':0.02374,'ma_subcutaneus':0.011,'ma_dermis':0.037,'ma_air':1e-5,
+            'ms_space':1e-8,'ms_trabecular':20.54,'ms_cortical':17.67,'ms_subcutaneus':20,'ms_dermis':20,'ms_air':1e-5,
+            'g_space':0.90,'g_trabecular':0.90,'g_cortical':0.90,'g_subcutaneus':0.90,'g_dermis':.90,'g_air':.90,
+            }
+        self.keys = list(self.params.keys())
+
+        self._make_model_params()
+        self.bmd = self._get_bone_vbmd()
+        self.voxel_space = self.params['voxel_space']
+        self.voxel_model = np.zeros((3,3,3),dtype = self.dtype)
+        self.model_shape = (3,3,3)
+
+    def _make_model_params(self):
+        # パラメーターは、[骨梁間隙, 海綿骨, 緻密骨, 皮下組織, 皮膚, 外気]のように設定されています。
+        name_list = ['_space','_trabecular','_cortical','_subcutaneus','_dermis','_air']
+        _n = [];_ma = [];_ms = [];_g = []
+        for i in name_list:
+            _n.append(self.params['n'+i])
+            _ma.append(self.params['ma'+i])
+            _ms.append(self.params['ms'+i])
+            _g.append(self.params['g'+i])
+        self.n = np.array(_n).astype(self.dtype_f)
+        self.ma = np.array(_ma).astype(self.dtype_f)
+        self.ms = np.array(_ms).astype(self.dtype_f)
+        self.g = np.array(_g).astype(self.dtype_f)
+
+    def _make_voxel_model(self):
+        #骨梁間隙を0,海綿骨を1、緻密骨を2、 皮下組織を3、皮膚を4、大気を５、領域外を-1に設定する
+        if self.params['dicom_path']:
+            self.voxel_model = self._read_dicom()
+        #　骨サイズに合わせてデータを削除
+        #### 注意 ####
+        #　r_bone*2はチューリングモデルよりも小さくなくてはならない
+        num_pix = int((self.voxel_model.shape[0]-int(self.params['r_bone']*2/self.voxel_space))/2)
+        self.voxel_model = self.voxel_model[num_pix:-num_pix,:,num_pix:-num_pix]
+
+        #軟組織分のVoxelを増やす。この時、全ては空気であると仮定する。
+        num_pix = int((self.params['th_subcutaneus']+self.params['th_dermis'])/self.voxel_space)+1
+        #Z軸方向
+        ct = np.ones((
+        self.voxel_model.shape[0],self.voxel_model.shape[1],num_pix),
+        dtype = self.dtype)*self.air_num
+        self.voxel_model = np.concatenate((ct,self.voxel_model),2)
+        self.voxel_model = np.concatenate((self.voxel_model,ct),2)
+        #x方向の追加
+        ct = np.ones((
+        num_pix,self.voxel_model.shape[1],self.voxel_model.shape[2]
+        ),dtype = self.dtype)*self.air_num
+        self.voxel_model = np.concatenate((self.voxel_model,ct),0)
+        self.voxel_model = np.concatenate((ct,self.voxel_model),0)
+
+        #中心からxzの半径方向距離を出す
+        x_size = self.voxel_model.shape[0]
+        z_size = self.voxel_model.shape[2]
+        x_c = int((x_size)/2)
+        z_c = int((z_size)/2)
+        data_xnum = (np.tile(np.arange(x_size),(z_size,1)).T-x_c)*self.voxel_space
+        data_znum = (np.tile(np.arange(z_size),(x_size,1))-z_c)*self.voxel_space
+        r = np.sqrt(data_xnum**2+data_znum**2)
+
+        #各組織の条件をつける
+        #皮質骨
+        r_ref_in = self.params['r_bone']-self.params['th_cortical']
+        r_ref_out = self.params['r_bone']
+        index = np.where((r>=r_ref_in)&(r<r_ref_out))
+        self.voxel_model[index[0],:,index[1]]=self.ct_num
+        num_pix = int((self.params['th_cortical'])/self.voxel_space)+1
+        self.voxel_model[:,:num_pix,:]=self.ct_num
+        #皮下組織
+        r_ref_in = self.params['r_bone']
+        r_ref_out = self.params['r_bone']+self.params['th_subcutaneus']
+        index = np.where((r>=r_ref_in)&(r<r_ref_out))
+        self.voxel_model[index[0],:,index[1]]=self.subc_num
+        #真皮
+        r_ref_in = self.params['r_bone']+self.params['th_subcutaneus']
+        r_ref_out = self.params['r_bone']+self.params['th_subcutaneus']+self.params['th_dermis']
+        index = np.where((r>=r_ref_in)&(r<r_ref_out))
+        self.voxel_model[index[0],:,index[1]]=self.skin_num
+
+        #境界を定義
+        self.voxel_model[0,:,:] = -1
+        self.voxel_model[-1,:,:] = -1
+        self.voxel_model[:,0,:] = -1
+        self.voxel_model[:,-1,:] = -1
+        self.voxel_model[:,:,0] = -1
+        self.voxel_model[:,:,-1] = -1
+
+
 class SeparatedPlateModel(PlateModel):
     def __init__(
         self,*,thickness=[0.2,] ,xy_size=[0.1,0.1],voxel_space = 0.1,
@@ -1396,10 +1498,19 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
         z_max_mode = False,
         beam_angle = 0,initial_refrect_by_angle = False,
         wavelength = 850,beam_posision = 10,
-        lens_curvature_radius = 51.68,grass_type = 'N-BK7',first_layer_clear=False
+        lens_curvature_radius = 51.68,grass_type = 'N-BK7',first_layer_clear=False,
+        model_name = 'TuringModel'
         ):
+        namelist = ['TuringModel','TuringModel_cylinder']
+        if model_name==namelist[0]:
+            model = TuringModel()
+        elif model_name == namelist[1]:
+            model = TuringModel_cylinder()
+        else:
+            print('Invalid name: ',model_name)
+
         super().__init__(
-            nPh = nPh,fluence_mode =fluence_mode, model = TuringModel(),
+            nPh = nPh,fluence_mode =fluence_mode, model = model,
             dtype='float32',nr=nr,nz=nz,dr=dr,dz=dz,z_max_mode = z_max_mode,
             w_beam=w_beam,beam_angle = beam_angle,
             initial_refrect_by_angle = initial_refrect_by_angle,
