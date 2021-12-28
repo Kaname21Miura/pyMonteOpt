@@ -229,7 +229,7 @@ class MonteCalro:
         self.Ttw = self.w_result[self.Tt_index].sum()/self.nPh
         print('######')
         print('Mean Rd %0.6f'% self.Rdw)
-        print('Mean Tt %0.6f'% self.Ttw)
+        print('Mean Td %0.6f'% self.Ttw)
         print()
 
     def getRdTtIndex(self):

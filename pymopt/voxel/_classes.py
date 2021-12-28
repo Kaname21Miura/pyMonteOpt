@@ -843,55 +843,69 @@ class DicomLinearModel(DicomBinaryModel):
 
 class PlateModel(VoxelModel):
     @_deprecate_positional_args
-    def __init__(
-        self,*,thickness=[0.2,] ,xy_size=[0.1,0.1],voxel_space = 0.1,
-        ma=[1,],ms=[100,],g=[0.9,],n=[1.37,],n_air=1,f = 'float32'):
+    def __init__(self):
         self.model_name = 'PlateModel'
-        self.thickness = thickness
-        self.n =np.array(n+[n_air]).astype(f)
-        self.ms = np.array(ms).astype(f)
-        self.ma = np.array(ma).astype(f)
-        self.g = np.array(g).astype(f)
-        self.voxel_space = voxel_space
-        self.xy_size = xy_size
-        self.borderposit = self._make_borderposit(thickness,f)
-        self._make_voxel_model()
+        self.dtype_f = np.float32
+        self.dtype = np.int8
+        self.params = {
+            'x_size':40,'y_size':40,#X-Yはintralipidの領域を示す
+            'voxel_space':0.1,
+            'thickness':[1.3,40],
+            'n':[1.5,1.4],
+            'n_air':1.,
+            'ma':[1e-5,0.02374],
+            'ms':[1e-5,0.02374],
+            'g':[0.9,0.9],
+            }
+        self.keys = list(self.params.keys())
+        self._param_instantiating()
+        self.voxel_model = np.zeros((3,3,3),dtype = self.dtype)
+        self.model_shape = (3,3,3)
 
-    def _make_borderposit(self,thickness,f):
-        thickness = [0]+thickness
-        b = 0; b_list = []
-        for i in  thickness:
-            b += i
-            b_list.append(b)
-        return np.array(b_list).astype(f)
+    def _param_instantiating(self):
+        f = self.dtype_f
+        self.thickness = self.params['thickness']
+        self.n =np.array(self.params['n']+[self.params['n_air']]).astype(f)
+        self.ms = np.array(self.params['ms']).astype(f)
+        self.ma = np.array(self.params['ma']).astype(f)
+        self.g = np.array(self.params['g']).astype(f)
+        self.voxel_space = self.params['voxel_space']
+        self.x_size = np.int32(round(self.params['x_size']/self.params['voxel_space']))
+        self.y_size = np.int32(round(self.params['y_size']/self.params['voxel_space']))
+        self.z_size = np.int32(round(np.array(self.thickness).sum()/self.params['voxel_space']))
 
-    def _make_voxel_model(self):
-        nx_box = np.round(self.xy_size[0]/self.voxel_space).astype(int)
-        ny_box = np.round(self.xy_size[1]/self.voxel_space).astype(int)
-        nz_box = np.round(self.borderposit/self.voxel_space).astype(int)
-        self.voxel_model = np.zeros((nx_box+2,ny_box+2,nz_box[-1]+2),dtype = 'int8')
-        for i in range(nz_box.size-1):
-            self.voxel_model[:,:,nz_box[i]+1:nz_box[i+1]+1] = i
-        self.voxel_model[0] = -1;self.voxel_model[-1] = -1
-        self.voxel_model[:,0] = -1; self.voxel_model[:,-1] = -1
-        self.voxel_model[:,:,0] = -1; self.voxel_model[:,:,-1] = -1
-
-    @_deprecate_positional_args
-    def build(self,thickness,xy_size,voxel_space,ma,ms,g,n,n_air,f = 'float32'):
+    def build(self):
+        #thickness,xy_size,voxel_space,ma,ms,g,n,n_air
         del self.voxel_model
         gc.collect()
-        #-1はモデルの外側
-        self.voxel_space = voxel_space
-        self.xy_size = xy_size
-        self.thickness = thickness
-        self.borderposit = self._make_borderposit(thickness,f)
         self._make_voxel_model()
-
-        self.n =np.array(n+[n_air]).astype(f)
-        self.ms = np.array(ms).astype(f)
-        self.ma = np.array(ma).astype(f)
-        self.g = np.array(g).astype(f)
         self.getModelSize()
+
+    def set_params(self,*initial_data, **kwargs):
+        set_params(self.params,self.keys,*initial_data, **kwargs)
+        self._param_instantiating()
+
+    def _make_voxel_model(self):
+
+        self.voxel_model = np.empty((
+            self.x_size+2,
+            self.y_size+2,
+            self.z_size+2
+        )).astype(self.dtype)
+
+        val = 1
+        for n_,i in enumerate(self.thickness):
+            val_ = round(i/self.voxel_space)
+            self.voxel_model[:,:,val:val_+val] = np.int8(n_)
+            val+=val_
+
+        self.end_point = np.int8(-1)
+        self.voxel_model[0,:,:] = self.end_point
+        self.voxel_model[-1,:,:] = self.end_point
+        self.voxel_model[:,0,:] = self.end_point
+        self.voxel_model[:,-1,:] = self.end_point
+        self.voxel_model[:,:,0] = self.end_point
+        self.voxel_model[:,:,-1] = self.end_point
 
     def get_params(self):
         return {
@@ -904,6 +918,7 @@ class PlateModel(VoxelModel):
 
     def getModelSize(self):
         print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
+
 
 class PlateExModel(VoxelModel):
     #ガラスとイントラリピッドの２層構造のみを対象とする
@@ -1621,7 +1636,12 @@ class VoxelPlateModel(BaseVoxelMonteCarlo):
             lens_curvature_radius = lens_curvature_radius,
             grass_type = grass_type,first_layer_clear=first_layer_clear
         )
-
+    def build(self,*initial_data, **kwargs):
+        if initial_data == () and kwargs == {}:
+            pass
+        else:
+            self.model.set_params(*initial_data, **kwargs)
+        self.model.build()
 class VoxelPlateExModel(BaseVoxelMonteCarlo):
     #ガラスとイントラリピッドの２層構造のみを対象とする
     #ガラスはイントラリピッドを取り囲んでいるものとする
