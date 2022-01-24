@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from ._kernel import vmc_kernel
+"""
+Created on Thu Dec 24 16:56:05 2021
+@author: Kaname Miura
+"""
+import cupy as cp
+from ._cukernel import vmc_kernel
 
 import numpy as np
 import os
@@ -41,6 +46,7 @@ class BaseVoxelMonteCarlo(metaclass = ABCMeta):
                  first_layer_clear = False,
                  threadnum = 128,
                  ):
+        super().__init__()
 
         def __check_list_name(name,name_list):
             if not(name in name_list):
@@ -65,25 +71,54 @@ class BaseVoxelMonteCarlo(metaclass = ABCMeta):
         else:
             self.threadnum = int(threadnum)
 
-    def start(self):
+    def start(self,rand_seed=None):
+        if rand_seed is None:
+            rand_seed = np.random.randint(1e5)
         self.nPh = int(self.nPh)
         self._reset_results()
         self._generate_initial_coodinate(self.nPh)
+
+        M = np.int32(self.model.voxel_model.shape[1])
+        L = np.int32(self.model.voxel_model.shape[2])
 
         self.add = self.add.astype(np.int32)
         self.p = self.p.astype(np.float32)
         self.v = self.v.astype(np.float32)
         self.w = self.w.astype(np.float32)
+
+        func = vmc_kernel()
         print("")
-        print("###### Start ######")
+        print("###### Start (Random seed: %s) ######" %rand_seed)
         print("")
         start_ = time.time()
-        self.add,self.p,self.v,self.w = vmc_kernel(
-            self.add, self.p,self.v, self.w,
-            self.model.ma, self.model.ms, self.model.n, self.model.g,
-            self.model.voxel_model, self.model.voxel_space,
-            np.int32(self.nPh), np.int8(self.model.end_point)
-        )
+        mempool = cp.get_default_memory_pool()
+        pinned_mempool = cp.get_default_pinned_memory_pool()
+
+        add_ = cp.asarray(self.add)
+        p_ = cp.asarray(self.p)
+        v_ = cp.asarray(self.v)
+        w_ = cp.asarray(self.w)
+
+        print("Comp mem tranceration")
+        func((int((self.nPh+self.threadnum-1)/self.threadnum),), (self.threadnum,),
+         (
+         add_,p_,v_,w_,
+         cp.asarray(self.model.ma.astype(np.float32)),
+         cp.asarray(self.model.ms.astype(np.float32)),
+         cp.asarray(self.model.n.astype(np.float32)),
+         cp.asarray(self.model.g.astype(np.float32)),
+         cp.asarray(self.model.voxel_model.astype(np.int8)),np.float32(self.model.voxel_space),
+         M,L,np.int32(self.nPh),np.int8(self.model.end_point),np.int32(rand_seed)
+         ))
+        self.add = cp.asnumpy(add_)
+        self.p = cp.asnumpy(p_)
+        self.v = cp.asnumpy(v_)
+        self.w = cp.asnumpy(w_)
+
+        del add_,p_,v_,w_
+        gc.collect()
+        mempool.free_all_blocks()
+        pinned_mempool.free_all_blocks()
 
         self._end_process()
         print("###### End ######")
@@ -273,9 +308,9 @@ class BaseVoxelMonteCarlo(metaclass = ABCMeta):
         encoded_position[2] = np.round(space*(add[2]-1)+p[2]+space/2,6)
         return encoded_position
 
-    def set_monte_params(self,*,nPh,model, dtype_f=np.float32, dtype=np.int32,w_beam = 0):
-        self.dtype_f = dtype_f
+    def set_monte_params(self,*,nPh,model, dtype_f=np.float32,dtype=np.int32,w_beam = 0):
         self.dtype = dtype
+        self.dtype_f = dtype_f
         self.nPh = nPh
         self.w_beam = w_beam
         self.model = model
@@ -346,6 +381,23 @@ class VoxelModel:
         pass
     def set_params(self):
         pass
+    def getAbsorptionCoeff(self,add):
+        index = self.voxel_model[add[0],add[1],add[2]]
+        return self.ma[index]
+    def getScatteringCoeff(self,add):
+        index = self.voxel_model[add[0],add[1],add[2]]
+        return self.ms[index]
+    def getAnisotropyCoeff(self,add):
+        index = self.voxel_model[add[0],add[1],add[2]]
+        return self.g[index]
+    def getReflectiveIndex(self,add):
+        index = self.voxel_model[add[0],add[1],add[2]]
+        return self.n[index]
+    def get_second_layer_addz(self):
+        return np.where(self.voxel_model==self.voxel_model[1,1,1])[2][-1]+1
+
+    def get_addIndex(self,add):
+        return self.voxel_model[add[0],add[1],add[2]]
 
 class PlateModel(VoxelModel):
     @_deprecate_positional_args
@@ -785,7 +837,7 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
             'Date':datetime.datetime.now().isoformat(),
             'coment':coment,
             'number_of_photons':self.nPh,
-            'calc_dtype_f':"32 bit",
+            'calc_dtype':"32 bit",
             'model':{
                 'model_name':self.model.model_name,
                 'model_params':self.model.params,
