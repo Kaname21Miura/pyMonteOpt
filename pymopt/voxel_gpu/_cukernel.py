@@ -25,10 +25,10 @@ def vmc_kernel():
         }
 
         __global__ void cuVMC(
-            int* add,
-            float* p,
-            float* v,
-            float* w,
+            volatile int* add,
+            volatile float* p,
+            volatile float* v,
+            volatile float* w,
             float* ma, float* ms, float* n, float* g,
             char* voxel_model, float l,
             int M, int L, int nPh, char end_point, int rand_seed
@@ -45,7 +45,6 @@ def vmc_kernel():
                 // 変数系　計算用メモリ
                 int add_[3] = {};
                 float v_[3] = {};
-                float sum_v = 0;
                 float zero_vec[3] = {0,0,0}, one_vec[3] = { 1,1,1 };
                 float fi = 0;
                 float cos_fi, cos_th;
@@ -133,8 +132,9 @@ def vmc_kernel():
                                             + zero_vec[i] * copysignf(1, v[idx + nPh * i]) * cosf(at);
                                         zero_vec[i] = 0, one_vec[i] = 1;
                                     }
-                                    valf = norm3df(v[ix],v[iy],v[iz]);
-                                    for (int i = 0; i < 3; i++) { v[idx + nPh * i] /= valf; }
+                                    valf = 0;
+                                    for (int i = 0; i < 3; i++) { valf += powf(v[idx + nPh * i],2); }
+                                    for (int i = 0; i < 3; i++) { v[idx + nPh * i] /= sqrtf(valf); }
                                 }
                                 else { // Fresnel 反射
                                     flag_tr = 0;
@@ -207,8 +207,8 @@ def vmc_kernel():
                         for (int i = 0; i < 3; i++){ v[idx + nPh * i] = v_[i]; }
                     }
                     // 計算誤差の補正（単位ベクトルに変換）
-                    valf = norm3df(v[ix],v[iy],v[iz]);
-                    for (int i = 0; i < 3; i++) { v[idx + nPh * i] /= valf; }
+                    for (int i = 0; i < 3; i++) { valf += powf(v[idx + nPh * i],2); }
+                    for (int i = 0; i < 3; i++) { v[idx + nPh * i] /= sqrtf(valf); }
                     /*
                     if (step == 0){
                         flag = 0;
@@ -217,6 +217,7 @@ def vmc_kernel():
                     */
                 }
             End:
+            //__syncthreads();
             }
         }
     }

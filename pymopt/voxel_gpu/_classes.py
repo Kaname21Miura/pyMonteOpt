@@ -6,7 +6,7 @@ Created on Thu Dec 24 16:56:05 2021
 """
 import cupy as cp
 from ._cukernel import vmc_kernel
-
+from tqdm import tqdm
 import numpy as np
 import os
 import pydicom
@@ -29,6 +29,7 @@ import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 #os.system("taskset -p 0xff %d" % os.getpid())
 
+func = vmc_kernel()
 __all__ = [
 'VoxelPlateModel','VoxelTuringModel'
 ]
@@ -81,50 +82,63 @@ class BaseVoxelMonteCarlo(metaclass = ABCMeta):
         M = np.int32(self.model.voxel_model.shape[1])
         L = np.int32(self.model.voxel_model.shape[2])
 
-        self.add = self.add.astype(np.int32)
-        self.p = self.p.astype(np.float32)
-        self.v = self.v.astype(np.float32)
-        self.w = self.w.astype(np.float32)
+        add_cpu = self.add.astype(np.int32)
+        p_cpu = self.p.astype(np.float32)
+        v_cpu = self.v.astype(np.float32)
+        w_cpu = self.w.astype(np.float32)
 
-        func = vmc_kernel()
         print("")
         print("###### Start (Random seed: %s) ######" %rand_seed)
         print("")
         start_ = time.time()
         mempool = cp.get_default_memory_pool()
         pinned_mempool = cp.get_default_pinned_memory_pool()
-
-        add_ = cp.asarray(self.add)
-        p_ = cp.asarray(self.p)
-        v_ = cp.asarray(self.v)
-        w_ = cp.asarray(self.w)
-
-        print("Comp mem tranceration")
-        func((int((self.nPh+self.threadnum-1)/self.threadnum),), (self.threadnum,),
-         (
-         add_,p_,v_,w_,
-         cp.asarray(self.model.ma.astype(np.float32)),
-         cp.asarray(self.model.ms.astype(np.float32)),
-         cp.asarray(self.model.n.astype(np.float32)),
-         cp.asarray(self.model.g.astype(np.float32)),
-         cp.asarray(self.model.voxel_model.astype(np.int8)),np.float32(self.model.voxel_space),
-         M,L,np.int32(self.nPh),np.int8(self.model.end_point),np.int32(rand_seed)
-         ))
-        self.add = cp.asnumpy(add_)
-        self.p = cp.asnumpy(p_)
-        self.v = cp.asnumpy(v_)
-        self.w = cp.asnumpy(w_)
-
-        del add_,p_,v_,w_
-        gc.collect()
         mempool.free_all_blocks()
         pinned_mempool.free_all_blocks()
+
+        add_ = cp.asarray(add_cpu)
+        p_ = cp.asarray(p_cpu)
+        v_ = cp.asarray(v_cpu)
+        w_ = cp.asarray(w_cpu)
+        ma_ = cp.asarray(self.model.ma.astype(np.float32))
+        ms_ = cp.asarray(self.model.ms.astype(np.float32))
+        n_ = cp.asarray(self.model.n.astype(np.float32))
+        g_ = cp.asarray(self.model.g.astype(np.float32))
+        v_model = cp.asarray(self.model.voxel_model.astype(np.int8))
+        l_ = np.float32(self.model.voxel_space)
+        nph = np.int32(self.nPh)
+        end_p = np.int8(self.model.end_point)
+
+        func((int((self.nPh+self.threadnum-1)/self.threadnum),1), (self.threadnum,1),
+        (
+            add_,p_,v_,w_,
+            ma_,ms_,n_,g_,
+            v_model,l_,
+            M,L,nph,end_p,np.int32(rand_seed)
+        ))
+
+        w_cpu = cp.asnumpy(w_)
+        add_cpu = cp.asnumpy(add_)
+        p_cpu = cp.asnumpy(p_)
+        v_cpu = cp.asnumpy(v_)
+
+        del add_,p_,v_,w_,
+        del ma_,ms_,n_,g_,
+        del v_model,
+        del l_,M,L,nph,end_p,rand_seed,
+        cp.get_default_pinned_memory_pool().free_all_blocks()
+        mempool.free_all_blocks()
+        #pinned_mempool.free_all_blocks()
+
+        self.add,self.p,self.v,self.w = add_cpu,p_cpu,v_cpu,w_cpu
+        del add_cpu,p_cpu,v_cpu,w_cpu
+        gc.collect()
 
         self._end_process()
         print("###### End ######")
         self.getRdTtRate()
         calTime(time.time(), start_)
-        #del func
+
         return self
 
     def _end_process(self):#書き換え
