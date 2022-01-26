@@ -52,6 +52,8 @@ class TuringPattern:
         self.save_dicom=save_dicom
         mempool = cp.get_default_memory_pool()
         pinned_mempool = cp.get_default_pinned_memory_pool()
+        mempool.free_all_blocks()
+        pinned_mempool.free_all_blocks()
         self._calc_kukv()
         u,v = self._get_inital_vector()
         for i in tqdm(range(self.repetition)):
