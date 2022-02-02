@@ -91,23 +91,21 @@ class BaseVoxelMonteCarlo(metaclass = ABCMeta):
         print("###### Start (Random seed: %s) ######" %rand_seed)
         print("")
         start_ = time.time()
-        mempool = cp.get_default_memory_pool()
-        pinned_mempool = cp.get_default_pinned_memory_pool()
-        mempool.free_all_blocks()
-        pinned_mempool.free_all_blocks()
+        cp.get_default_memory_pool().free_all_blocks()
+        cp.get_default_pinned_memory_pool().free_all_blocks()
 
-        add_ = cp.asarray(add_cpu)
-        p_ = cp.asarray(p_cpu)
-        v_ = cp.asarray(v_cpu)
-        w_ = cp.asarray(w_cpu)
+        add_ = cp.asarray(add_cpu,dtype = np.int32)
+        p_ = cp.asarray(p_cpu,dtype = np.float32)
+        v_ = cp.asarray(v_cpu,dtype = np.float32)
+        w_ = cp.asarray(w_cpu,dtype = np.float32)
         ma_ = cp.asarray(self.model.ma.astype(np.float32))
         ms_ = cp.asarray(self.model.ms.astype(np.float32))
         n_ = cp.asarray(self.model.n.astype(np.float32))
         g_ = cp.asarray(self.model.g.astype(np.float32))
-        v_model = cp.asarray(self.model.voxel_model.astype(np.int8))
-        l_ = np.float32(self.model.voxel_space)
-        nph = np.int32(self.nPh)
-        end_p = np.int8(self.model.end_point)
+        v_model = cp.asarray(self.model.voxel_model.astype(np.int8),dtype = np.int8)
+        l_ = cp.float32(self.model.voxel_space)
+        nph = cp.int32(self.nPh)
+        end_p = cp.int8(self.model.end_point)
 
         func((int((self.nPh+self.threadnum-1)/self.threadnum),1), (self.threadnum,1),
         (
@@ -126,8 +124,8 @@ class BaseVoxelMonteCarlo(metaclass = ABCMeta):
         del ma_,ms_,n_,g_,
         del v_model,
         del l_,M,L,nph,end_p,rand_seed,
+        cp.get_default_memory_pool().free_all_blocks()
         cp.get_default_pinned_memory_pool().free_all_blocks()
-        mempool.free_all_blocks()
         #pinned_mempool.free_all_blocks()
 
         self.add,self.p,self.v,self.w = add_cpu,p_cpu,v_cpu,w_cpu
@@ -640,12 +638,13 @@ class TuringModel(VoxelModel):
         self.voxel_model[:,:,0] = self.end_point
         self.voxel_model[:,:,-1] = self.end_point
 
+        print("Shape of voxel_model ->",self.voxel_model.shape)
+
     def getModelSize(self):
         print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
 
 class TuringModel_cylinder(TuringModel):
     def __init__(self):
-        self.model_name = 'TuringModel_cylinder'
         self.model_name = 'TuringModel_cylinder'
         self.dtype_f = np.float32
         self.dtype = np.int8
@@ -696,7 +695,9 @@ class TuringModel_cylinder(TuringModel):
         self.voxel_model = self.voxel_model[num_pix:-num_pix,:,num_pix:-num_pix]
 
         #軟組織分のVoxelを増やす。この時、全ては空気であると仮定する。
-        num_pix = int((self.params['th_subcutaneus']+self.params['th_dermis'])/self.voxel_space)+1
+        num_pix_subc = int(self.params['th_subcutaneus']/self.voxel_space)
+        num_pix_derm = int(self.params['th_dermis']/self.voxel_space)
+        num_pix = num_pix_subc + num_pix_derm
         #Z軸方向
         ct = np.ones((
         self.voxel_model.shape[0],self.voxel_model.shape[1],num_pix),
@@ -723,21 +724,22 @@ class TuringModel_cylinder(TuringModel):
         #皮質骨
         r_ref_in = self.params['r_bone']-self.params['th_cortical']
         r_ref_out = self.params['r_bone']
-        index = np.where((r>=r_ref_in)&(r<r_ref_out))
+        index = np.where((r>r_ref_in)&(r<=r_ref_out))
         self.voxel_model[index[0],:,index[1]]=self.ct_num
         num_pix = int((self.params['th_cortical'])/self.voxel_space)+1
         self.voxel_model[:,:num_pix,:]=self.ct_num
+        index = np.where((r>r_ref_out))
+        self.voxel_model[index[0],:,index[1]]=self.air_num
         #皮下組織
         r_ref_in = self.params['r_bone']
         r_ref_out = self.params['r_bone']+self.params['th_subcutaneus']
-        index = np.where((r>=r_ref_in)&(r<r_ref_out))
+        index = np.where((r>r_ref_in)&(r<=r_ref_out))
         self.voxel_model[index[0],:,index[1]]=self.subc_num
         #真皮
         r_ref_in = self.params['r_bone']+self.params['th_subcutaneus']
         r_ref_out = self.params['r_bone']+self.params['th_subcutaneus']+self.params['th_dermis']
-        index = np.where((r>=r_ref_in)&(r<r_ref_out))
+        index = np.where((r>r_ref_in)&(r<=r_ref_out))
         self.voxel_model[index[0],:,index[1]]=self.skin_num
-
         #境界を定義
         self.voxel_model[0,:,:] = self.end_point
         self.voxel_model[-1,:,:] = self.end_point
@@ -746,6 +748,7 @@ class TuringModel_cylinder(TuringModel):
         self.voxel_model[:,:,0] = self.end_point
         self.voxel_model[:,:,-1] = self.end_point
         self.voxel_model = self.voxel_model.astype(self.dtype)
+        print("Shape of voxel_model ->",self.voxel_model.shape)
 
 # =============================================================================
 # Public montecalro model
@@ -776,10 +779,10 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
         threadnum = 128,
         model_name = 'TuringModel'
         ):
-        namelist = ['TuringModel','TuringModel_cylinder']
-        if model_name==namelist[0]:
+        self.namelist = ['TuringModel','TuringModel_cylinder']
+        if model_name==self.namelist[0]:
             model = TuringModel()
-        elif model_name == namelist[1]:
+        elif model_name == self.namelist[1]:
             model = TuringModel_cylinder()
         else:
             print('Invalid name: ',model_name)
@@ -792,6 +795,29 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
             threadnum = threadnum
         )
         self.bone_model = False
+
+    def _set_inital_add(self):
+
+        if self.beam_type == 'TEM00':
+            self.add =  np.zeros((3, self.nPh),dtype = self.dtype)
+        self.add[0] = self._get_center_add(self.model.voxel_model.shape[0])
+        self.add[1] = self._get_center_add(self.model.voxel_model.shape[1])
+        if self.first_layer_clear:
+            self.add[2] = self.model.get_second_layer_addz()
+        else:
+            self.add[2] = 1
+
+        if self.model.model_name==self.namelist[1]:
+            def _get_first_num_z(a,x):
+                if a[x]==(self.model.end_point-2):
+                    return x
+                return _get_first_num_z(a,x+1)
+            aa = self.add[:,0]
+            a = self.model.voxel_model[aa[0],aa[1]]
+            x=0
+            zz = _get_first_num_z(a,x)
+            print("Inital add for z-axis is ",zz)
+            self.add[2] = zz
 
     def build(self,*initial_data, **kwargs):
         if initial_data == () and kwargs == {}:

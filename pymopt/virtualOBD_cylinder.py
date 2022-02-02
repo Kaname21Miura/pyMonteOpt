@@ -1,7 +1,18 @@
-from pymopt.modeling import TuringPattern
-from pymopt.voxel import VoxelTuringModel
+from pymopt.modeling_gpu import TuringPattern
+from pymopt.voxel_gpu import VoxelTuringModel
 from pymopt.utils import generate_variable_params
-from pymopt.optics import OBD
+from pymopt import metrics as met
+
+import datetime,time
+import os,gc
+import numpy as np
+import pandas as pa
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_style("ticks", {'grid.linestyle': '--'})
+import pandas as pd
+
 
 import datetime,time
 import os,gc
@@ -10,8 +21,7 @@ import pandas as pa
 from multiprocessing import Pool
 
 
-repetitions = 500
-pool_num = 8
+repetitions = 10000
 nPh = 1e7
 iteral_num=np.arange(repetitions)
 
@@ -32,6 +42,7 @@ range_params_osteoporosis['th_cortical'] = [0.487,0.138]
 range_params_osteopenia = range_params_norm.copy()
 range_params_osteopenia['bv_tv'] = [0.103,0.030]
 range_params_osteopenia['th_cortical'] = [0.571,0.173]
+
 def determining_params_range():
     a = np.random.rand()
     range_params = 0
@@ -47,26 +58,28 @@ def determining_params_range():
     return range_params
 
 model_params ={
-    'grid':40,
-    'dx':1/40,
+    'grid':30,
+    'dx':1/30,
     'dt':1,
     'du':0.0002,
     'dv':0.01,
     'length':10,
     'repetition':100,
-    'voxelsize':0.0245,
+    'voxelsize':0.0306,
     'seed':False,
     'ct_coef':4.5e4,
     'tile_num_xz':2,
     'tile_num_y':4,
 }
 
-th_coef = np.array([-7.6618293,1.64450117,-0.45237661,0.60426539])
+
+#th_coef = np.array([-7.6618293,1.64450117,-0.45237661,0.60426539])
+th_coef = np.array([-10.93021385,   2.62630274,  -0.50913966,   0.60371039])
 
 
 monte_params = {
     'voxel_space':model_params['voxelsize'],
-    'r_bone':9.17,
+    'r_bone':9.,
 
     'n_space':1.4,
     'n_trabecular':1.55,
@@ -78,12 +91,12 @@ monte_params = {
     'ma_space':0.00862,
     'ma_trabecular':0.02374,
     'ma_cortical':0.02374,
-    'ma_air':1e-5,
+    'ma_air':1e-6,
 
     'ms_space':11.13,
     'ms_trabecular':20.588,
     'ms_cortical':20.588,
-    'ms_air':1e-5,
+    'ms_air':1e-6,
 
     'g_space':0.90,
     'g_trabecular':0.90,
@@ -107,13 +120,12 @@ def generate_bone_model(bv_tv,path,model_params):
     gc.collect()
     return u,bvtv_
 
+
 def calc_montecalro(vp,iteral,params,path,u):
     print()
     print('###################################')
     print('# %s'%iteral)
-
-    lamda = 850
-    deg = 0
+    
     nn = 0
     params['th_dermis'] = vp['th_dermis'][nn]
     params['ma_dermis'] = vp['ma_dermis'][nn]
@@ -128,23 +140,16 @@ def calc_montecalro(vp,iteral,params,path,u):
 
     params['bv_tv'] = vp['bv_tv'][nn]
     params['th_cortical'] = vp['th_cortical'][nn]
-
+    #print(params)
     model = VoxelTuringModel(
         nPh = nPh,
-        z_max_mode = False,
-        beam_angle = deg*np.pi/180,
-        wavelength = lamda,
-        beam_posision = 10,
-        lens_curvature_radius = 51.68,
-        grass_type = 'N-BK7',
-        initial_refrect_by_angle = True,
         model_name = 'TuringModel_cylinder'
     )
     model.set_model(u)
 
     model.build(**params)
     start = time.time()
-    model = model.start()
+    model = model.start(iteral)
     print('%s sec'%(time.time()-start))
     print('# %s'%iteral)
     print("Save -> %s"%path)
@@ -153,7 +158,47 @@ def calc_montecalro(vp,iteral,params,path,u):
 
     del model
     gc.collect()
-    return res
+    return res,params
+
+def calc_ray_tracing(res,monte_params,path,alias_name):
+    l = monte_params["r_bone"]*2+monte_params["th_subcutaneus"]*2+monte_params["th_dermis"]*2
+    nn = 300
+    dr = 30/nn
+    nn_ = 400
+    dr_ = 40/nn_
+    margin = 1e-8
+    ind = np.where((res["v"][2]<0)&(res["p"][2]<margin))[0]
+    alphaRd,Rd = met.radialDistance(res["p"][:,ind],res["w"][ind],nn,dr,res["nPh"])
+    
+    ind = np.where(res["v"][2]>0&(res["p"][2]>l-margin))[0]
+    alphaTt,Tt = met.radialDistance(res["p"][:,ind],res["w"][ind],nn,dr,res["nPh"])
+
+    ind = np.where((res["v"][0]<0))[0]
+    alpha_ssyz,Ssyz = met.lineDistance(res["p"][:,ind],res["w"][ind],nn_,dr_,res["nPh"],y_range=5)
+
+    print('# Ray Tracing save -> %s'%path)
+    
+    path_ = path+"_B"
+    aa = alias_name+"_B"
+    df = pd.DataFrame()
+    df[aa] = Rd
+    df.index = alphaRd
+    df.to_csv(path_+".csv")
+
+    path_ = path+"_F"
+    aa = alias_name+"_F"
+    df = pd.DataFrame()
+    df[aa] = Tt
+    df.index = alphaTt
+    df.to_csv(path_+".csv")
+    
+    path_ = path+"_L"
+    aa = alias_name+"_L"
+    df = pd.DataFrame()
+    df[aa] = Ssyz
+    df.index = alpha_ssyz
+    df.to_csv(path_+".csv")
+    
 
 
 def calc(iteral):
@@ -178,9 +223,11 @@ def calc(iteral):
         print('it: ',iteral,', change bvtv: ',vp['bv_tv'][0],'-->',bv_tv)
         vp['bv_tv'][0] = bv_tv
         path_ = monte_path+alias_name
-        res = calc_montecalro(vp,iteral,monte_params,path_,u)
+        res,params_ = calc_montecalro(vp,iteral,monte_params,path_,u)
         print('###### end monte calro in it: ',iteral)
-
+        
+        path_ = opt_path+alias_name
+        calc_ray_tracing(res,params_,path_,alias_name)
         print('')
         print('############### End %s it ###################'%iteral)
         print('')
@@ -193,8 +240,8 @@ def calc(iteral):
 
 if __name__ == "__main__":
 
-    p = Pool(pool_num)
-    p.map(calc, iteral_num)
+    for iteral in range(repetitions):
+        calc(iteral)
 
     print()
     print('######################')

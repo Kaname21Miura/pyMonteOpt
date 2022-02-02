@@ -68,7 +68,6 @@ def vmc_kernel():
                 float ai = 0, at = 0, ra = 0;
 
                 bool flag = 1;
-                bool flag_tr = 1;
                 //int step = 0;
 
                 while (flag) {
@@ -103,7 +102,6 @@ def vmc_kernel():
 
                             // 透過先の屈折率を入手
                             nt = n[index_next];
-                            flag_tr = 1;
                             if (ni != nt) {// 屈折率が変化した場合
                                 // 透過判別
                                 ai = acosf(fabsf(v[dbid])); // 入射角
@@ -124,7 +122,6 @@ def vmc_kernel():
                                 valf = curand_uniform(&s);
 
                                 if (ra < valf) { //透過
-                                    flag_tr = 1;
                                     // ベクトルを更新
                                     zero_vec[dbnum] = 1, one_vec[dbnum] = 0;
                                     for (int i = 0; i < 3; i++) {
@@ -135,12 +132,26 @@ def vmc_kernel():
                                     valf = 0;
                                     for (int i = 0; i < 3; i++) { valf += powf(v[idx + nPh * i],2); }
                                     for (int i = 0; i < 3; i++) { v[idx + nPh * i] /= sqrtf(valf); }
+
+                                    // Addressを更新
+                                    add[dbid] += (int)copysignf(1, v[dbid]);
+
+                                    // Voxel内の位置を更新
+                                    p[dbid] *= -1;
+                                    // 光学特性indexを更新
+                                    index = index_next;
+                                    if (index == index_end) {// 更新先が終端voxelだった場合
+                                        goto End;
+                                    }
+                                    // 光学特性を更新
+                                    mt = ma[index] + ms[index];
+                                    ni = nt;
                                 }
                                 else { // Fresnel 反射
-                                    flag_tr = 0;
+                                    v[dbid] *= -1; //ベクトルの更新
                                 }
                             }
-                            if (flag_tr) {//透過するときの処理
+                            else {//透過するときの処理
 
                                 // Addressを更新
                                 add[dbid] += (int)copysignf(1, v[dbid]);
@@ -154,10 +165,6 @@ def vmc_kernel():
                                 }
                                 // 光学特性を更新
                                 mt = ma[index] + ms[index];
-                                ni = nt;
-                            }
-                            else {//反射するときの処理
-                                v[dbid] *= -1; //ベクトルの更新
                             }
                         }
                         else {
@@ -207,12 +214,11 @@ def vmc_kernel():
                         for (int i = 0; i < 3; i++){ v[idx + nPh * i] = v_[i]; }
                     }
                     // 計算誤差の補正（単位ベクトルに変換）
+                    valf = 0;
                     for (int i = 0; i < 3; i++) { valf += powf(v[idx + nPh * i],2); }
                     for (int i = 0; i < 3; i++) { v[idx + nPh * i] /= sqrtf(valf); }
                     /*
-                    if (step == 0){
-                        flag = 0;
-                    }
+                    if (step == 0){flag = 0;}
                     step += 1;
                     */
                 }

@@ -1,7 +1,18 @@
-from pymopt.modeling import TuringPattern
-from pymopt.voxel import VoxelTuringModel
+from pymopt.modeling_gpu import TuringPattern
+from pymopt.voxel_gpu import VoxelTuringModel
 from pymopt.utils import generate_variable_params
-from pymopt.optics import OBD
+from pymopt import metrics as met
+
+import datetime,time
+import os,gc
+import numpy as np
+import pandas as pa
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_style("ticks", {'grid.linestyle': '--'})
+import pandas as pd
+
 
 import datetime,time
 import os,gc
@@ -10,12 +21,11 @@ import pandas as pa
 from multiprocessing import Pool
 
 
-repetitions = 130
-pool_num = 8
+repetitions = 1000
 nPh = 1e7
 iteral_num=np.arange(repetitions)
 
-range_params = {
+range_params_norm = {
     'th_dermis':[1,2],             # 皮膚厚さの範囲
     'ma_dermis':[0.00633,0.08560], # 皮膚吸収係数の範囲
     'msd_dermis':[1.420,2.506],    # 皮膚減衰散乱係数の範囲
@@ -26,23 +36,45 @@ range_params = {
     'th_cortical':[0.804, 0.149],  # 皮質骨厚さの平均と分散
     'corr':0.54,                   # 皮質骨と海綿骨の相関係数 Boutry2005
 }
+range_params_osteoporosis = range_params_norm.copy()
+range_params_osteoporosis['bv_tv'] = [0.085,0.022]
+range_params_osteoporosis['th_cortical'] = [0.487,0.138]
+range_params_osteopenia = range_params_norm.copy()
+range_params_osteopenia['bv_tv'] = [0.103,0.030]
+range_params_osteopenia['th_cortical'] = [0.571,0.173]
+
+def determining_params_range():
+    a = np.random.rand()
+    range_params = 0
+    if a <= 0.4:
+        print('Osteoporosis')
+        range_params = range_params_osteoporosis
+    elif a >= 0.6:
+        print('Normal')
+        range_params = range_params_norm
+    else:
+        print('Osteoprnia')
+        range_params = range_params_osteopenia
+    return range_params
 
 model_params ={
-    'grid':40,
-    'dx':1/40,
+    'grid':30,
+    'dx':1/30,
     'dt':1,
     'du':0.0002,
     'dv':0.01,
-    'length':9,
+    'length':10,
     'repetition':100,
-    'voxelsize':0.0245,
+    'voxelsize':0.0306,
     'seed':False,
     'ct_coef':4.5e4,
     'tile_num_xz':2,
     'tile_num_y':4,
 }
 
-th_coef = np.array([-7.61194835,1.62003258,-0.44989454,0.60428882])
+
+#th_coef = np.array([-7.6618293,1.64450117,-0.45237661,0.60426539])
+th_coef = np.array([-10.93021385,   2.62630274,  -0.50913966,   0.60371039])
 
 monte_params = {
     'voxel_space':model_params['voxelsize'],
@@ -57,17 +89,11 @@ monte_params = {
     'n_dermis':1.4,
     'n_air':1.,
 
-    'ma_space':0.00862,
     'ma_trabecular':0.02374,
     'ma_cortical':0.02374,
-    'ma_subcutaneus':0.011,
-    'ma_dermis':0.05925,
-
-    'ms_space':11.13,
+    
     'ms_trabecular':20.588,
     'ms_cortical':20.588,
-    'ms_subcutaneus':20,
-    'ms_dermis':19.63,
 
     'g_space':0.90,
     'g_trabecular':0.90,
@@ -76,48 +102,6 @@ monte_params = {
     'g_dermis':0.90,
 }
 
-opt_params ={
-    'start':0,
-    'end':85,
-    'split':0.5,
-
-    'wavelength':850,
-
-    'outerD_1':50,
-    'efl_1':100,
-    'bfl_1':93.41,
-    'ct_1':10,
-    'et_1':3.553,
-    'r_1':51.68,
-    'substrate_1':'N-BK7',
-
-    'outerD_2' : 50,
-    'efl_2' : 50,
-    'bfl_2' : 43.28,
-    'ct_2':12,
-    'et_2':3.01,
-    'r_2':39.24,
-    'substrate_2':'N-SF11',
-
-    'slit_outerD':50,
-    'slit_D':20,
-    'slit_width':2,
-    'slit_thickness':3,
-    'd_pd':3,
-
-    'distance_2slits':32,
-    'pd_poit_correction':0.22,
-    'ld_fix_part':False,
-    'inversion':False,
-    'side':False,
-}
-
-opt_params_inv = opt_params.copy()
-opt_params_inv['inversion']=True
-opt_params_inv['side']=False
-opt_params_side = opt_params.copy()
-opt_params_side['inversion']=False
-opt_params_side['side']=True
 
 def generate_bone_model(bv_tv,path,model_params):
     model_params['bv_tv']=bv_tv
@@ -136,9 +120,7 @@ def calc_montecalro(vp,iteral,params,path,u):
     print()
     print('###################################')
     print('# %s'%iteral)
-
-    lamda = 850
-    deg = 0
+    
     nn = 0
     params['th_dermis'] = vp['th_dermis'][nn]
     params['ma_dermis'] = vp['ma_dermis'][nn]
@@ -153,22 +135,16 @@ def calc_montecalro(vp,iteral,params,path,u):
 
     params['bv_tv'] = vp['bv_tv'][nn]
     params['th_cortical'] = vp['th_cortical'][nn]
-
+    #print(params)
     model = VoxelTuringModel(
         nPh = nPh,
-        z_max_mode = False,
-        beam_angle = deg*np.pi/180,
-        wavelength = lamda,
-        beam_posision = 10,
-        lens_curvature_radius = 51.68,
-        grass_type = 'N-BK7',
-        initial_refrect_by_angle = True,
+        model_name = 'TuringModel'
     )
     model.set_model(u)
 
     model.build(**params)
     start = time.time()
-    model = model.start()
+    model = model.start(iteral)
     print('%s sec'%(time.time()-start))
     print('# %s'%iteral)
     print("Save -> %s"%path)
@@ -177,22 +153,53 @@ def calc_montecalro(vp,iteral,params,path,u):
 
     del model
     gc.collect()
-    return res
+    return res,params
 
-def calc_ray_tracing(res,opt_params,path):
-    obd = OBD()
-    obd.set_monte_data(res)
-    obd.set_params(opt_params)
-    obd.start()
+def calc_ray_tracing(res,monte_params,path,alias_name):
+    l = monte_params["xz_size"]+monte_params["th_subcutaneus"]*2+monte_params["th_dermis"]*2
+    nn = 300
+    dr = 30/nn
+    nn_ = 400
+    dr_ = 40/nn_
+    margin = 1e-8
+    ind = np.where((res["v"][2]<0)&(res["p"][2]<margin))[0]
+    alphaRd,Rd = met.radialDistance(res["p"][:,ind],res["w"][ind],nn,dr,res["nPh"])
+    
+    ind = np.where(res["v"][2]>0&(res["p"][2]>l-margin))[0]
+    alphaTt,Tt = met.radialDistance(res["p"][:,ind],res["w"][ind],nn,dr,res["nPh"])
+
+    ind = np.where((res["v"][0]<0))[0]
+    alpha_ssyz,Ssyz = met.lineDistance(res["p"][:,ind],res["w"][ind],nn_,dr_,res["nPh"],y_range=5)
 
     print('# Ray Tracing save -> %s'%path)
-    obd.save_result(path)
-    del obd
-    gc.collect()
+    
+    path_ = path+"_B"
+    aa = alias_name+"_B"
+    df = pd.DataFrame()
+    df[aa] = Rd
+    df.index = alphaRd
+    df.to_csv(path_+".csv")
+
+    path_ = path+"_F"
+    aa = alias_name+"_F"
+    df = pd.DataFrame()
+    df[aa] = Tt
+    df.index = alphaTt
+    df.to_csv(path_+".csv")
+    
+    path_ = path+"_L"
+    aa = alias_name+"_L"
+    df = pd.DataFrame()
+    df[aa] = Ssyz
+    df.index = alpha_ssyz
+    df.to_csv(path_+".csv")
+    
 
 
 def calc(iteral):
     gvp = generate_variable_params()
+    range_params = determining_params_range()
+
     gvp.set_params(range_params)
     vp = gvp.generate(1)
 
@@ -211,19 +218,11 @@ def calc(iteral):
         print('it: ',iteral,', change bvtv: ',vp['bv_tv'][0],'-->',bv_tv)
         vp['bv_tv'][0] = bv_tv
         path_ = monte_path+alias_name
-        res = calc_montecalro(vp,iteral,monte_params,path_,u)
+        res,params_ = calc_montecalro(vp,iteral,monte_params,path_,u)
         print('###### end monte calro in it: ',iteral)
-
+        
         path_ = opt_path+alias_name
-        calc_ray_tracing(res,opt_params,path_)
-
-        path_ = opt_path+alias_name+'_inv'
-        calc_ray_tracing(res,opt_params_inv,path_)
-
-        path_ = opt_path+alias_name+'_side'
-        thickness = vp['th_subcutaneus'][0]+vp['th_dermis'][0]+monte_params['xz_size']/2
-        opt_params_side['side']=thickness
-        calc_ray_tracing(res,opt_params_side,path_)
+        calc_ray_tracing(res,params_,path_,alias_name)
         print('')
         print('############### End %s it ###################'%iteral)
         print('')
@@ -234,12 +233,10 @@ def calc(iteral):
 
 
 
-
-
 if __name__ == "__main__":
 
-    p = Pool(pool_num)
-    p.map(calc, iteral_num)
+    for iteral in range(repetitions):
+        calc(iteral)
 
     print()
     print('######################')
