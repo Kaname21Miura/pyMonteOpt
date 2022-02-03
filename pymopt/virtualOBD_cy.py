@@ -21,7 +21,7 @@ import pandas as pa
 from multiprocessing import Pool
 
 
-repetitions = 10000
+repetitions = 1000
 nPh = 1e7
 iteral_num=np.arange(repetitions)
 
@@ -73,13 +73,12 @@ model_params ={
 }
 
 
-#th_coef = np.array([-7.6618293,1.64450117,-0.45237661,0.60426539])
 th_coef = np.array([-10.93021385,   2.62630274,  -0.50913966,   0.60371039])
 
 
 monte_params = {
     'voxel_space':model_params['voxelsize'],
-    'r_bone':9.,
+    'r_bone':9.14,
 
     'n_space':1.4,
     'n_trabecular':1.55,
@@ -143,7 +142,7 @@ def calc_montecalro(vp,iteral,params,path,u):
     #print(params)
     model = VoxelTuringModel(
         nPh = nPh,
-        model_name = 'TuringModel_cylinder'
+        model_name = 'TuringModel_Cylinder'
     )
     model.set_model(u)
 
@@ -179,28 +178,26 @@ def calc_ray_tracing(res,monte_params,path,alias_name):
     print('# Ray Tracing save -> %s'%path)
     
     path_ = path+"_B"
-    aa = alias_name+"_B"
+    aa = alias_name
     df = pd.DataFrame()
     df[aa] = Rd
     df.index = alphaRd
     df.to_csv(path_+".csv")
 
     path_ = path+"_F"
-    aa = alias_name+"_F"
+    aa = alias_name
     df = pd.DataFrame()
     df[aa] = Tt
     df.index = alphaTt
     df.to_csv(path_+".csv")
     
     path_ = path+"_L"
-    aa = alias_name+"_L"
+    aa = alias_name
     df = pd.DataFrame()
     df[aa] = Ssyz
     df.index = alpha_ssyz
     df.to_csv(path_+".csv")
     
-
-
 def calc(iteral):
     gvp = generate_variable_params()
     range_params = determining_params_range()

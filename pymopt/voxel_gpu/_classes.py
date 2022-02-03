@@ -864,7 +864,6 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
             'model':{
                 'model_name':self.model.model_name,
                 'model_params':self.model.params,
-                'model_bmd':self.model.bmd,
             },
             'w_beam':self.w_beam,
             'beam_angle':self.beam_angle,
