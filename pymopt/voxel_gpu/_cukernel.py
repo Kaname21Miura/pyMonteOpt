@@ -223,7 +223,6 @@ def vmc_kernel():
                     */
                 }
             End:
-            //__syncthreads();
             }
         }
     }
