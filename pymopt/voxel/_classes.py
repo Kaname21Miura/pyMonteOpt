@@ -39,7 +39,6 @@ class BaseVoxelMonteCarlo(metaclass = ABCMeta):
                  beam_type = 'TEM00',w_beam = 0,
                  beam_angle = 0,initial_refrect_by_angle = False,
                  first_layer_clear = False,
-                 threadnum = 128,
                  ):
 
         def __check_list_name(name,name_list):
@@ -60,10 +59,6 @@ class BaseVoxelMonteCarlo(metaclass = ABCMeta):
 
         self.model = model
         self.first_layer_clear=first_layer_clear
-        if threadnum > 1024:
-            raise Exception('There are too many threads. threadnum < 1024.')
-        else:
-            self.threadnum = int(threadnum)
 
     def start(self):
         self.nPh = int(self.nPh)
@@ -347,6 +342,9 @@ class VoxelModel:
     def set_params(self):
         pass
 
+    def getModelSize(self):
+        print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
+
 class PlateModel(VoxelModel):
     @_deprecate_positional_args
     def __init__(self):
@@ -366,7 +364,6 @@ class PlateModel(VoxelModel):
         self.keys = list(self.params.keys())
         self._param_instantiating()
         self.voxel_model = np.zeros((3,3,3),dtype = self.dtype)
-        self.model_shape = (3,3,3)
 
     def _param_instantiating(self):
         f = self.dtype_f
@@ -422,42 +419,112 @@ class PlateModel(VoxelModel):
                 'g':self.g
                 }
 
-    def getModelSize(self):
-        print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
-
-class TuringModel(VoxelModel):
+class PlateExModel(VoxelModel):
+    #ガラスとイントラリピッドの２層構造のみを対象とする
+    #ガラスはイントラリピッドを取り囲んでいるものとする
     def __init__(self):
-        self.model_name = 'TuringModel'
+        self.model_name = 'PlateExModel'
+        self.dtype = 'int8'
+        self.dtype_f = 'float32'
+        self.grass_num=0
+        self.intra_num=1
+        self.end_point = 2
+        self.params = {
+            'x_size':40,'y_size':40,#X-Yはintralipidの領域を示す
+            'voxel_space':0.1,
+            'thickness':[1.3,40],
+            'n':[1.5,1.4],
+            'n_air':1.,
+            'ma':[1e-5,0.02374],
+            'ms':[1e-5,0.02374],
+            'g':[0.9,0.9],
+            }
+        self.keys = list(self.params.keys())
+        self._param_instantiating()
+        self.voxel_model = np.zeros((3,3,3),dtype = self.dtype)
+        self.model_shape = (3,3,3)
+
+    def _param_instantiating(self):
+        f = self.dtype_f
+        self.thickness = self.params['thickness']
+        self.n =np.array(self.params['n']+[self.params['n_air']]).astype(f)
+        self.ms = np.array(self.params['ms']).astype(f)
+        self.ma = np.array(self.params['ma']).astype(f)
+        self.g = np.array(self.params['g']).astype(f)
+        self.voxel_space = self.params['voxel_space']
+        self.x_size = int(self.params['x_size']/self.params['voxel_space'])
+        self.y_size = int(self.params['y_size']/self.params['voxel_space'])
+        self.z_size = int(self.params['thickness'][1]/self.params['voxel_space'])
+
+    def build(self):
+        #thickness,xy_size,voxel_space,ma,ms,g,n,n_air
+        del self.voxel_model
+        gc.collect()
+        self._make_voxel_model()
+        self.getModelSize()
+
+    def set_params(self,*initial_data, **kwargs):
+        set_params(self.params,self.keys,*initial_data, **kwargs)
+        self._param_instantiating()
+
+    def _make_voxel_model(self):
+        #まずイントラリピッドを定義し、その後、ガラス面を定義する
+        self.voxel_model = np.ones((self.x_size,self.y_size,self.z_size),dtype = self.dtype)
+        self.num_pix = int(self.params['thickness'][0]/self.params['voxel_space'])
+
+        #z方向の追加
+        ct = np.ones((
+        self.voxel_model.shape[0],self.voxel_model.shape[1],self.num_pix+1),
+        dtype = self.dtype)*self.grass_num
+        self.voxel_model = np.concatenate((ct,self.voxel_model),2)
+        self.voxel_model = np.concatenate((self.voxel_model,ct),2)
+        #y方向の追加
+        ct = np.ones((
+        self.voxel_model.shape[0],self.num_pix+1,self.voxel_model.shape[2]
+        ),dtype = self.dtype)*self.grass_num
+        self.voxel_model = np.concatenate((self.voxel_model,ct),1)
+        self.voxel_model = np.concatenate((ct,self.voxel_model),1)
+        #x方向の追加
+        ct = np.ones((
+        self.num_pix+1,self.voxel_model.shape[1],self.voxel_model.shape[2]
+        ),dtype = self.dtype)*self.grass_num
+        self.voxel_model = np.concatenate((self.voxel_model,ct),0)
+        self.voxel_model = np.concatenate((ct,self.voxel_model),0)
+
+        # end cooding
+        self.voxel_model[0,:,:] = self.end_point
+        self.voxel_model[-1,:,:] = self.end_point
+        self.voxel_model[:,0,:] = self.end_point
+        self.voxel_model[:,-1,:] = self.end_point
+        self.voxel_model[:,:,0] = self.end_point
+        self.voxel_model[:,:,-1] = self.end_point
+
+    def get_second_layer_addz(self):
+        return self.num_pix+1
+
+
+class TuringModel_Rectangular(VoxelModel):
+    def __init__(self):
+        self.model_name = 'TuringModel_Rectangular'
         self.dtype_f = np.float32
         self.dtype = np.int8
         self.ct_num=2
         self.subc_num=3
         self.skin_num=4
         self.end_point = 5
+        self.voxel_model = np.zeros((3,3,3),dtype = self.dtype)
+
         self.params = {
             'xz_size':17.15,'voxel_space':0.0245,'dicom_path':False,'bv_tv':0.138,
-            'symmetrization':False,'enclosure':False,
-            'th_trabecular':40,'th_cortical':1.,'th_subcutaneus':2.6,'th_dermis':1.4,
+            'th_cortical':1.,'th_subcutaneus':2.6,'th_dermis':1.4,
             'n_space':1.,'n_trabecular':1.4,'n_cortical':1.4,'n_subcutaneus':1.4,'n_dermis':1.4,'n_air':1.,
             'ma_space':1e-8,'ma_trabecular':0.02374,'ma_cortical':0.02374,'ma_subcutaneus':0.011,'ma_dermis':0.037,
             'ms_space':1e-8,'ms_trabecular':20.54,'ms_cortical':17.67,'ms_subcutaneus':20,'ms_dermis':20,
             'g_space':0.90,'g_trabecular':0.90,'g_cortical':0.90,'g_subcutaneus':0.90,'g_dermis':.90,
             }
         self.keys = list(self.params.keys())
-
         self._make_model_params()
-        self.bmd = self._get_bone_vbmd()
         self.voxel_space = self.params['voxel_space']
-        self.voxel_model = np.zeros((3,3,3),dtype = self.dtype)
-        self.model_shape = (3,3,3)
-
-    def _get_bone_vbmd(self):
-        ms_ugru = self.params['ms_trabecular']*(1-self.params['g_trabecular'])
-        ms_ugru = ms_ugru/(1-0.93)
-        bmd_wet = 0.0382*ms_ugru+0.8861
-        bmd_ash = 0.9784*bmd_wet - 0.8026
-        return bmd_ash*self.params['bv_tv']*1000
-
 
     def build(self,bone_model):
         #thickness,xy_size,voxel_space,ma,ms,g,n,n_air
@@ -469,12 +536,9 @@ class TuringModel(VoxelModel):
         self._make_voxel_model()
         self.getModelSize()
 
-
     def set_params(self,*initial_data, **kwargs):
         set_params(self.params,self.keys,*initial_data, **kwargs)
         self._make_model_params()
-        self.bmd = self._get_bone_vbmd()
-        print('Trabecular vBMD = %4f [mg/cm^3]'%self.bmd)
 
     def _make_model_params(self):
         # パラメーターは、[骨梁間隙, 海綿骨, 緻密骨, 皮下組織, 皮膚, 外気]のように設定されています。
@@ -510,77 +574,53 @@ class TuringModel(VoxelModel):
         ds = np.array(ds).astype("int8")
         return ds
 
+    def add_array(self,X,num_pix,val,dtype,y_axis = False):
+        # Z方向
+        ct = np.zeros((X.shape[0],X.shape[1],num_pix),dtype = dtype)+val
+        X = np.concatenate((ct,X),2)
+        X = np.concatenate((X,ct),2)
+        # X方向
+        ct = np.zeros((num_pix,X.shape[1],X.shape[2]),dtype = dtype)+val
+        X = np.concatenate((ct,X),0)
+        X = np.concatenate((X,ct),0)
+        # Y方向
+        if y_axis:
+            ct = np.zeros((X.shape[0],num_pix,X.shape[2]),dtype = dtype)+val
+            X = np.concatenate((ct,X),1)
+            X = np.concatenate((X,ct),1)
+
+        return X
+
     def _make_voxel_model(self):
-        #骨梁間隙を0,海綿骨を1、緻密骨を2、 皮下組織を3、皮膚を4、領域外を-1に設定する
         if self.params['dicom_path']:
             self.voxel_model = self._read_dicom()
-        #　骨サイズに合わせてデータを削除
-        #### 注意 ####
-        #　xz_sizeはチューリングモデルよりも小さくなくてはならない
-        num_pix = int((self.voxel_model.shape[0]-int(self.params['xz_size']/self.voxel_space))/2)
-        self.voxel_model = self.voxel_model[num_pix:-num_pix,:,num_pix:-num_pix]
+        A = np.zeros_like(self.voxel_model).astype(bool)
+        list_num = [self.ct_num,self.subc_num,self.skin_num]
+        num_s = np.round(np.array(
+        [self.params['th_cortical'],self.params['th_subcutaneus'],self.params['th_dermis']]
+        )/self.params["voxel_space"]).astype(np.int)
 
-        def _cort_data_add(params,voxel_model,th_name,space,num,dtype):
-            if params[th_name] !=0:
-                num_pix = int(params[th_name]/space)
-                # x軸
-                voxel_model[:num_pix,:,:] = num
-                voxel_model[-num_pix:,:,:] = num
-                # y軸
-                voxel_model[:,:num_pix,:] = num
-                # z軸
-                voxel_model[:,:,:num_pix] = num
-                voxel_model[:,:,-num_pix:] = num
-            return voxel_model
+        int_num = int(self.voxel_model.shape[0]/2-round(self.params["xz_size"]/(self.params["voxel_space"]*2)))+num_s[0]
+        A[int_num:-int_num,:,int_num:-int_num] = 1
 
-        def _soft_data_add(params,voxel_model,th_name,space,num,dtype):
-            if params[th_name] !=0:
-                num_pix = int(params[th_name]/space)
-                ct = np.ones((
-                voxel_model.shape[0],voxel_model.shape[1],num_pix),
-                dtype = dtype)*num
-                voxel_model = np.concatenate((ct,voxel_model),2)
-                if params['symmetrization'] or params['enclosure']:
-                    voxel_model = np.concatenate((voxel_model,ct),2)
-                if params['enclosure']:
-                    #y方向の追加
-                    '''ct = np.ones((
-                    voxel_model.shape[0],num_pix,voxel_model.shape[2]
-                    ),dtype = dtype)*num
-                    voxel_model = np.concatenate((voxel_model,ct),1)
-                    voxel_model = np.concatenate((ct,voxel_model),1)'''
-                    #x方向の追加
-                    ct = np.ones((
-                    num_pix,voxel_model.shape[1],voxel_model.shape[2]
-                    ),dtype = dtype)*num
-                    voxel_model = np.concatenate((voxel_model,ct),0)
-                    voxel_model = np.concatenate((ct,voxel_model),0)
-            return voxel_model
+        x=0
+        for i in A[:,int(A.shape[2]/2),int(A.shape[0]/2)]:
+            if i:
+                break
+            x+=1
+        A = A[x:-x,:,x:-x]
+        self.voxel_model = self.voxel_model[x:-x,:,x:-x]
 
-        self.voxel_model = _cort_data_add(
-        self.params,self.voxel_model,'th_cortical',self.voxel_space,self.ct_num,self.dtype
-        )
-        self.voxel_model = _soft_data_add(
-        self.params,self.voxel_model,'th_subcutaneus',self.voxel_space,self.subc_num,self.dtype
-        )
-        self.voxel_model = _soft_data_add(
-        self.params,self.voxel_model,'th_dermis',self.voxel_space,self.skin_num,self.dtype
-        )
+        for i in tqdm(range(3)):
+            self.voxel_model = self.add_array(self.voxel_model,num_s[i],list_num[i],np.int8)
 
-        self.voxel_model[0,:,:] = self.end_point
-        self.voxel_model[-1,:,:] = self.end_point
-        self.voxel_model[:,0,:] = self.end_point
-        self.voxel_model[:,-1,:] = self.end_point
-        self.voxel_model[:,:,0] = self.end_point
-        self.voxel_model[:,:,-1] = self.end_point
+        self.voxel_model = self.add_array(self.voxel_model,1,self.end_point,np.int8,y_axis=True)
+        print("Shape of voxel_model ->",self.voxel_model.shape)
 
-    def getModelSize(self):
-        print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
 
-class TuringModel_cylinder(TuringModel):
+class TuringModel_Cylinder(TuringModel_Rectangular):
     def __init__(self):
-        self.model_name = 'TuringModel_cylinder'
-        self.model_name = 'TuringModel_cylinder'
+        self.model_name = 'TuringModel_Cylinder'
         self.dtype_f = np.float32
         self.dtype = np.int8
         self.ct_num=2
@@ -588,8 +628,10 @@ class TuringModel_cylinder(TuringModel):
         self.skin_num=4
         self.air_num=5
         self.end_point = 6
+        self.voxel_model = np.zeros((3,3,3),dtype = self.dtype)
+
         self.params = {
-            'r_bone':9.17,'voxel_space':0.0245,'dicom_path':False,'bv_tv':0.138,
+            'r_bone':9.14,'voxel_space':0.0245,'dicom_path':False,'bv_tv':0.138,
             'th_cortical':1.,'th_subcutaneus':2.6,'th_dermis':1.4,
             'n_space':1.,'n_trabecular':1.4,'n_cortical':1.4,'n_subcutaneus':1.4,'n_dermis':1.4,'n_air':1.,
             'ma_space':1e-8,'ma_trabecular':0.02374,'ma_cortical':0.02374,'ma_subcutaneus':0.011,'ma_dermis':0.037,'ma_air':1e-5,
@@ -597,12 +639,8 @@ class TuringModel_cylinder(TuringModel):
             'g_space':0.90,'g_trabecular':0.90,'g_cortical':0.90,'g_subcutaneus':0.90,'g_dermis':.90,'g_air':.90,
             }
         self.keys = list(self.params.keys())
-
         self._make_model_params()
-        self.bmd = self._get_bone_vbmd()
         self.voxel_space = self.params['voxel_space']
-        self.voxel_model = np.zeros((3,3,3),dtype = self.dtype)
-        self.model_shape = (3,3,3)
 
     def _make_model_params(self):
         # パラメーターは、[骨梁間隙, 海綿骨, 緻密骨, 皮下組織, 皮膚, 外気]のように設定されています。
@@ -619,67 +657,120 @@ class TuringModel_cylinder(TuringModel):
         self.ms = np.array(_ms).astype(self.dtype_f)
         self.g = np.array(_g).astype(self.dtype_f)
 
+    def round_index(self,X,num_r):
+        size_x = int(X.shape[0]/2)
+        size_y = int(X.shape[1])
+        size_z = int(X.shape[2]/2)
+        x_lab = np.tile(np.arange(X.shape[0]),(X.shape[2], 1)).T-size_x
+        y_lab = np.tile(np.arange(X.shape[2]),(X.shape[0], 1))-size_z
+        r_ = np.sqrt(x_lab**2+y_lab**2)
+        return np.where(r_<num_r)
+
     def _make_voxel_model(self):
         #骨梁間隙を0,海綿骨を1、緻密骨を2、 皮下組織を3、皮膚を4、大気を５、領域外を-1に設定する
         if self.params['dicom_path']:
             self.voxel_model = self._read_dicom()
-        #　骨サイズに合わせてデータを削除
-        #### 注意 ####
-        #　r_bone*2はチューリングモデルよりも小さくなくてはならない
-        num_pix = int((self.voxel_model.shape[0]-int(self.params['r_bone']*2/self.voxel_space))/2)
-        self.voxel_model = self.voxel_model[num_pix:-num_pix,:,num_pix:-num_pix]
+        A = np.zeros_like(self.voxel_model).astype(bool)
+        list_num = [self.ct_num,self.subc_num,self.skin_num]
+        num_s = np.round(np.array(
+        [self.params['th_cortical'],self.params['th_subcutaneus'],self.params['th_dermis']]
+        )/self.params["voxel_space"]).astype(np.int)
 
-        #軟組織分のVoxelを増やす。この時、全ては空気であると仮定する。
-        num_pix = int((self.params['th_subcutaneus']+self.params['th_dermis'])/self.voxel_space)+1
-        #Z軸方向
-        ct = np.ones((
-        self.voxel_model.shape[0],self.voxel_model.shape[1],num_pix),
-        dtype = self.dtype)*self.air_num
-        self.voxel_model = np.concatenate((ct,self.voxel_model),2)
-        self.voxel_model = np.concatenate((self.voxel_model,ct),2)
-        #x方向の追加
-        ct = np.ones((
-        num_pix,self.voxel_model.shape[1],self.voxel_model.shape[2]
-        ),dtype = self.dtype)*self.air_num
-        self.voxel_model = np.concatenate((self.voxel_model,ct),0)
-        self.voxel_model = np.concatenate((ct,self.voxel_model),0)
+        num_tr = round(self.params["r_bone"]/self.params["voxel_space"])-num_s[0]
+        ind = self.round_index(A,num_tr)
+        for i in range(A.shape[1]):
+            A[ind[0],i,ind[1]] = 1
+        ind = np.where(A==0)
+        self.voxel_model[ind] = self.air_num
+        x=0
+        for i in A[:,int(A.shape[2]/2),int(A.shape[0]/2)]:
+            if i:
+                break
+            x+=1
+        A = A[x:-x,:,x:-x]
+        self.voxel_model = self.voxel_model[x:-x,:,x:-x]
 
-        #中心からxzの半径方向距離を出す
-        x_size = self.voxel_model.shape[0]
-        z_size = self.voxel_model.shape[2]
-        x_c = int((x_size)/2)
-        z_c = int((z_size)/2)
-        data_xnum = (np.tile(np.arange(x_size),(z_size,1)).T-x_c)*self.voxel_space
-        data_znum = (np.tile(np.arange(z_size),(x_size,1))-z_c)*self.voxel_space
-        r = np.sqrt(data_xnum**2+data_znum**2)
+        for i in tqdm(range(3)):
+            B = self.add_array(A,num_s[i],False,bool)
+            self.voxel_model = self.add_array(self.voxel_model,num_s[i],self.air_num,np.int8)
+            num_tr+=num_s[i]
+            ind = self.round_index(B,num_tr)
+            A = np.zeros_like(B).astype(bool)
+            for j in range(A.shape[1]):
+                A[ind[0],j,ind[1]] = 1
+            ind = np.where((A&~B)==1)
+            self.voxel_model[ind] = list_num[i]
 
-        #各組織の条件をつける
-        #皮質骨
-        r_ref_in = self.params['r_bone']-self.params['th_cortical']
-        r_ref_out = self.params['r_bone']
-        index = np.where((r>=r_ref_in)&(r<r_ref_out))
-        self.voxel_model[index[0],:,index[1]]=self.ct_num
-        num_pix = int((self.params['th_cortical'])/self.voxel_space)+1
-        self.voxel_model[:,:num_pix,:]=self.ct_num
-        #皮下組織
-        r_ref_in = self.params['r_bone']
-        r_ref_out = self.params['r_bone']+self.params['th_subcutaneus']
-        index = np.where((r>=r_ref_in)&(r<r_ref_out))
-        self.voxel_model[index[0],:,index[1]]=self.subc_num
-        #真皮
-        r_ref_in = self.params['r_bone']+self.params['th_subcutaneus']
-        r_ref_out = self.params['r_bone']+self.params['th_subcutaneus']+self.params['th_dermis']
-        index = np.where((r>=r_ref_in)&(r<r_ref_out))
-        self.voxel_model[index[0],:,index[1]]=self.skin_num
+        self.voxel_model = self.add_array(self.voxel_model,1,self.end_point,np.int8,y_axis=True)
+        print("Shape of voxel_model ->",self.voxel_model.shape)
 
-        #境界を定義
-        self.voxel_model[0,:,:] = self.end_point
-        self.voxel_model[-1,:,:] = self.end_point
-        self.voxel_model[:,0,:] = self.end_point
-        self.voxel_model[:,-1,:] = self.end_point
-        self.voxel_model[:,:,0] = self.end_point
-        self.voxel_model[:,:,-1] = self.end_point
-        self.voxel_model = self.voxel_model.astype(self.dtype)
+class TuringModel_RnC(TuringModel_Cylinder):
+    def __init__(self):
+        self.model_name = 'TuringModel_RnC'
+        self.dtype_f = np.float32
+        self.dtype = np.int8
+        self.ct_num=2
+        self.subc_num=3
+        self.skin_num=4
+        self.air_num=5
+        self.end_point = 6
+        self.voxel_model = np.zeros((3,3,3),dtype = self.dtype)
+        self.params = {
+            'r_bone':9.14,'xz_size':17.15,'voxel_space':0.0245,'dicom_path':False,'bv_tv':0.138,
+            'th_cortical':1.,'th_subcutaneus':2.6,'th_dermis':1.4,
+            'n_space':1.,'n_trabecular':1.4,'n_cortical':1.4,'n_subcutaneus':1.4,'n_dermis':1.4,'n_air':1.,
+            'ma_space':1e-8,'ma_trabecular':0.02374,'ma_cortical':0.02374,'ma_subcutaneus':0.011,'ma_dermis':0.037,'ma_air':1e-5,
+            'ms_space':1e-8,'ms_trabecular':20.54,'ms_cortical':17.67,'ms_subcutaneus':20,'ms_dermis':20,'ms_air':1e-5,
+            'g_space':0.90,'g_trabecular':0.90,'g_cortical':0.90,'g_subcutaneus':0.90,'g_dermis':.90,'g_air':.90,
+            }
+        self.keys = list(self.params.keys())
+        self._make_model_params()
+        self.voxel_space = self.params['voxel_space']
+
+    def _make_voxel_model(self):
+        #骨梁間隙を0,海綿骨を1、緻密骨を2、 皮下組織を3、皮膚を4、大気を５、領域外を-1に設定する
+        if self.params['dicom_path']:
+            self.voxel_model = self._read_dicom()
+        A = np.zeros_like(self.voxel_model).astype(bool)
+        B = np.zeros_like(A).astype(bool)
+
+        list_num = [self.ct_num,self.subc_num,self.skin_num]
+        num_s = np.round(np.array(
+        [self.params['th_cortical'],self.params['th_subcutaneus'],self.params['th_dermis']]
+        )/self.params["voxel_space"]).astype(np.int)
+
+        int_num = int(self.voxel_model.shape[0]/2-round(self.params["xz_size"]/(self.params["voxel_space"]*2)))+num_s[0]
+        A[int_num:-int_num,:,int_num:-int_num] = 1
+
+        num_tr = round(self.params["r_bone"]/self.params["voxel_space"])-num_s[0]
+        ind = self.round_index(B,num_tr)
+        for i in range(B.shape[1]):
+            B[ind[0],i,ind[1]] = 1
+
+        A = A&B
+        ind = np.where(A==0)
+        self.voxel_model[ind] = self.air_num
+        x=0
+        for i in A[:,int(A.shape[2]/2),int(A.shape[0]/2)]:
+            if i:
+                break
+            x+=1
+        A = A[x:-x,:,x:-x]
+        self.voxel_model = self.voxel_model[x:-x,:,x:-x]
+
+        for i in tqdm(range(3)):
+            B = self.add_array(A,num_s[i],False,bool)
+            self.voxel_model = self.add_array(self.voxel_model,num_s[i],self.air_num,np.int8)
+            num_tr+=num_s[i]
+            ind = self.round_index(B,num_tr)
+            A = np.zeros_like(B).astype(bool)
+            for j in range(A.shape[1]):
+                A[ind[0],j,ind[1]] = 1
+            ind = np.where((A&~B)==1)
+            self.voxel_model[ind] = list_num[i]
+
+        self.voxel_model = self.add_array(self.voxel_model,1,self.end_point,np.int8,y_axis=True)
+        print("Shape of voxel_model ->",self.voxel_model.shape)
 
 # =============================================================================
 # Public montecalro model
@@ -691,15 +782,63 @@ class VoxelPlateModel(BaseVoxelMonteCarlo):
         beam_type = 'TEM00',w_beam = 0,
         beam_angle = 0,initial_refrect_by_angle = False,
         first_layer_clear = False,
-        threadnum = 128,
     ):
         super().__init__(
             nPh = nPh, model = PlateModel(),dtype_f=dtype_f,dtype=dtype,
             w_beam=w_beam,beam_angle = beam_angle,beam_type = beam_type,
             initial_refrect_by_angle = initial_refrect_by_angle,
             first_layer_clear=first_layer_clear,
-            threadnum = threadnum
         )
+
+class VoxelPlateExModel(BaseVoxelMonteCarlo):
+    #ガラスとイントラリピッドの２層構造のみを対象とする
+    #ガラスはイントラリピッドを取り囲んでいるものとする
+    def __init__(
+        self,*,nPh=1000,dtype_f=np.float32,dtype=np.int32,
+        beam_type = 'TEM00',w_beam = 0,
+        beam_angle = 0,initial_refrect_by_angle = False,
+        first_layer_clear = True,
+        ):
+        super().__init__(
+            nPh = nPh, model = PlateExModel(),dtype_f=dtype_f,dtype=dtype,
+            w_beam=w_beam,beam_angle = beam_angle,beam_type = beam_type,
+            initial_refrect_by_angle = initial_refrect_by_angle,
+            first_layer_clear=first_layer_clear,
+        )
+
+
+    def build(self,*initial_data, **kwargs):
+        if initial_data == () and kwargs == {}:
+            pass
+        else:
+            self.model.set_params(*initial_data, **kwargs)
+        self.model.build()
+
+    def set_params(self,*initial_data, **kwargs):
+        self.model.set_params(*initial_data, **kwargs)
+
+    def _calc_info(self,coment=''):
+        calc_info = {
+            'Date':datetime.datetime.now().isoformat(),
+            'coment':coment,
+            'number_of_photons':self.nPh,
+            'calc_dtype':self.dtype,
+            'model':{
+                'model_name':self.model.model_name,
+                'model_params':self.model.params,
+            },
+            'w_beam':self.w_beam,
+            'beam_angle':self.beam_angle,
+            'initial_refrect_mode':self.initial_refrect_by_angle,
+            'beam_mode':'TEM00',
+            'fluence_mode':self.fluence_mode,
+        }
+        if self.beam_angle_mode:
+            calc_info['wavelength'] = self.wavelength
+            calc_info['beam_posision'] = self.beam_posision
+            calc_info['lens_curvature_radius'] = self.lens_curvature_radius
+            calc_info['grass_type'] = self.grass_type
+        return calc_info
 
 class VoxelTuringModel(BaseVoxelMonteCarlo):
     def __init__(
@@ -707,14 +846,15 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
         beam_type = 'TEM00',w_beam = 0,
         beam_angle = 0,initial_refrect_by_angle = False,
         first_layer_clear = False,
-        threadnum = 128,
         model_name = 'TuringModel'
         ):
-        namelist = ['TuringModel','TuringModel_cylinder']
-        if model_name==namelist[0]:
-            model = TuringModel()
-        elif model_name == namelist[1]:
-            model = TuringModel_cylinder()
+        self.namelist = ['TuringModel_Rectangular','TuringModel_Cylinder','TuringModel_RnC']
+        if model_name==self.namelist[0]:
+            model = TuringModel_Rectangular()
+        elif model_name == self.namelist[1]:
+            model = TuringModel_Cylinder()
+        elif model_name == self.namelist[2]:
+            model = TuringModel_RnC()
         else:
             print('Invalid name: ',model_name)
 
@@ -723,9 +863,31 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
             w_beam=w_beam,beam_angle = beam_angle,beam_type = beam_type,
             initial_refrect_by_angle = initial_refrect_by_angle,
             first_layer_clear=first_layer_clear,
-            threadnum = threadnum
         )
         self.bone_model = False
+
+    def _set_inital_add(self):
+
+        if self.beam_type == 'TEM00':
+            self.add =  np.zeros((3, self.nPh),dtype = self.dtype)
+        self.add[0] = self._get_center_add(self.model.voxel_model.shape[0])
+        self.add[1] = self._get_center_add(self.model.voxel_model.shape[1])
+        if self.first_layer_clear:
+            self.add[2] = self.model.get_second_layer_addz()
+        else:
+            self.add[2] = 1
+
+        if self.model.model_name==self.namelist[1]:
+            def _get_first_num_z(a,x):
+                if a[x]==(self.model.end_point-2):
+                    return x
+                return _get_first_num_z(a,x+1)
+            aa = self.add[:,0]
+            a = self.model.voxel_model[aa[0],aa[1]]
+            x=0
+            zz = _get_first_num_z(a,x)
+            print("Inital add for z-axis is ",zz)
+            self.add[2] = zz
 
     def build(self,*initial_data, **kwargs):
         if initial_data == () and kwargs == {}:
@@ -742,7 +904,7 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
     def set_params(self,*initial_data, **kwargs):
         self.model.set_params(*initial_data, **kwargs)
 
-    def get_model_fig(self,*,dpi=300,save_path = False,):
+    def get_model_fig(self,*,dpi=300,save_path = [False,False],):
         image = self.model.voxel_model
         resol0 = (image.shape[0]+1)*self.model.params['voxel_space']/2-\
         np.array([self.model.params['voxel_space']*i for i in range(image.shape[0]+1)])
@@ -756,9 +918,9 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
         plt.xlabel('X [mm]')
         plt.ylabel('Z [mm]')
         plt.ylim(resol2[-1],resol2[0])
-        if save_path:
+        if save_path[0]:
             plt.savefig(
-                save_path,
+                save_path[0],
                 dpi=dpi,
                 orientation='portrait',
                 transparent=False,
@@ -771,9 +933,9 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
         plt.xlabel('Y [mm]')
         plt.ylabel('Z [mm]')
         plt.ylim(resol2[-1],resol2[0])
-        if save_path:
+        if save_path[1]:
             plt.savefig(
-                save_path,
+                save_path[1],
                 dpi=dpi,
                 orientation='portrait',
                 transparent=False,
@@ -785,11 +947,10 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
             'Date':datetime.datetime.now().isoformat(),
             'coment':coment,
             'number_of_photons':self.nPh,
-            'calc_dtype_f':"32 bit",
+            'calc_dtype':"32 bit",
             'model':{
                 'model_name':self.model.model_name,
                 'model_params':self.model.params,
-                'model_bmd':self.model.bmd,
             },
             'w_beam':self.w_beam,
             'beam_angle':self.beam_angle,

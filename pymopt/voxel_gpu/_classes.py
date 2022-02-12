@@ -383,6 +383,9 @@ class VoxelModel:
     def set_params(self):
         pass
 
+    def getModelSize(self):
+        print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
+
 class PlateModel(VoxelModel):
     @_deprecate_positional_args
     def __init__(self):
@@ -457,8 +460,89 @@ class PlateModel(VoxelModel):
                 'g':self.g
                 }
 
-    def getModelSize(self):
-        print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
+class PlateExModel(VoxelModel):
+    #ガラスとイントラリピッドの２層構造のみを対象とする
+    #ガラスはイントラリピッドを取り囲んでいるものとする
+    def __init__(self):
+        self.model_name = 'PlateExModel'
+        self.dtype = 'int8'
+        self.dtype_f = 'float32'
+        self.grass_num=0
+        self.intra_num=1
+        self.end_point = 2
+        self.params = {
+            'x_size':40,'y_size':40,#X-Yはintralipidの領域を示す
+            'voxel_space':0.1,
+            'thickness':[1.3,40],
+            'n':[1.5,1.4],
+            'n_air':1.,
+            'ma':[1e-5,0.02374],
+            'ms':[1e-5,0.02374],
+            'g':[0.9,0.9],
+            }
+        self.keys = list(self.params.keys())
+        self._param_instantiating()
+        self.voxel_model = np.zeros((3,3,3),dtype = self.dtype)
+        self.model_shape = (3,3,3)
+
+    def _param_instantiating(self):
+        f = self.dtype_f
+        self.thickness = self.params['thickness']
+        self.n =np.array(self.params['n']+[self.params['n_air']]).astype(f)
+        self.ms = np.array(self.params['ms']).astype(f)
+        self.ma = np.array(self.params['ma']).astype(f)
+        self.g = np.array(self.params['g']).astype(f)
+        self.voxel_space = self.params['voxel_space']
+        self.x_size = int(self.params['x_size']/self.params['voxel_space'])
+        self.y_size = int(self.params['y_size']/self.params['voxel_space'])
+        self.z_size = int(self.params['thickness'][1]/self.params['voxel_space'])
+
+    def build(self):
+        #thickness,xy_size,voxel_space,ma,ms,g,n,n_air
+        del self.voxel_model
+        gc.collect()
+        self._make_voxel_model()
+        self.getModelSize()
+
+    def set_params(self,*initial_data, **kwargs):
+        set_params(self.params,self.keys,*initial_data, **kwargs)
+        self._param_instantiating()
+
+    def _make_voxel_model(self):
+        #まずイントラリピッドを定義し、その後、ガラス面を定義する
+        self.voxel_model = np.ones((self.x_size,self.y_size,self.z_size),dtype = self.dtype)
+        self.num_pix = int(self.params['thickness'][0]/self.params['voxel_space'])
+
+        #z方向の追加
+        ct = np.ones((
+        self.voxel_model.shape[0],self.voxel_model.shape[1],self.num_pix+1),
+        dtype = self.dtype)*self.grass_num
+        self.voxel_model = np.concatenate((ct,self.voxel_model),2)
+        self.voxel_model = np.concatenate((self.voxel_model,ct),2)
+        #y方向の追加
+        ct = np.ones((
+        self.voxel_model.shape[0],self.num_pix+1,self.voxel_model.shape[2]
+        ),dtype = self.dtype)*self.grass_num
+        self.voxel_model = np.concatenate((self.voxel_model,ct),1)
+        self.voxel_model = np.concatenate((ct,self.voxel_model),1)
+        #x方向の追加
+        ct = np.ones((
+        self.num_pix+1,self.voxel_model.shape[1],self.voxel_model.shape[2]
+        ),dtype = self.dtype)*self.grass_num
+        self.voxel_model = np.concatenate((self.voxel_model,ct),0)
+        self.voxel_model = np.concatenate((ct,self.voxel_model),0)
+
+        # end cooding
+        self.voxel_model[0,:,:] = self.end_point
+        self.voxel_model[-1,:,:] = self.end_point
+        self.voxel_model[:,0,:] = self.end_point
+        self.voxel_model[:,-1,:] = self.end_point
+        self.voxel_model[:,:,0] = self.end_point
+        self.voxel_model[:,:,-1] = self.end_point
+
+    def get_second_layer_addz(self):
+        return self.num_pix+1
+
 
 class TuringModel_Rectangular(VoxelModel):
     def __init__(self):
@@ -574,8 +658,6 @@ class TuringModel_Rectangular(VoxelModel):
         self.voxel_model = self.add_array(self.voxel_model,1,self.end_point,np.int8,y_axis=True)
         print("Shape of voxel_model ->",self.voxel_model.shape)
 
-    def getModelSize(self):
-        print("Memory area size for voxel storage: %0.3f Mbyte" % (self.voxel_model.nbytes*1e-6))
 
 class TuringModel_Cylinder(TuringModel_Rectangular):
     def __init__(self):
@@ -751,6 +833,57 @@ class VoxelPlateModel(BaseVoxelMonteCarlo):
             threadnum = threadnum
         )
 
+class VoxelPlateExModel(BaseVoxelMonteCarlo):
+    #ガラスとイントラリピッドの２層構造のみを対象とする
+    #ガラスはイントラリピッドを取り囲んでいるものとする
+    def __init__(
+        self,*,nPh=1000,dtype_f=np.float32,dtype=np.int32,
+        beam_type = 'TEM00',w_beam = 0,
+        beam_angle = 0,initial_refrect_by_angle = False,
+        first_layer_clear = True,
+        threadnum = 128,
+        ):
+        super().__init__(
+            nPh = nPh, model = PlateModel(),dtype_f=dtype_f,dtype=dtype,
+            w_beam=w_beam,beam_angle = beam_angle,beam_type = beam_type,
+            initial_refrect_by_angle = initial_refrect_by_angle,
+            first_layer_clear=first_layer_clear,
+            threadnum = threadnum
+        )
+
+    def build(self,*initial_data, **kwargs):
+        if initial_data == () and kwargs == {}:
+            pass
+        else:
+            self.model.set_params(*initial_data, **kwargs)
+        self.model.build()
+
+    def set_params(self,*initial_data, **kwargs):
+        self.model.set_params(*initial_data, **kwargs)
+
+    def _calc_info(self,coment=''):
+        calc_info = {
+            'Date':datetime.datetime.now().isoformat(),
+            'coment':coment,
+            'number_of_photons':self.nPh,
+            'calc_dtype':self.dtype,
+            'model':{
+                'model_name':self.model.model_name,
+                'model_params':self.model.params,
+            },
+            'w_beam':self.w_beam,
+            'beam_angle':self.beam_angle,
+            'initial_refrect_mode':self.initial_refrect_by_angle,
+            'beam_mode':'TEM00',
+            'fluence_mode':self.fluence_mode,
+        }
+        if self.beam_angle_mode:
+            calc_info['wavelength'] = self.wavelength
+            calc_info['beam_posision'] = self.beam_posision
+            calc_info['lens_curvature_radius'] = self.lens_curvature_radius
+            calc_info['grass_type'] = self.grass_type
+        return calc_info
+
 class VoxelTuringModel(BaseVoxelMonteCarlo):
     def __init__(
         self,*,nPh=1000,dtype_f=np.float32,dtype=np.int32,
@@ -780,7 +913,6 @@ class VoxelTuringModel(BaseVoxelMonteCarlo):
         self.bone_model = False
 
     def _set_inital_add(self):
-
         if self.beam_type == 'TEM00':
             self.add =  np.zeros((3, self.nPh),dtype = self.dtype)
         self.add[0] = self._get_center_add(self.model.voxel_model.shape[0])

@@ -1656,6 +1656,7 @@ class VoxelPlateModel(BaseVoxelMonteCarlo):
         else:
             self.model.set_params(*initial_data, **kwargs)
         self.model.build()
+
 class VoxelPlateExModel(BaseVoxelMonteCarlo):
     #ガラスとイントラリピッドの２層構造のみを対象とする
     #ガラスはイントラリピッドを取り囲んでいるものとする
