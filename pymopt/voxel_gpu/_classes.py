@@ -31,7 +31,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 func = vmc_kernel()
 __all__ = [
-'VoxelPlateModel','VoxelTuringModel'
+'VoxelPlateModel','VoxelTuringModel','VoxelPlateExModel'
 ]
 
 # =============================================================================
@@ -844,7 +844,7 @@ class VoxelPlateExModel(BaseVoxelMonteCarlo):
         threadnum = 128,
         ):
         super().__init__(
-            nPh = nPh, model = PlateModel(),dtype_f=dtype_f,dtype=dtype,
+            nPh = nPh, model = PlateExModel(),dtype_f=dtype_f,dtype=dtype,
             w_beam=w_beam,beam_angle = beam_angle,beam_type = beam_type,
             initial_refrect_by_angle = initial_refrect_by_angle,
             first_layer_clear=first_layer_clear,
@@ -866,7 +866,7 @@ class VoxelPlateExModel(BaseVoxelMonteCarlo):
             'Date':datetime.datetime.now().isoformat(),
             'coment':coment,
             'number_of_photons':self.nPh,
-            'calc_dtype':self.dtype,
+            'calc_dtype':"32 bit",
             'model':{
                 'model_name':self.model.model_name,
                 'model_params':self.model.params,
@@ -875,13 +875,7 @@ class VoxelPlateExModel(BaseVoxelMonteCarlo):
             'beam_angle':self.beam_angle,
             'initial_refrect_mode':self.initial_refrect_by_angle,
             'beam_mode':'TEM00',
-            'fluence_mode':self.fluence_mode,
         }
-        if self.beam_angle_mode:
-            calc_info['wavelength'] = self.wavelength
-            calc_info['beam_posision'] = self.beam_posision
-            calc_info['lens_curvature_radius'] = self.lens_curvature_radius
-            calc_info['grass_type'] = self.grass_type
         return calc_info
 
 class VoxelTuringModel(BaseVoxelMonteCarlo):
