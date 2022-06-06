@@ -332,6 +332,9 @@ class BaseVoxelMonteCarlo(metaclass = ABCMeta):
         print('Mean Rd %0.6f'% self.Rdw)
         print('Mean Td %0.6f'% self.Ttw)
         print()
+        
+    def getRdTtValues(self):
+        return {'Rd':self.Rdw,'Td':self.Ttw}
 
     def save_result(self,fname,coment=''):
         start_ = time.time()
