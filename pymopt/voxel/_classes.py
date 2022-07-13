@@ -292,23 +292,27 @@ class BaseVoxelMonteCarlo(metaclass = ABCMeta):
         print('Mean Td %0.6f'% self.Ttw)
         print()
 
-    def save_result(self,fname,coment=''):
+    def save_result(self,fname,
+    *,coment='',save_monte = True,save_params = True,):
         start_ = time.time()
 
-        res = self.get_result()
-        save_name = fname+"_LID.pkl.bz2"
-        with bz2.open(save_name, 'wb') as fp:
-            fp.write(pickle.dumps(res))
-        print("Monte Carlo results saved in ")
-        print("-> %s" %(save_name))
-        print('')
-        info = self._calc_info(coment)
-        save_name = fname+"_info.json"
-        with open(save_name, 'w') as fp:
-            json.dump(info,fp,indent=4,cls= ToJsonEncoder)
-        print("Calculation conditions are saved in")
-        print("-> %s" %(save_name))
-        print('')
+        if save_monte:
+            res = self.get_result()
+            save_name = fname+"_LID.pkl.bz2"
+            with bz2.open(save_name, 'wb') as fp:
+                fp.write(pickle.dumps(res))
+            print("Monte Carlo results saved in ")
+            print("-> %s" %(save_name))
+            print('')
+
+        if save_params :
+            info = self._calc_info(coment)
+            save_name = fname+"_info.json"
+            with open(save_name, 'w') as fp:
+                json.dump(info,fp,indent=4,cls= ToJsonEncoder)
+            print("Calculation conditions are saved in")
+            print("-> %s" %(save_name))
+            print('')
 
         calTime(time.time(), start_)
 
